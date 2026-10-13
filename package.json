@@ -1,0 +1,20 @@
+{
+  "name": "splitsense",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "SplitSense（歧見預判）：在部分標註下預測標註分歧、協助安排複核．研究規格文件",
+  "scripts": {
+    "docs": "notecraftapp view ./docs --port 4326",
+    "docs:serve": "notecraftapp serve ./docs --port 4326",
+    "docs:build": "notecraftapp build ./docs",
+    "skill:init": "notecraftapp init-skill",
+    "skill:check": "notecraftapp init-skill --check"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "devDependencies": {
+    "notecraftapp": "^1.13.0"
+  }
+}

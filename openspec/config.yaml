@@ -1,0 +1,50 @@
+schema: spec-driven
+
+context: |
+  SplitSense（歧見預判）: predict whether full annotation of an item will show
+  annotator disagreement when only part of its annotations are visible, and
+  rank items for human review under a fixed budget. EN (TID-8) + zh-TW pilot,
+  shared multilingual embedding (BAAI/bge-m3). Course final project, due
+  2026-12-21.
+
+  Division of truth (no duplication):
+  - docs/00-research-spec.mdx owns research decisions (why / what): questions,
+    hypotheses, data protocol, evaluation, schedule, glossary.
+  - openspec/specs/ owns behavior of the experiment code (SHALL + Scenario).
+  Proposals MUST cite the research-spec section or Qn they implement, and MUST
+  NOT restate or change research decisions; a change that needs a different
+  decision updates docs/ first.
+
+  Hard rules from the research spec:
+  - Splits are item-level; hidden annotations (U_i) MUST NOT appear in
+    features, statistics, or graph adjacency for scored items.
+  - Report EN and zh-TW metrics separately, never only a pooled score.
+  - Public repo: never commit data, raw text, individual annotations,
+    embeddings, or model weights. zh-TW pilot text MUST NOT be sent to
+    external embedding APIs.
+
+  Language: zh-TW
+  All artifacts must be written in zh-TW.
+  Keep OpenSpec structural headings and SHALL/MUST keywords in English.
+
+# Per-artifact rules (optional)
+# Add custom rules for specific artifacts.
+# Example:
+#   rules:
+#     proposal:
+#       - Keep proposals under 500 words
+#       - Always state what is out of scope
+#     tasks:
+#       - Break tasks into chunks of max 2 hours
+
+# Per-operation guidance (optional)
+# Add advisory guidance for how apply and archive work should be conducted.
+# This is separate from artifact rules above.
+# Example:
+#   operations:
+#     apply:
+#       guidance:
+#         - Keep test summaries concise
+#     archive:
+#       guidance:
+#         - Summarize the archive outcome before finishing

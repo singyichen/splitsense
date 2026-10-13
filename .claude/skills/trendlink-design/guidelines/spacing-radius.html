@@ -1,0 +1,25 @@
+<!-- @dsCard group="Spacing" viewport="700x160" name="Radius" subtitle="From 4px to the signature pill" -->
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="../styles.css">
+<style>
+  body { margin: 0; padding: 24px; background: var(--surface-card); font-family: var(--font-latin); }
+  .row { display: flex; gap: 16px; align-items: flex-start; }
+  .item { text-align: center; flex: 1; }
+  .box { height: 64px; background: var(--blue-50); border: 2px solid var(--blue-500); }
+  .v { font-size: 12px; color: var(--text-strong); font-weight: 700; margin-top: 8px; }
+  .k { font-size: 10px; font-family: var(--font-mono); color: var(--text-muted); }
+</style>
+</head>
+<body>
+  <div class="row">
+    <div class="item"><div class="box" style="border-radius:var(--radius-sm)"></div><div class="v">6px</div><div class="k">sm</div></div>
+    <div class="item"><div class="box" style="border-radius:var(--radius-md)"></div><div class="v">10px</div><div class="k">md</div></div>
+    <div class="item"><div class="box" style="border-radius:var(--radius-lg)"></div><div class="v">16px</div><div class="k">lg</div></div>
+    <div class="item"><div class="box" style="border-radius:var(--radius-xl)"></div><div class="v">24px</div><div class="k">xl</div></div>
+    <div class="item"><div class="box" style="border-radius:var(--radius-pill)"></div><div class="v">pill</div><div class="k">999px</div></div>
+  </div>
+</body>
+</html>

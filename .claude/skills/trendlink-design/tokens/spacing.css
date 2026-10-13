@@ -1,0 +1,72 @@
+/* ============================================================
+   TrendLink 聯和趨動 — Spacing, Radius, Shadow, Layout Tokens
+   ------------------------------------------------------------
+   4px base grid. The brand reads CLEAN & ROOMY: large section
+   padding, soft-but-shallow shadows, gently rounded cards, and a
+   signature FULL PILL radius on primary buttons (from the site's
+   orange CTAs).
+   ============================================================ */
+
+:root {
+  /* ---- Spacing scale (4px grid) ------------------------ */
+  --space-0:  0;
+  --space-1:  0.25rem;   /* 4   */
+  --space-2:  0.5rem;    /* 8   */
+  --space-3:  0.75rem;   /* 12  */
+  --space-4:  1rem;      /* 16  */
+  --space-5:  1.5rem;    /* 24  */
+  --space-6:  2rem;      /* 32  */
+  --space-7:  2.5rem;    /* 40  */
+  --space-8:  3rem;      /* 48  */
+  --space-9:  4rem;      /* 64  */
+  --space-10: 5rem;      /* 80  */
+  --space-12: 7.5rem;    /* 120 — section rhythm */
+
+  /* ---- Radius ------------------------------------------ */
+  --radius-xs:   4px;
+  --radius-sm:   6px;
+  --radius-md:   10px;   /* inputs, small cards          */
+  --radius-lg:   16px;   /* cards                        */
+  --radius-xl:   24px;   /* feature panels               */
+  --radius-2xl:  32px;
+  --radius-pill: 999px;  /* CTA buttons, tags, chips     */
+  --radius-circle: 50%;
+
+  /* ---- Shadows (soft, cool-tinted, shallow) ------------ */
+  --shadow-xs:  0 1px 2px rgba(17, 47, 93, 0.06);
+  --shadow-sm:  0 2px 6px rgba(17, 47, 93, 0.08);
+  --shadow-md:  0 6px 18px rgba(17, 47, 93, 0.10);
+  --shadow-lg:  0 14px 34px rgba(17, 47, 93, 0.12);
+  --shadow-xl:  0 24px 60px rgba(17, 47, 93, 0.16);
+  /* Warm glow for orange CTAs on hover */
+  --shadow-accent: 0 8px 22px rgba(227, 123, 36, 0.32);
+  --shadow-brand:  0 10px 28px rgba(27, 79, 156, 0.28);
+
+  /* ---- Borders ----------------------------------------- */
+  --border-width: 1px;
+  --border-width-strong: 2px;
+
+  /* ---- Focus ring -------------------------------------- */
+  --ring-width: 3px;
+  --ring-offset: 2px;
+
+  /* ---- Layout ------------------------------------------ */
+  --container-max: 1200px;
+  --container-narrow: 880px;
+  --header-height: 76px;
+  --section-pad-y: clamp(3rem, 7vw, 7.5rem);
+  --gutter: clamp(1rem, 4vw, 2.5rem); /* @kind spacing */
+
+  /* ---- Motion ------------------------------------------ */
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1); /* @kind other */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1); /* @kind other */
+  --duration-fast: 140ms; /* @kind other */
+  --duration-normal: 220ms; /* @kind other */
+  --duration-slow: 360ms; /* @kind other */
+
+  /* ---- Z-index ----------------------------------------- */
+  --z-sticky: 100; /* @kind other */
+  --z-overlay: 500; /* @kind other */
+  --z-modal: 600; /* @kind other */
+  --z-toast: 700; /* @kind other */
+}

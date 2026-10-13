@@ -1,0 +1,24 @@
+<!-- @dsCard group="Colors" viewport="700x150" name="Semantic Status" subtitle="Success · Warning · Danger · Info" -->
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="../styles.css">
+<style>
+  body { margin: 0; padding: 22px; background: var(--surface-card); font-family: var(--font-sans); }
+  .row { display: flex; gap: 12px; }
+  .sw { flex: 1; display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-radius: var(--radius-md); }
+  .dot { width: 26px; height: 26px; border-radius: 50%; flex: none; }
+  .name { font-size: 13px; font-weight: 700; }
+  .hex { font-size: 10px; font-family: var(--font-mono); opacity: .7; }
+</style>
+</head>
+<body>
+  <div class="row">
+    <div class="sw" style="background:var(--success-50)"><span class="dot" style="background:var(--success-500)"></span><span><div class="name" style="color:var(--success-500)">Success</div><div class="hex" style="color:var(--success-500)">#2e9e6b</div></span></div>
+    <div class="sw" style="background:var(--warning-50)"><span class="dot" style="background:var(--warning-500)"></span><span><div class="name" style="color:var(--warning-500)">Warning</div><div class="hex" style="color:var(--warning-500)">#e3a008</div></span></div>
+    <div class="sw" style="background:var(--danger-50)"><span class="dot" style="background:var(--danger-500)"></span><span><div class="name" style="color:var(--danger-500)">Danger</div><div class="hex" style="color:var(--danger-500)">#d64545</div></span></div>
+    <div class="sw" style="background:var(--info-50)"><span class="dot" style="background:var(--info-500)"></span><span><div class="name" style="color:var(--info-500)">Info</div><div class="hex" style="color:var(--info-500)">#2c6ebb</div></span></div>
+  </div>
+</body>
+</html>

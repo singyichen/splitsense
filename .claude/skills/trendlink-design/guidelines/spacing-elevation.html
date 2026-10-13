@@ -1,0 +1,25 @@
+<!-- @dsCard group="Spacing" viewport="700x190" name="Elevation" subtitle="Soft, cool-tinted, shallow shadows" -->
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="../styles.css">
+<style>
+  body { margin: 0; padding: 30px 24px; background: var(--surface-page); font-family: var(--font-latin); }
+  .row { display: flex; gap: 24px; }
+  .item { flex: 1; text-align: center; }
+  .box { height: 70px; background: #fff; border-radius: var(--radius-lg); }
+  .v { font-size: 11px; color: var(--text-strong); font-weight: 700; margin-top: 14px; }
+  .k { font-size: 10px; font-family: var(--font-mono); color: var(--text-muted); }
+</style>
+</head>
+<body>
+  <div class="row">
+    <div class="item"><div class="box" style="box-shadow:var(--shadow-xs)"></div><div class="v">xs</div><div class="k">subtle</div></div>
+    <div class="item"><div class="box" style="box-shadow:var(--shadow-sm)"></div><div class="v">sm</div><div class="k">card rest</div></div>
+    <div class="item"><div class="box" style="box-shadow:var(--shadow-md)"></div><div class="v">md</div><div class="k">card hover</div></div>
+    <div class="item"><div class="box" style="box-shadow:var(--shadow-lg)"></div><div class="v">lg</div><div class="k">popover</div></div>
+    <div class="item"><div class="box" style="box-shadow:var(--shadow-accent)"></div><div class="v">accent</div><div class="k">CTA glow</div></div>
+  </div>
+</body>
+</html>

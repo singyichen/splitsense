@@ -1,0 +1,60 @@
+<!-- @dsCard group="Components" viewport="700x400" name="Cards · Badges · Tags · Stats" subtitle="Content surfaces & metadata" -->
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="../../styles.css">
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="../../_ds_bundle.js"></script>
+<style>
+  body { margin: 0; padding: 26px; background: var(--surface-page); font-family: var(--font-sans); }
+  .row { display: flex; gap: 16px; margin-bottom: 18px; flex-wrap: wrap; align-items: center; }
+  .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+  const { Card, CardIcon, Badge, Tag, Avatar, Stat } = window.TrendLinkDesignSystem_b2a0d6;
+  const Doc = () => (<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 13h6M9 17h6"/></svg>);
+  const Chart = () => (<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3v18h18"/><path d="m7 14 3-3 3 3 5-5"/></svg>);
+  function Demo() {
+    return (
+      <div>
+        <div className="row">
+          <Badge tone="blue">企業新訊</Badge>
+          <Badge tone="orange">熱門</Badge>
+          <Badge tone="success" variant="solid">已通過</Badge>
+          <Badge tone="warning">待處理</Badge>
+          <Tag active>勞動法令</Tag>
+          <Tag>績效考核</Tag>
+          <Tag onRemove={()=>{}}>高雄</Tag>
+          <Avatar name="傅春炳" tone="navy" />
+          <Avatar name="涵曦" tone="orange" />
+        </div>
+        <div className="cards">
+          <Card accent="blue" hoverable>
+            <CardIcon tone="blue"><Doc/></CardIcon>
+            <h3 style={{margin:"14px 0 6px",fontSize:"var(--text-lg)",color:"var(--text-strong)"}}>一鍵發薪 雲端人資系統</h3>
+            <p style={{margin:0,fontSize:"var(--text-sm)",color:"var(--text-muted)",lineHeight:1.7}}>計薪、排班、休假、出勤一次搞定，快速生成管理報表。</p>
+          </Card>
+          <Card accent="orange" hoverable>
+            <CardIcon tone="orange"><Chart/></CardIcon>
+            <h3 style={{margin:"14px 0 6px",fontSize:"var(--text-lg)",color:"var(--text-strong)"}}>日日考核 績效系統</h3>
+            <p style={{margin:0,fontSize:"var(--text-sm)",color:"var(--text-muted)",lineHeight:1.7}}>首創行為積分制，考核標準更透明，操作更便利。</p>
+          </Card>
+        </div>
+        <Card style={{marginTop:16,display:"flex",justifyContent:"space-around"}}>
+          <Stat value="800" suffix="家+" label="中小企業輔導經驗" align="center" />
+          <Stat value="7645" label="股票代號" tone="orange" align="center" />
+          <Stat value="2018" label="成立年份" align="center" />
+        </Card>
+      </div>
+    );
+  }
+  ReactDOM.createRoot(document.getElementById("root")).render(<Demo/>);
+</script>
+</body>
+</html>

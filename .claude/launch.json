@@ -1,0 +1,19 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "docs",
+      "runtimeExecutable": "/Users/mandychen/.nvm/versions/node/v22.16.0/bin/node",
+      "runtimeArgs": ["node_modules/notecraftapp/bin/notecraftapp.mjs", "view", "./docs", "--port", "4326"],
+      "port": 4326,
+      "autoPort": false
+    },
+    {
+      "name": "docs-serve",
+      "runtimeExecutable": "/Users/mandychen/.nvm/versions/node/v22.16.0/bin/node",
+      "runtimeArgs": ["node_modules/notecraftapp/bin/notecraftapp.mjs", "serve", "./docs", "--port", "4326", "--no-open"],
+      "port": 4326,
+      "autoPort": false
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+<!-- @dsCard group="Components" viewport="700x230" name="Alerts" subtitle="Inline status banners — info/success/warning/danger" -->
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="../../styles.css">
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="../../_ds_bundle.js"></script>
+<style>
+  body { margin: 0; padding: 26px; background: var(--surface-card); font-family: var(--font-sans); }
+  .stack { display: flex; flex-direction: column; gap: 14px; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+  const { Alert } = window.TrendLinkDesignSystem_b2a0d6;
+  const Warn = () => (<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m21.7 18-8-14a2 2 0 0 0-3.4 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.7-3Z"/><path d="M12 9v4M12 17h.01"/></svg>);
+  const Check = () => (<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21.8 10A10 10 0 1 1 12 2"/><path d="m9 11 3 3L22 4"/></svg>);
+  function Demo() {
+    return (
+      <div className="stack">
+        <Alert tone="warning" title="2026 勞動法令更新" icon={<Warn/>}>基本工資調漲、發薪日變更，請於設定中確認薪資結構。</Alert>
+        <Alert tone="success" icon={<Check/>}>已成功送出諮詢申請，顧問將於 1 個工作日內與您聯繫。</Alert>
+        <Alert tone="info">本系統依勞動部最新函釋更新法遵查核規則。</Alert>
+        <Alert tone="danger" title="偵測到潛在風險">3 名員工工時超出法定上限，請儘速調整排班。</Alert>
+      </div>
+    );
+  }
+  ReactDOM.createRoot(document.getElementById("root")).render(<Demo/>);
+</script>
+</body>
+</html>

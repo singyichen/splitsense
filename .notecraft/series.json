@@ -1,0 +1,13 @@
+{
+  "series": [
+    {
+      "id": "research-spec",
+      "title": "SplitSense 研究規格",
+      "eyebrow": "RESEARCH",
+      "description": "研究問題與假設、雙語資料協議、評估方法、時程與停損，以及待拍板清單",
+      "accent": "navy",
+      "icon": "bookOpen",
+      "slugs": ["00-research-spec", "90-open-questions"]
+    }
+  ]
+}

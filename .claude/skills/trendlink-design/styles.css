@@ -1,0 +1,13 @@
+/* ============================================================
+   TrendLink 聯和趨動 Design System — Global entry point
+   ------------------------------------------------------------
+   Consumers link THIS file only. It is a manifest of @imports;
+   no rules live here directly. Everything reachable below ships
+   to consuming projects (tokens + @font-face webfonts).
+   ============================================================ */
+
+@import url("./tokens/fonts.css");
+@import url("./tokens/colors.css");
+@import url("./tokens/typography.css");
+@import url("./tokens/spacing.css");
+@import url("./tokens/base.css");

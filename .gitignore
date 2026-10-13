@@ -31,3 +31,9 @@ outputs/
 .DS_Store
 .idea/
 .vscode/
+
+# Node / notecraftapp
+node_modules/
+dist/
+.astro/
+*.log

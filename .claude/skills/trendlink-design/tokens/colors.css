@@ -1,0 +1,102 @@
+/* ============================================================
+   TrendLink 聯和趨動 — Color Tokens
+   ------------------------------------------------------------
+   Brand DNA: a trustworthy corporate BLUE (drawn from the
+   navy→azure header gradient and logo mark) paired with a warm
+   GOLDEN-ORANGE accent (CTA buttons, logo swoosh). Blue carries
+   authority & stability; orange carries warmth & approachability
+   toward SME owners. Neutrals are cool, slightly blue-tinted.
+   ============================================================ */
+
+:root {
+  /* ---- Brand blue (primary) ----------------------------- */
+  --blue-50:  #eef4fb;
+  --blue-100: #d6e4f5;
+  --blue-200: #adc8e8;
+  --blue-300: #7ba6da;
+  --blue-400: #4d84cb;
+  --blue-500: #2c6ebb;   /* azure — right side of header gradient */
+  --blue-600: #1f5aa6;
+  --blue-700: #1b4f9c;   /* PRIMARY navy — left side of header   */
+  --blue-800: #163f7d;
+  --blue-900: #112f5d;
+  --blue-950: #0b1f3e;
+
+  /* ---- Sky / cyan (secondary brand accent) -------------- */
+  --sky-400: #4aa3d6;
+  --sky-500: #348bc9;    /* search circle / highlight blue       */
+  --sky-600: #2a76ad;
+
+  /* ---- Brand orange (accent / CTA) ---------------------- */
+  --orange-50:  #fdf4e6;
+  --orange-100: #fbe7c6;
+  --orange-200: #f6cd86;
+  --orange-300: #f2b955;
+  --orange-400: #ed9b26;  /* primary CTA gold                    */
+  --orange-500: #e37b24;  /* logo swoosh / hover deep orange     */
+  --orange-600: #c7641a;
+  --orange-700: #a04f15;
+
+  /* ---- Neutral (cool, blue-tinted grays) ---------------- */
+  --neutral-0:   #ffffff;
+  --neutral-50:  #f6f8fb;
+  --neutral-100: #eef1f6;
+  --neutral-200: #e1e6ee;
+  --neutral-300: #cbd3df;
+  --neutral-400: #9aa6b8;
+  --neutral-500: #6c798e;
+  --neutral-600: #4f5b6e;
+  --neutral-700: #3a4456;
+  --neutral-800: #262e3d;
+  --neutral-900: #161c28;
+
+  /* ---- Semantic status ---------------------------------- */
+  --success-500: #2e9e6b;
+  --success-50:  #e7f6ee;
+  --warning-500: #e3a008;
+  --warning-50:  #fcf3da;
+  --danger-500:  #d64545;
+  --danger-50:   #fbeaea;
+  --info-500:    #2c6ebb;
+  --info-50:     #eef4fb;
+
+  /* ============================================================
+     SEMANTIC ALIASES — reach for these in product UI
+     ============================================================ */
+
+  /* Text */
+  --text-strong:   var(--neutral-900);   /* headings              */
+  --text-body:     var(--neutral-700);   /* paragraph copy        */
+  --text-muted:    var(--neutral-500);   /* captions, meta        */
+  --text-on-brand: #ffffff;              /* text on blue/orange   */
+  --text-brand:    var(--blue-700);      /* blue headings & links */
+  --text-accent:   var(--orange-500);
+
+  /* Surfaces */
+  --surface-page:    var(--neutral-50);
+  --surface-card:    var(--neutral-0);
+  --surface-sunken:  var(--neutral-100);
+  --surface-brand:   var(--blue-700);
+  --surface-brand-soft: var(--blue-50);
+  --surface-accent-soft: var(--orange-50);
+  --surface-inverse: var(--neutral-900);
+
+  /* Borders */
+  --border-subtle:  var(--neutral-200);
+  --border-default: var(--neutral-300);
+  --border-strong:  var(--neutral-400);
+  --border-brand:   var(--blue-500);
+
+  /* Interactive */
+  --action-primary:        var(--orange-400);
+  --action-primary-hover:  var(--orange-500);
+  --action-primary-press:  var(--orange-600);
+  --action-secondary:      var(--blue-700);
+  --action-secondary-hover:var(--blue-800);
+  --action-link:           var(--blue-600);
+  --focus-ring:            var(--sky-500);
+
+  /* Signature header gradient (navy → azure, ~12° like the site) */
+  --gradient-header: linear-gradient(105deg, var(--blue-800) 0%, var(--blue-700) 45%, var(--blue-500) 100%);
+  --gradient-accent: linear-gradient(105deg, var(--orange-500) 0%, var(--orange-400) 100%);
+}

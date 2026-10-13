@@ -1,0 +1,77 @@
+/* ============================================================
+   TrendLink 聯和趨動 — Base element styles & helpers
+   Light reset + brand defaults. Safe to ship to consumers.
+   ============================================================ */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-weight: var(--weight-regular);
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
+  color: var(--text-body);
+  background: var(--surface-page);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  margin: 0;
+  font-family: var(--heading-font);
+  font-weight: var(--heading-weight);
+  line-height: var(--leading-tight);
+  color: var(--text-strong);
+  text-wrap: balance;
+}
+
+p { margin: 0; line-height: var(--leading-relaxed); }
+p { text-wrap: pretty; }
+
+a { color: var(--action-link); text-decoration: none; }
+a:hover { color: var(--blue-700); }
+
+img { max-width: 100%; display: block; }
+
+::selection { background: var(--orange-200); color: var(--blue-900); }
+
+:focus-visible {
+  outline: var(--ring-width) solid color-mix(in srgb, var(--focus-ring) 55%, transparent);
+  outline-offset: var(--ring-offset);
+  border-radius: var(--radius-xs);
+}
+
+/* ---- Brand eyebrow / overline label ------------------- */
+.tl-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-wider);
+  color: var(--text-accent);
+  text-transform: uppercase;
+}
+.tl-eyebrow::before {
+  content: "";
+  width: 28px;
+  height: 3px;
+  border-radius: var(--radius-pill);
+  background: var(--gradient-accent);
+}
+
+/* ---- Section title underline accent ------------------- */
+.tl-title-accent { position: relative; display: inline-block; }
+.tl-title-accent::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -10px;
+  width: 56px;
+  height: 4px;
+  border-radius: var(--radius-pill);
+  background: var(--gradient-accent);
+}

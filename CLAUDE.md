@@ -12,9 +12,30 @@
 
 ## 現況
 
-- 2026-10-13 建立 repo，處於設計階段：研究規格尚未定稿，尚無實驗程式碼。
-- 文件骨架（是否沿用 TrendMile PRD 的 14 章、如何改成研究型專案）尚未拍板。
+- 2026-10-13 建立 repo，處於設計階段：研究規格骨架已建立、內容待填，尚無實驗程式碼。
 - Python 工具鏈（uv / pip、版本、目錄佈局）尚未拍板；等寫第一行實驗程式碼時再定，不預先猜。
+
+## 文件分工（2026-10-13 定案）
+
+兩層各管一件事、內容不重疊，讓每一項決策只有一份真相：
+
+| 位置 | 管什麼 |
+| --- | --- |
+| `docs/00-research-spec.mdx` | 研究決策：研究問題與假設、問題形式化、資料協議、評估方法、時程與停損、術語表（十四章，改自 TrendMile PRD 骨架） |
+| `docs/90-open-questions.mdx` | 待釐清事項的單一清單（`Qn` 編號，不重排、不回收） |
+| `openspec/specs/` | 實驗程式的行為：每個 capability 的 Requirement（SHALL）與 Scenario |
+
+- OpenSpec 的 change proposal 引用研究規格的章節或 `Qn`，不重述也不改動研究決策；需要不同決策時先改 `docs/`。
+- 書寫風格沿用 TrendMile `prd-writing` skill 的「書寫風格」七條（`~/mandy/project/trendmile/.claude/skills/prd-writing/SKILL.md`）。
+- OpenSpec 指令：`/opsx:propose`、`/opsx:apply`、`/opsx:archive` 等；CLI 為全域安裝的 `openspec`（1.14.1）。
+
+## 用 notecraftapp 檢視文件
+
+- 固定 **port 4326**（4324 是 TrendMile、4325 是 trendlink-portal）；需要 Node ≥ 22，開 terminal 後先 `nvm use`。
+- `npm run docs`（HMR，可從 UI 改檔）／`npm run docs:serve`（唯讀 + 自動 reload）／`npm run docs:build`。`.claude/launch.json` 有 `docs`、`docs-serve` 兩組設定。
+- 新增或刪除 `docs/` 底下的文件時，同步改 `.notecraft/series.json`，它不會自動掃描。
+- `@ai-visualize` 生成元件放專案根的 `.notecraft/components/`，跟著文件一起 commit；互動元件掛 `client:idle`，不要用 `client:visible`。
+- `npm run skill:init` 會覆寫 `content-visualize`、`content-present` 與 `trendlink-design`，本地修改會被蓋掉。
 
 ## 已定案的研究決策
 

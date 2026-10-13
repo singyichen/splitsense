@@ -1,0 +1,15 @@
+/* ============================================================
+   TrendLink 聯和趨動 — Webfonts
+   ------------------------------------------------------------
+   The brand site uses a clean Traditional-Chinese humanist sans.
+   We ship Noto Sans TC (the de-facto standard for zh-TW web UI)
+   as the primary face, with Noto Sans for crisp Latin / numerals.
+   Loaded from Google Fonts CDN.
+
+   ⚠ SUBSTITUTION NOTE: the live trendlink.com.tw site serves its
+   own bundled CJK font; we could not extract the original binary,
+   so Noto Sans TC is used as the nearest high-quality match.
+   Swap the @import below if the brand font files are provided.
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Noto+Sans:wght@400;500;600;700&display=swap');
