@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.python-version
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.ipynb_checkpoints/
+
+# 資料與實驗產物：一律不進版控，讓 public repo 不會帶出原始文字與個別 annotation
+data/
+artifacts/
+runs/
+outputs/
+*.parquet
+*.jsonl
+*.pt
+*.ckpt
+*.npy
+.cache/
+
+# 金鑰與本機設定
+.env
+.env.*
+.claude/settings.local.json
+
+# OS / Editor
+.DS_Store
+.idea/
+.vscode/
