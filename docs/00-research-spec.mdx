@@ -3,14 +3,14 @@ title: "SplitSense 研究規格"
 description: "在部分標註下預測標註分歧、協助安排人工複核的研究問題、資料協議、評估方法與時程"
 tags: ["研究規格", "標註分歧", "複核排序"]
 createdAt: "2026-10-13"
-updatedAt: "2026-10-13"
+updatedAt: "2026-10-29"
 Project Name: SplitSense
 文件類型: Research Specification
-文件版本: v0.1.0
+文件版本: v0.2.0
 文件狀態: 草稿
 文件作者: 陳欣怡
 建立日期: 2026-10-13
-更新日期: 2026-10-13
+更新日期: 2026-10-29
 ---
 
 # SplitSense（歧見預判）
@@ -25,68 +25,815 @@ Project Name: SplitSense
 | --- | --- |
 | 專案名稱 | SplitSense |
 | 文件類型 | Research Specification |
-| 文件版本 | v0.1.0 |
+| 文件版本 | v0.2.0 |
 | 文件狀態 | 草稿 |
 | 文件作者 | 陳欣怡 |
 | 建立日期 | 2026-10-13 |
-| 更新日期 | 2026-10-13 |
+| 更新日期 | 2026-10-29 |
 
 ### 1.2 文件分工
 
 本文件管研究決策（為什麼做、做什麼），`openspec/specs/` 管實驗程式的行為（SHALL 與 Scenario）；兩者不重疊，讓每一項決策只有一份真相。
 
-### 1.3 章節完成度
+研究設計的原始脈絡在 notecraft 筆記《機器學習實作系列第 16 週－期末專案》。**自 v0.2.0 起，規格以本文件為準**；筆記保留為推導過程與原始實測紀錄，兩者有出入時以本文件為準，並在第 14 章記下變更理由。
+
+| 文件 | 管什麼 |
+| --- | --- |
+| `docs/00-research-spec.mdx`（本文件） | 研究決策：研究問題、形式化、資料協議、方法、評估、時程與停損 |
+| `docs/10-dataset-card-goemotions.mdx` | 定案資料集的來源、授權、統計與已知限制 |
+| `docs/90-open-questions.mdx` | 待釐清事項的單一清單（`Qn` 編號，不重排、不回收） |
+
+### 1.3 兩個版本
+
+本專題有兩個範圍不同的版本，全文一律標明適用版本，不混寫：
+
+| 版本 | 期限 | 範圍 |
+| --- | --- | --- |
+| **課堂版** | 2026-12-21 前發表 | 只做英文、只做 GoEmotions 一個子資料集、只做模型階梯 0–3 |
+| **論文延伸** | 期末發表之後 | 繁中 pilot、annotator 歷史、多語 Embedding 雙語比較、GraphSAGE、跨資料集穩健性 |
+
+課堂版沿用論文延伸的問題形式化（第 5 章）與資料協議核心（第 6 章），其餘延伸項目全部後推。
+
+### 1.4 章節完成度
 
 | # | 章節 | 狀態 | 卡在什麼 |
 | --- | --- | --- | --- |
-| 1 | 文件資訊 | :badge[進行中]{variant="note"} | — |
-| 2 | 研究背景與目標 | :badge[進行中]{variant="note"} | — |
-| 3 | 研究問題與假設 | :badge[進行中]{variant="note"} | — |
-| 4 | 範圍 | :badge[進行中]{variant="note"} | — |
-| 5 | 問題形式化 | :badge[進行中]{variant="note"} | — |
-| 6 | 資料協議 | :badge[進行中]{variant="note"} | — |
-| 7 | 方法與實驗矩陣 | :badge[進行中]{variant="note"} | — |
-| 8 | 評估方法 | :badge[進行中]{variant="note"} | — |
-| 9 | 外部依賴與授權 | :badge[進行中]{variant="note"} | — |
-| 10 | 時程與停損 | :badge[進行中]{variant="note"} | — |
-| 11 | 技術選型 | :badge[進行中]{variant="note"} | — |
-| 12 | 術語表 | :badge[進行中]{variant="note"} | — |
+| 1 | 文件資訊 | :badge[已定案]{variant="success"} | — |
+| 2 | 研究背景與目標 | :badge[已定案]{variant="success"} | — |
+| 3 | 研究問題與假設 | :badge[已定案]{variant="success"} | — |
+| 4 | 範圍 | :badge[已定案]{variant="success"} | — |
+| 5 | 問題形式化 | :badge[已定案]{variant="success"} | — |
+| 6 | 資料協議 | :badge[部分待定]{variant="warning"} | 繁中 pilot 題目來源未定（Q7）；文字去重策略未定（Q5） |
+| 7 | 方法與實驗矩陣 | :badge[部分待定]{variant="warning"} | 樹模型二選一未定（Q3）；TF-IDF 設定未定（Q4） |
+| 8 | 評估方法 | :badge[已定案]{variant="success"} | — |
+| 9 | 外部依賴與授權 | :badge[已定案]{variant="success"} | — |
+| 10 | 時程與停損 | :badge[已定案]{variant="success"} | 發表週次依學號排定，尚未公布（Q8） |
+| 11 | 技術選型 | :badge[待拍板]{variant="danger"} | Python 工具鏈與目錄佈局未定（Q1） |
+| 12 | 術語表 | :badge[已定案]{variant="success"} | — |
 | 13 | 待釐清事項 | :badge[持續更新]{variant="neutral"} | — |
 | 14 | Change Log | :badge[持續更新]{variant="neutral"} | — |
 
 ## 2. 研究背景與目標
 
+### 2.1 問題的場景
+
+資料標註時，一題會發給好幾個人標。一則 Reddit 留言發給 3 個人標它的情緒是正面、負面、模糊還是中立：有些留言 3 個人答案一模一樣，那就沒事；有些留言兩人說中立、一人說正面——這種題目才需要人工進去確認，是標註規範沒寫清楚，還是這題本身就有爭議。
+
+問題在於：要等 3 個人全標完，才知道哪些題會吵。但標註是陸續進來的，能複核的人力又有限。所以要做的是一個**提早預警**：只看前 2 個人的答案加上留言本身的文字，先算出「這題會吵的機率」，再照機率排序，複核的人從最上面開始看。
+
+### 2.2 為什麼不是「看前兩個人有沒有吵」就好
+
+那是最直覺的做法，也正是本專題的對照組之一（模型階梯第 1 層）。但它只抓得到已經明顯的那種分歧，真正有價值的是另一種題目：**前兩個人剛好意見一致，但其實是爭議題**——這種題用規則會被判成安全，直接漏掉。
+
+定案資料的實測數字（見 [Dataset Card](./10-dataset-card-goemotions.mdx)）：隨機揭露 2 份標註後，66.6% 的題目「前兩人一致」，而這些題裡有 **24.4%** 的第三位標註者最後給了不同答案。只看前兩人一不一致，這四分之一的爭議題全部會被判成安全。這個子集就是本專題真正要解的難題。
+
+### 2.3 與 Label Suite 的關係
+
+本專題是 Label Suite 的技術調研與離線原型。Label Suite 之後要處理「標註進來後哪些該送複核」，需要先知道這件事用機器學習值不值得、以及平台要先記下哪些欄位（見第 8.7 節與第 10.3 節）。
+
+本專題**不**取代標註者、**不**裁定哪一個標籤正確，也**不**把分歧直接等同於標註錯誤，更不開發正式的複核佇列功能。
+
+### 2.4 交付情境：課程規範
+
+課堂版的範圍由課程規範決定（教師陳慶永公布）：
+
+| 項目 | 規定 |
+| --- | --- |
+| 分組 | 至多二人一組（本專題獨立完成，規範允許一人） |
+| 確定主題與組員 | 最遲 **2026-11-30**，以表單登記 |
+| 發表方式 | 簡報，每組約 12 分鐘 + Q&A 3 分鐘 |
+| 發表日期 | 2026-12-14（第 15 週）或 2026-12-21（第 16 週），依學號順序排定 |
+| 評分 | 教師 60%、同儕 40%（分數範圍 70～95） |
+| 程式交付 | 規範未要求 |
+
+簡報必須涵蓋六段，課堂版的設計逐段對應：
+
+| # | 規範段落 | 課堂版內容 | 本文件章節 |
+| --- | --- | --- | --- |
+| 1 | 問題描述 | 二元分類：完整標註是否出現分歧（`z_i`），機率用於排序複核優先順序 | 3.1、5 |
+| 2 | 資料收集 | TID-8 的 `goemotions-atr`，只取恰好 3 份標註的 31,766 個 item | 9.1、Dataset Card |
+| 3 | 資料分析與前處理 | EDA 統計、文字去重、item-level split 70/15/15、揭露 2 份、TF-IDF | 6 |
+| 4 | 模型訓練 | 模型階梯 0–3，`GridSearchCV` 搭配 `GroupKFold` 調參 | 7.1–7.3 |
+| 5 | 模型評估 | PR-AUC、`Recall@10%`、混淆矩陣；5 個 reveal seeds 報平均 ± 標準差 | 8 |
+| 6 | 結論 | 機器學習是否勝過 entropy 規則，加上錯誤案例分析 | 8.6、8.7 |
+
+登記表單填寫內容：主題名稱「部分標註下的標註分歧預測與複核排序」、機器學習任務「分類」、資料集來源「GoEmotions（Google Research，Apache-2.0）」、組員 2 留空。
+
 ## 3. 研究問題與假設
+
+### 3.1 課堂版研究問題
+
+> 一筆資料只取得前 2 份標註時，能否預測完整標註是否會出現分歧，並且勝過只看這 2 份標註的簡單規則？
+
+### 3.2 論文延伸研究問題
+
+> 在一筆資料只取得部分標註時，能否預測完整標註結果是否會出現分歧，並在固定複核預算下，比隨機或簡單分歧分數更早找出需要人工關注的項目？
+
+子問題：
+
+1. 只使用目前可見標籤的 entropy 與票數差距，可以做到多好？
+2. 加入文字 Embedding 後，是否能找出「目前暫時一致，但後續可能出現分歧」的項目？
+3. 英文與繁中是否呈現相似改善，或存在明顯語言落差？
+4. 加入 annotator 歷史與圖結構後，GraphSAGE 是否穩定勝過非圖模型？
+5. 模型增益是否足以抵銷資料需求、維護成本與可解釋性損失？
+
+課堂版只回答子問題 1 與 2 的英文部分。
+
+### 3.3 預先設定的假設
+
+| 假設 | 內容 | 適用版本 |
+| --- | --- | --- |
+| H1 | 可見標籤 entropy 會顯著勝過隨機排序 | 課堂版 |
+| H2 | 多語 Embedding 加上結構化特徵，會勝過只使用可見標籤統計的基準 | 課堂版（TF-IDF 版）、論文延伸（Embedding 版） |
+| H3 | 在具備足夠重複 annotator 與連通圖結構時，GraphSAGE 可能進一步改善排序 | 論文延伸 |
+| H4 | 英文模型的改善不能直接代表繁中；繁中結果需獨立成立 | 論文延伸 |
+
+### 3.4 與既有研究的差異
+
+「不要聚合成單一真值、直接從分歧中學習」已經是成熟方向：SemEval-2023 Task 11（Le-Wi-Di，Learning With Disagreements）以四個保留逐人標註的資料集辦過 shared task，有數十支隊伍的系統論文。GoEmotions 雖不在那四個之中，同樣是 TID-8 與 soft label 文獻反覆使用的資料集。因此「機器學習能不能預測標註分歧」**不能當成本專題的新發現**，必須明確引用並指出差異：
+
+| 面向 | Le-Wi-Di 與多數既有文獻 | 本專題 |
+| --- | --- | --- |
+| 預測時點 | 拿到完整標註後，估計該題的 soft label 分布（事後擬合） | 只拿到 `r` 份標註時預測剩下的會不會分歧（提早預警），主要設定 `r=2` |
+| 目標 | 擬合標籤分布，指標是 cross-entropy 與 micro-F1 | 在固定複核預算下排序，指標是 `Recall@K` 與 PR-AUC |
+| 可用資訊 | 文字（部分系統另加 annotator 身分） | 文字＋當下已可見的標註＋annotator 歷史與圖結構，且嚴格禁止使用隱藏標註 |
+| 產出 | 模型與排行榜成績 | 模型比較結果，加上標註平台要記下哪些欄位才重建得出「當時可見的資訊」 |
+| 語言 | 英文與阿拉伯文 | 英文公開資料加上臺灣繁體中文 pilot |
+
+本專題宣告兩個貢獻，順序如下：
+
+1. **部分觀測下的複核排序**這個問題設定與方法比較。
+2. **標註平台的資料需求規格**（第 10.3 節）。
+
+分歧預測本身只是達成第一項的手段，不單獨當成貢獻。
+
+論文暫定題目：
+
+> 部分標註下的複核排序：標註分歧預測方法比較與標註平台資料需求
 
 ## 4. 範圍
 
 ### 4.1 核心目標
 
+| 層級 | 課堂版 | 論文延伸 | 內容 |
+| --- | --- | --- | --- |
+| 英文真實資料 | 必做 | 必做 | TID-8 `goemotions-atr`，保留 `item_id`、`annotator_id` 與個別標籤 |
+| 隨機與規則基準 | 必做 | 必做 | 隨機排序、可見標籤 entropy、票數差距 |
+| 傳統分類模型 | 必做 | 必做 | Logistic Regression、Random Forest 或 Gradient Boosting |
+| 超參數調整 | 必做 | 必做 | `GridSearchCV` + `GroupKFold`，group 為 `item_id` |
+| 繁體中文 pilot | 不做 | 必做 | 150–300 筆，每筆至少 3 位標註者獨立標註 |
+| Annotator 歷史特徵 | 不做 | 必做 | 只從 training items 計算 |
+| 多語 Embedding | 選做 | 必做 | `BAAI/bge-m3` 本機產生，英文與繁中共用 |
+| 零樣本 LLM 對照線 | 選做 | 必做 | 階梯最上層，非主線模型 |
+| GraphSAGE | 不做 | 選做 | item–annotator 異質二分圖 |
+| 完整 Label Suite 功能 | 不做 | 不做 | 只做離線原型與資料需求建議 |
+
 ### 4.2 範圍外
+
+不研究的問題，在論文中明確排除：
+
+- 真值聚合（Dawid–Skene、MACE、majority vote）：解的是「正確標籤是什麼」，與本專題的排序目標不同。
+- 評分標註者好壞：不把低一致率 annotator 自動標成低品質人員。
+- 自動決定最終標籤：模型只排序 item，不自動裁決。
+- 正式複核佇列開發：本專題只到離線原型。
 
 ### 4.3 假設與限制
 
+| 項目 | 內容 |
+| --- | --- |
+| 隨機部分觀測 | 公開資料沒有可靠的標註時間順序，reveal 是隨機模擬，報告中稱「隨機部分觀測模擬」，**不得寫成真實時間序列預測** |
+| 分歧 ≠ 錯誤 | 分歧可能是主觀差異、規範不清或標註錯誤，三者不等同，論文須明確分開 |
+| 課堂版無繁中證據 | 課堂版結論只在英文 Reddit 情緒標註成立，不得外推到繁中或其他任務 |
+| 機器翻譯 | 翻譯資料最多當 Embedding 的跨語壓力測試，不得當繁中主證據 |
+| LLM 對照線的資料污染 | GoEmotions 公開且被大量使用，LLM 幾乎確定在預訓練時見過，其分數不可檢驗 |
+
 ## 5. 問題形式化
+
+令第 `i` 個資料項目為 `x_i`，標籤集合為 `\mathcal{C}`，完整標註集合為 `A_i`。類別 `c` 在完整標註中的比例為：
+
+```math
+p_{ic}
+=
+\frac{\sum_{a \in A_i}\mathbf{1}(y_{ia}=c)}{|A_i|}
+```
+
+其中 `y_{ia}` 表示 annotator `a` 對項目 `i` 的標籤。使用正規化 entropy 表示完整分歧程度：
+
+```math
+H_i
+=
+\frac{-\sum_{c \in \mathcal{C}}p_{ic}\log p_{ic}}{\log |\mathcal{C}|}
+```
+
+`H_i=0` 代表所有標註完全一致；越接近 `1`，代表標籤分布越分散。
+
+主要二元目標定義為是否出現任何分歧：
+
+```math
+z_i
+=
+\mathbf{1}
+\left(
+\left|\{y_{ia}:a\in A_i\}\right| > 1
+\right)
+```
+
+備用的高分歧門檻版本：
+
+```math
+z_i^{(\tau)} = \mathbf{1}(H_i \ge \tau)
+```
+
+門檻 `\tau` 只能由訓練集決定，固定後才可評估測試集。
+
+> **本專題固定使用 `z_i`，不使用 `z_i^{(\tau)}`。** 定案資料每題恰好 3 份標註、4 個類別，`H_i` 只有少數幾個離散值，門檻版本沒有意義；且「任何分歧」的陽性率 49.7% 落在合理區間，沒有切換的理由。
+
+部分觀測實驗中，只向模型揭露 `r` 份標註，記為 `O_i`；其餘標註 `U_i=A_i\setminus O_i` 全部隱藏。主要設定為 `r=2`。模型輸出風險分數：
+
+```math
+s_i
+=
+f_{\theta}
+\left(
+x_i,
+O_i,
+\text{history}(a),
+G_{\text{visible}}
+\right)
+```
+
+其中 `G_{\text{visible}}` 只能包含預測當下已可見的 annotation edges。**測試項目的隱藏標註不得出現在特徵、統計或圖 adjacency 中。**
+
+### 5.1 符號表
+
+| 符號 | 意義 |
+| --- | --- |
+| `x_i` | 第 `i` 個資料項目的文字 |
+| `\mathcal{C}` | 標籤集合；定案資料為 positive、negative、ambiguous、neutral |
+| `A_i` | 項目 `i` 的完整標註集合；定案資料固定 `|A_i|=3` |
+| `y_{ia}` | annotator `a` 對項目 `i` 的標籤 |
+| `p_{ic}` | 類別 `c` 在 `A_i` 中的比例 |
+| `H_i` | 正規化 entropy，完整分歧程度 |
+| `z_i` | 二元目標：完整標註是否出現分歧 |
+| `O_i` | 可見標註集合，`|O_i|=r`，主要設定 `r=2` |
+| `U_i` | 隱藏標註集合，`U_i=A_i\setminus O_i` |
+| `s_i` | 模型輸出的風險分數，用於排序 |
+| `b` | 複核預算比例，`b\in\{0.05,0.10,0.20\}` |
+| `K` | 排序後取前 `K` 筆，`K=\lfloor bN\rfloor` |
+| `\pi` | 測試集的分歧盛行率 |
+| `\Delta_{\text{lang}}` | 語言落差，`M_{\text{zh-TW}} - M_{\text{en}}` |
 
 ## 6. 資料協議
 
+這一階段的品質比選哪個模型更重要。目標是建立能模擬「已取得少量標註，要不要把這筆送去複核」的資料切分。
+
+### 6.1 資料來源與 schema
+
+課堂版資料為 TID-8 的 `goemotions-atr` config，只取恰好 3 份標註的 31,766 個 item。來源、授權、完整統計與已知代價見 [GoEmotions Dataset Card](./10-dataset-card-goemotions.mdx)。
+
+標準化 schema（論文延伸共用，繁中 pilot 沿用同一組欄位）：
+
+```text
+item_id
+text
+annotator_id
+label
+language
+source_dataset
+```
+
+載入後立刻丟棄 `author`（Reddit 使用者名稱，屬個資）。`subreddit` 保留，僅作穩健性分析的分組軸。
+
+### 6.2 Item-level split
+
+以 `item_id` 分組切分：
+
+```math
+\mathcal{D}
+=
+\mathcal{D}_{\text{train}}
+\cup
+\mathcal{D}_{\text{val}}
+\cup
+\mathcal{D}_{\text{test}}
+```
+
+```math
+|\mathcal{D}_{\text{train}}|:
+|\mathcal{D}_{\text{val}}|:
+|\mathcal{D}_{\text{test}}|
+=
+70:15:15
+```
+
+- 同一個 item 的所有 annotation 必須留在同一 split。不能逐 annotation 隨機切分，否則模型在訓練時已看過測試 item 的其他標註。
+- **不得沿用 TID-8 自帶的 split**。已實測確認 `goemotions-atr` 的 test item 有 96.0% 同時出現在 train；TID-8 的兩種切法是為「從分歧中學習」設計的，不是為本專題的排序任務設計。
+- 切 split 前先處理 163 筆重複文字，避免同一段文字同時落在 train 與 test（去重或合併，見 Q5）。
+
+### 6.3 部分標註 reveal protocol
+
+對每個 item：
+
+1. 從完整標註中抽出 `r=2` 份成為可見集合 `O_i`。
+2. 其餘標註成為隱藏集合 `U_i`。
+3. **只用 `O_i` 與 training history 建立特徵。**
+4. 用完整 `A_i` 計算 target `z_i`。
+5. 因公開資料沒有可靠時間順序，重複多個 random reveal seeds（課堂版 5 個，論文延伸建議 10 個）。
+
+### 6.4 洩漏檢查
+
+以下一律禁止，並需有自動化測試逐條驗證：
+
+| # | 禁止事項 | 為什麼 |
+| --- | --- | --- |
+| 1 | 使用 test item 的隱藏標註 `U_i` | 直接洩漏 target |
+| 2 | 以 test item 的完整 entropy `H_i` 或 majority label 作特徵 | 由 `A_i` 推得，等同洩漏 target |
+| 3 | 用 validation 或 test annotation 計算 annotator 歷史表現 | 歷史統計必須 training-only 或 out-of-fold |
+| 4 | 完整圖預訓練後再切 train/test | 預訓練已吸收測試資訊 |
+| 5 | 將 target edge 放入 GNN message passing | 等同把答案送進模型 |
+| 6 | 用完整資料調整 `\tau` 或決定特徵 | 門檻與特徵選擇只能由 training 決定 |
+| 7 | 以「每題標註數」當特徵 | GoEmotions 標註數 1–5 不等，標註數變多代表當初被判定需要加標，**標註數本身洩漏答案**；本專題只取恰好 3 份的子集，分母固定 |
+
+GNN 另有兩條（論文延伸）：test item 的 hidden edges 不得進圖；未知 annotator 不可只靠 training 中學到的 ID embedding。
+
+### 6.5 繁中 pilot 設計（論文延伸）
+
+- 樣本：150 至 300 筆繁中資料，題目必須貼近論文主要使用情境，不能只為了方便選與產品無關的任務（來源未定，見 Q7）。
+- 標註者：至少 3 位，最好 5 位；每位先閱讀同一份規範，再獨立作答。
+- Pilot 前用 20 至 30 筆做校準，但校準討論後的資料不直接混入正式測試。
+- 保存原始 label、時間、規範版本與後續裁決，不只保存 majority label。
+- 先計算 raw agreement、Fleiss' kappa 或 Krippendorff's alpha，確認任務真的存在可研究的分歧。
+- 繁中 pilot 的原始文字與 annotator 身分只存本機，**不得送往外部 Embedding API**，只用本機 `bge-m3`。
+
+### 6.6 冷啟動測試（論文延伸）
+
+建立兩種測試情境：
+
+1. **已知 annotator**：測試 annotator 曾在 training items 出現。
+2. **未知 annotator**：測試 annotator 完全不在 training graph。
+
+如果模型只在已知 annotator 有效，結論必須限定為「對既有標註團隊有效」，不能宣稱能直接泛化到新標註者。GoEmotions 只有 79 位 annotator，此實驗在課堂版資料上只能是探索性結果。
+
+### 6.7 階段產出
+
+- 固定的 split manifest。
+- Reveal seed manifest。
+- 自動洩漏檢查測試（對應 6.4 的七條）。
+- 資料流程圖與樣本統計。
+- 繁中標註規範與資料字典（論文延伸）。
+
 ## 7. 方法與實驗矩陣
+
+### 7.1 模型階梯（課堂版）
+
+由笨到聰明逐層比較，所有層級使用相同 split、相同可見資訊與相同 `K`：
+
+| 階梯 | 方法 | 用途 | 超參數 |
+| --- | --- | --- | --- |
+| 0 | 隨機排序 | 地板線 | 無 |
+| 1 | 可見標籤 entropy（只看前 2 份一不一致） | 「不用機器學習」的對照組 | 無 |
+| 2 | Logistic Regression | 第一個真正的 ML 模型 | `C` |
+| 3 | Random Forest 或 Gradient Boosting | 檢查非線性模型有無額外增益 | RF：`n_estimators`、`max_depth`；GB：`n_estimators`、`learning_rate`、`max_depth` |
+| 4（選做） | 零樣本大語言模型 | 回答「LLM 是不是早就會了」 | 無（只調提示詞） |
+
+階梯 3 的二選一尚未決定（Q3）。
+
+### 7.2 特徵
+
+| 類別 | 內容 | 版本 |
+| --- | --- | --- |
+| 文字特徵 | TF-IDF（設定未定，見 Q4） | 課堂版主線 |
+| 可見標註特徵 | 前 2 份標註是否一致、可見標籤 entropy、標了什麼 | 課堂版 |
+| 文字表面與 metadata | 字元數與 token 數、問號、否定詞、模糊詞與程度詞數量、是否多句或含引號條件句、`subreddit` | 論文延伸 Baseline 2 |
+| Annotator 歷史 | 歷史標註數、各類別標註比例、與同組其他 annotator 的歷史分歧率、與 training majority label 的一致率、覆蓋 domain 數、歷史不足指示值 | 論文延伸 Baseline 3，**只從 training items 計算** |
+| Embedding | `BAAI/bge-m3`，1024 維；先以 PCA 降維再接分類器 | 課堂版選做、論文延伸必做 |
+
+### 7.3 超參數調整
+
+| 項目 | 設定 |
+| --- | --- |
+| 搜尋方式 | `GridSearchCV` |
+| 交叉驗證 | `GroupKFold`，**group 必須是 `item_id`** |
+| 調參評分 | 直接用主要指標 `Recall@10%` |
+| 範圍 | 只在訓練集內交叉驗證，測試集只在最後評估一次 |
+
+若改用一般的 `KFold`，同一題被揭露的不同 reveal seed 可能同時落在訓練折與驗證折，調參分數會偏高。
+
+### 7.4 Embedding 消融（論文延伸）
+
+| 實驗 | 文字 Embedding | 可見標註統計 | Annotator 歷史 | 語言欄位 |
+| --- | ---: | ---: | ---: | ---: |
+| E1 | ✓ | | | |
+| E2 | | ✓ | ✓ | |
+| E3 | ✓ | ✓ | ✓ | |
+| E4 pooled bilingual | ✓ | ✓ | ✓ | ✓ |
+
+完整模型為：
+
+```math
+\mathbf{e}_i
+=
+\operatorname{Embed}(x_i)
+```
+
+```math
+\hat{p}_i
+=
+\sigma
+\left(
+\mathbf{w}^{\mathsf{T}}
+[\mathbf{e}_i;\mathbf{v}_i]
++b
+\right)
+```
+
+其中 `\mathbf{v}_i` 是可見標註與 annotator 歷史的結構化特徵，`[\cdot;\cdot]` 表示向量串接。
+
+雙語實驗分成三種，不混成一個模糊的「多語結果」：英文單語模型、繁中單語模型、跨語轉移（英文訓練繁中測試，或合併訓練；僅作探索性結果，不取代繁中單語驗證）。
+
+Embedding 工程需調研：pooling 與 normalization 是否固定、1024 維是否直接輸入或需 PCA、不同語言的向量 norm 是否偏移、繁中標點與全形字元是否需正規化、長文本截斷是否丟失造成分歧的上下文、模型版本固定與 cache invalidation。每筆 cache 至少保存：
+
+```text
+item_id
+language
+provider
+model_name
+model_revision
+dimension
+text_hash
+created_at
+embedding
+```
+
+### 7.5 GraphSAGE（論文延伸，選做）
+
+GNN 是待驗證方法，不是預設答案。
+
+Node 與 edge：
+
+```text
+item      ← 文字 Embedding、長度、語言、domain
+annotator ← training-only 歷史標籤分布、分歧率、標註量、冷啟動指示
+
+annotator --annotated_as_<label>--> item
+item --rev_annotated_as_<label>--> annotator
+```
+
+用不同 edge type 表示 label，避免最小版 GraphSAGE 完全忽略 edge label。
+
+最小模型：兩層 GraphSAGE、hidden dimension 測 64 與 128、dropout 測 0.2 與 0.5、item node 輸出 disagreement probability、以 validation PR-AUC early stopping、至少 5 個 model seeds。
+
+一層聚合：
+
+```math
+\mathbf{h}_i^{(\ell+1)}
+=
+\sigma
+\left(
+\mathbf{W}_1\mathbf{h}_i^{(\ell)}
++
+\mathbf{W}_2
+\operatorname{mean}_{j\in\mathcal{N}(i)}
+\mathbf{h}_j^{(\ell)}
+\right)
+```
+
+類別不平衡時使用帶正類權重的 binary cross-entropy：
+
+```math
+\mathcal{L}
+=
+-\frac{1}{N}
+\sum_{i=1}^{N}
+\left[
+w_{+}z_i\log \hat{p}_i
++
+(1-z_i)\log(1-\hat{p}_i)
+\right]
+```
+
+公平比較要求：Logistic Regression、Gradient Boosting 與 GraphSAGE 必須使用同一批 item、同一 reveal seed 與相同可見資訊，差別只在是否使用圖結構。
+
+**停損條件**——四條全部滿足才值得在結論中列為候選：
+
+1. `Recall@10%` 平均提升至少 3 個百分點。
+2. 5 個 seeds 中至少 4 個勝過最佳非圖模型。
+3. Paired bootstrap 的改善不是明顯不穩定。
+4. 推論與維護成本仍符合未來 Label Suite 情境。
+
+不符合時，正式結論是「圖結構沒有提供足以抵銷複雜度的穩定增益，應先採簡單模型」。這仍然是完整且有產品價值的研究結果。
+
+### 7.6 零樣本 LLM 對照線
+
+必須回答「這件事現在的大語言模型是不是早就會了」。文獻現況：零樣本 LLM 能給出不錯的**單一標籤**，但預測**人類分歧的分布與不確定性**時與人類有系統性落差，靠放大模型解決不了，需要 in-domain 微調才拉得近；硬標籤預測會塌成單峰，即使人類實際意見分裂。這與本專題的主張互補——分歧訊號有一部分不在文字裡，而在「誰標了、已經標成什麼」。
+
+| 項目 | 設定 |
+| --- | --- |
+| 做法 | 給 LLM 留言文字與已可見的 2 份標註，要它輸出 0 到 1 的分歧機率 |
+| 報告內容 | 與其他階梯同一條 `Recall@10%`，另加校準（ECE 或 reliability diagram） |
+| 定位 | 課堂版選做、論文階段必做；階梯最上層，不是主線模型 |
+| 必寫的限制 | 資料污染風險：GoEmotions 公開且被大量使用，LLM 幾乎確定在預訓練時見過，分數不可檢驗 |
+| 資料治理 | Apache-2.0 送外部 API 無授權障礙，但必須先丟掉 `author`；成本考量下可只送測試子樣本，或改用可本機執行的開源模型 |
 
 ## 8. 評估方法
 
+### 8.1 排序指標
+
+設測試集排序後前 `K` 筆為 `\operatorname{TopK}`，真正分歧集合為 `\mathcal{P}`：
+
+```math
+\operatorname{Precision@K}
+=
+\frac{|\operatorname{TopK}\cap\mathcal{P}|}{K}
+```
+
+```math
+\operatorname{Recall@K}
+=
+\frac{|\operatorname{TopK}\cap\mathcal{P}|}{|\mathcal{P}|}
+```
+
+測試集共 `N` 筆時，分歧盛行率與相對隨機抽查的提升為：
+
+```math
+\pi
+=
+\frac{|\mathcal{P}|}{N}
+\qquad
+\operatorname{Lift@K}
+=
+\frac{\operatorname{Precision@K}}{\pi}
+```
+
+固定預算比例 `b` 時：
+
+```math
+K=\lfloor bN\rfloor,
+\qquad
+b\in\{0.05,0.10,0.20\}
+```
+
+### 8.2 主要與次要指標
+
+| 類別 | 指標 |
+| --- | --- |
+| **主要** | `Recall@10%` |
+| 次要 | `Precision@5%`、`Precision@10%`、`Recall@5%`、`Recall@20%`、PR-AUC、`Lift@10%` |
+| 課堂版另報 | 混淆矩陣 |
+
+主要指標固定為 `Recall@10%`，因為它直接回答實務上的問句：「今天只有時間複核 10% 的題目，可以涵蓋多少真正分歧？」
+
+**所有主要指標與門檻必須在看測試結果前固定。**
+
+### 8.3 報告方式
+
+- 課堂版：5 個 reveal seeds，報平均 ± 標準差。
+- 隨機排序基準至少執行 30 個 random seeds，回報平均、標準差與 95% confidence interval。
+- 論文延伸：英文與繁中**分開報告**，不只報 pooled score；另報語言落差
+
+```math
+\Delta_{\text{lang}} = M_{\text{zh-TW}} - M_{\text{en}}
+```
+
+必須同時列出 `M_{\text{zh-TW}}` 與 `M_{\text{en}}`，否則英文樣本量較大時會遮住繁中的弱點。
+
+### 8.4 結果表格式
+
+| 模型 | PR-AUC | P@5% | R@5% | P@10% | R@10% | Lift@10% |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Random | | | | | | |
+| Visible entropy | | | | | | |
+| Logistic Regression | | | | | | |
+| Random Forest / Gradient Boosting | | | | | | |
+
+完成條件是至少一個可訓練模型完整跑通，且重跑可以得到相同 split 與評估結果。
+
+### 8.5 穩健性矩陣（論文延伸）
+
+| 維度 | 測試值 |
+| --- | --- |
+| Reveal 數量 | `r\in\{1,2,3\}` |
+| 複核預算 | `b\in\{0.05,0.10,0.20\}` |
+| 模型 seed | 至少 5 個 |
+| Reveal seed | 建議 10 個 |
+| 語言 | 英文、繁中、pooled |
+| Annotator | 已知、未知 |
+| 特徵 | text only、metadata only、combined、graph |
+
+統計方法：以 item 為單位做 paired bootstrap；回報平均、標準差與 95% confidence interval；不只呈現最佳 seed；所有模型在同一 bootstrap sample 上比較；樣本數太小時，不把很小的數值差異解讀成模型優勢。
+
+### 8.6 錯誤分析
+
+課堂版至少挑出模型判斷錯誤的案例分析原因。論文延伸英文與繁中各抽查 30 個 false positives、30 個 false negatives、20 個高信心正確案例。
+
+錯誤類型至少區分：文字本身有多種合理解讀、缺少前後文或外部知識、否定與反諷與條件句、label schema 邊界不清、少數 annotator 的系統性偏好、臺灣用語與繁簡差異、Embedding 截斷或正規化問題、模型只記住特定詞彙或 domain。
+
+定案資料的分歧集中在語意相鄰的類別（neutral↔positive、neutral↔negative、ambiguous↔neutral），真正相反的 negative↔positive 只佔 4.2%。因此預期模型抓不到的多半是相鄰類別的邊界題，而不是極性顛倒——這是錯誤分析的現成假設。
+
+### 8.7 決策規則
+
+把模型比較轉成可執行的產品與研究決策，而不是只留下最高分模型：
+
+| 實驗結果 | 結論與建議 |
+| --- | --- |
+| 可見 entropy 已經最好 | 先採透明規則排序，不導入模型 |
+| Embedding 穩定提升 | 採 Embedding + 簡單分類器作候選 |
+| GNN 顯著且穩定提升 | 等真實繁中平台資料累積後，再評估 GNN 導入 |
+| 英文有效、繁中無效 | 不可直接導入論文目標情境；需補繁中資料或領域調整 |
+| 模擬有效、真實資料無效 | 不宣稱可改善正式複核流程 |
+| 所有方法都不穩定 | 暫不做自動排序，優先改善資料紀錄與標註規範 |
+
+兩種走向都算完整結果，這是刻意設計的：ML 勝不過規則時，「就用那條透明的規則，不要為了用模型而用模型」同樣有價值，而且省下維護成本。
+
+### 8.8 公平與倫理
+
+- 不把 disagreement 直接稱為 error。
+- 不將低一致率 annotator 自動標成低品質人員。
+- 不以人口屬性作自動懲罰或排班依據。
+- Annotator ID 必須假名化。
+- 模型只排序 item，不自動裁決標籤。
+- 需人工檢查模型是否對特定語言、類別或 annotator 群體產生系統性偏差。
+
 ## 9. 外部依賴與授權
+
+### 9.1 資料
+
+| 項目 | 內容 |
+| --- | --- |
+| 英文主資料 | [`MichiganNLP/TID-8`](https://huggingface.co/datasets/MichiganNLP/TID-8) 的 `goemotions-atr` config |
+| 原始出處 | Demszky et al. 2020,《GoEmotions》（[ACL 2020](https://aclanthology.org/2020.acl-main.372/)）；[google-research-datasets/go_emotions](https://huggingface.co/datasets/google-research-datasets/go_emotions) |
+| 授權 | **Apache-2.0**（追到原始出處） |
+| TID-8 論文 | [Findings of EMNLP 2023](https://aclanthology.org/2023.findings-emnlp.832/) |
+
+TID-8 的 Dataset Card 授權欄標示 `unknown`，其論文也沒有授權聲明。**授權一律要追到原始出處**，不能因為 Hugging Face 可以下載就假設可以任意使用。候選比較與排除理由見 [Dataset Card](./10-dataset-card-goemotions.mdx)。
+
+論文延伸的第二資料集候選為 md-agreement，屆時須照流程填表單向作者申請原始檔。
+
+### 9.2 模型
+
+| 模型 | 定位 | 專題角色 | 注意事項 |
+| --- | --- | --- | --- |
+| [`BAAI/bge-m3`](https://huggingface.co/BAAI/bge-m3) | 開源多語 Embedding，1024 維，MIT License | **主模型**，本機一次處理英文與中文 | 官方資料以 `zh` 為單位，仍要用臺灣繁中 pilot 驗證（[論文](https://arxiv.org/abs/2402.03216)） |
+| [`voyage-4-lite`](https://docs.voyageai.com/docs/embeddings) | 多語 Embedding API | 有額度時作 API 對照 | 公開資料可送；論文真實資料需先確認資料治理 |
+| [`mistral-embed`](https://docs.mistral.ai/studio/knowledge-rag/embeddings) | 通用文字 Embedding API | Voyage 的替代方案 | 不需兩者都做；不使用 Mistral 對話模型產生判斷 |
+
+兩個 API 不必同時比較，否則研究焦點會從複核排序偏成供應商評比。
+
+### 9.3 資料治理
+
+- **任何資料檔都不進版控**：`data/`、`artifacts/`、`runs/`、`outputs/` 已在 `.gitignore`。commit 前確認沒有原始文字、個別 annotation、embedding 向量或模型權重。
+- 繁中 pilot 的原始文字與 annotator 身分只存本機；文件與範例一律用假資料或代號。
+- 繁中 pilot 的文字在確認資料治理之前，**不得送往外部 Embedding API**，只用本機 `bge-m3`。
+- 外部 API 送出前須確認：是否含個資或機密內容、供應商是否保留輸入、資料所在地與存取權限、是否允許論文研究使用、是否需要去識別化。
 
 ## 10. 時程與停損
 
+### 10.1 課堂版時程
+
+| 日期 | 工作 | 狀態 |
+| --- | --- | --- |
+| 10/19–10/25 | 下載 TID-8、EDA、選定子資料集、確認授權 | :badge[已完成]{variant="success"}（定案 GoEmotions；EDA 尚無可重跑腳本，見 Q10） |
+| 10/26–11/01 | Item split、reveal 2 份標註、TF-IDF；完成隨機與 entropy 兩個基準 | :badge[進行中]{variant="warning"} |
+| 11/02–11/15 | Logistic Regression、Random Forest 或 Gradient Boosting，加上超參數調整 | :badge[未開始]{variant="neutral"} |
+| 11/16–11/22 | BGE-M3 + PCA 比較（選做，來不及整週刪除） | :badge[未開始]{variant="neutral"} |
+| 11/23–11/29 | 5 個 seeds 評估、錯誤分析 | :badge[未開始]{variant="neutral"} |
+| **11/30 前** | **填表單登記主題** | :badge[未完成]{variant="danger"} |
+| 11/30–12/06 | 製作簡報 | :badge[未開始]{variant="neutral"} |
+| 12/07–12/13 | 排練與緩衝，以防排在第 15 週（12/14）發表 | :badge[未開始]{variant="neutral"} |
+
+進度落後時的刪減順序：
+
+1. 先刪 BGE-M3 比較。
+2. 樹模型只留一個。
+3. **不可刪除**：隨機排序、entropy 規則、Logistic Regression 加超參數調整。少了它們就無法滿足規範的「超參數調整與模型比較」。
+
+### 10.2 論文延伸時程
+
+| 日期 | 階段 | 必須完成的結果 |
+| --- | --- | --- |
+| 10/05–10/11 | 階段 1 | 研究問題、target、主要指標與停止條件 |
+| 10/12–10/25 | 階段 2 | TID-8 子資料決策、繁中資料策略、授權與 EDA |
+| 10/26–11/01 | 階段 3 | Item split、reveal protocol、繁中標註規範 |
+| 11/02–11/08 | 階段 4 | Random、entropy、Logistic Regression、Gradient Boosting |
+| 11/09–11/22 | 階段 5 | BGE-M3 雙語 embedding、消融與語言比較 |
+| 11/23–12/06 | 階段 6 | GraphSAGE 選做；未達條件即停止 |
+| 12/07–12/13 | 階段 7 | 多 seeds、bootstrap、雙語錯誤分析 |
+| 12/14–12/20 | 階段 8 | 報告、簡報與 Label Suite 決策建議 |
+
+> 這份時程是 10/19 課堂版定案前的原始規劃，期末發表的部分已由 10.1 取代。繁中 pilot 的啟動時機未定（Q2）。
+
+論文延伸的刪減順序：先刪 GAT、HGT 等第二種圖模型；再刪跨資料集泛化；保留單一 GraphSAGE，仍來不及就整段刪除；API Embedding 對照只留一個或完全不做。**不可刪除**：item-level split、隨機與規則 baseline、繁中 pilot、主要指標與錯誤分析。
+
+### 10.3 最低成功線
+
+| 版本 | 最低成功線 |
+| --- | --- |
+| 課堂版 | GoEmotions ＋ item-level split ＋ reveal protocol ＋ 隨機／entropy／Logistic Regression（含調參）＋ 5 seeds 評估 ＋ 錯誤分析 |
+| 論文延伸 | 英文真實資料 ＋ 繁中 pilot ＋ 完整 baseline ＋ 一個多語 Embedding 模型 ＋ 雙語獨立評估 |
+
+GraphSAGE 沒做完或沒改善都不影響結論成立。
+
+### 10.4 Label Suite 未來資料需求（第二貢獻）
+
+平台至少要能串起：
+
+```text
+project_id
+item_id
+task_schema_version
+annotator_pseudonymous_id
+assignment_id
+annotation_id
+label_payload
+annotation_started_at
+annotation_submitted_at
+review_id
+review_outcome
+adjudicated_label
+adjudication_reason
+reviewer_pseudonymous_id
+model_score
+model_version
+visible_annotation_count
+```
+
+必須保留**評分當下已可見的標註版本**，否則未來無法重建模型當時真正知道的資訊。也要區分複核原因是分歧、標註錯誤、規範問題、資料缺漏或其他；否則只能預測「分歧」，無法驗證是否真的節省複核成本。
+
+### 10.5 最終交付物
+
+| 項目 | 課堂版 | 論文延伸 |
+| --- | --- | --- |
+| 簡報（12 分鐘 + Q&A 3 分鐘） | 必要 | — |
+| 可重現的資料處理與實驗程式 | 必要（規範未要求交付，但自用） | 必要 |
+| 固定 split 與 reveal manifests | 必要 | 必要 |
+| Dataset Card | 英文 | 英文與繁中 |
+| Baseline 比較表 | 必要 | 加 Embedding 與選做 GNN |
+| 錯誤案例分析 | 必要 | 加雙語與信賴區間 |
+| 標註規範與資料字典 | — | 必要 |
+| 一頁產品決策摘要 | — | 必要 |
+| 期末報告／論文 | — | 必要 |
+
 ## 11. 技術選型
 
+### 11.1 已定案
+
+| 項目 | 選擇 | 理由 |
+| --- | --- | --- |
+| 文字特徵 | TF-IDF（scikit-learn） | 課堂版主線，不依賴 GPU 與外部模型 |
+| 分類器 | scikit-learn `LogisticRegression`、`RandomForestClassifier` 或 `GradientBoostingClassifier` | 對應規範的「模型比較」 |
+| 調參 | `GridSearchCV` + `GroupKFold`（group 為 `item_id`） | 避免同 item 跨折洩漏 |
+| Embedding | `BAAI/bge-m3` 本機推論 | 開源、多語、可本機跑，英文與繁中共用同一管線 |
+| 圖模型框架 | PyTorch Geometric [`HeteroData`](https://pytorch-geometric.readthedocs.io/en/latest/notes/heterogeneous.html) | 可分別保存不同 node 與 edge type，支援異質 GraphSAGE |
+
+### 11.2 未定案
+
+Python 工具鏈（uv／pip）、版本與目錄佈局尚未拍板，見 Q1。此決定在寫第一行實驗程式碼時一併拍板，不預先猜。
+
+### 11.3 Repo 邊界
+
+目前不把實驗程式拆成新 repo。期末專題定位為 Label Suite 的技術調研與離線原型，先把資料處理、設定、模型與結果放在獨立實驗目錄，避免未驗證模型直接成為正式功能。
+
+符合以下任一條件時再拆 repo：課程要求獨立交件、需要獨立部署 demo、Python／PyTorch 依賴與 Label Suite 主程式明顯不同、實驗已有自己的版本與資料下載與重現流程。
+
+正式公開前另確認：Label Suite 程式碼授權、公開資料授權、繁中 pilot 的同意與去識別化方式，以及論文是否允許公開原始文字與個別 annotation。
+
 ## 12. 術語表
+
+| 術語 | 定義 |
+| --- | --- |
+| **Annotation disagreement（標註分歧）** | 同一 item 的多位標註者給出不同標籤。可能源於主觀差異、規範不清或標註錯誤，三者不等同 |
+| **部分觀測（partial observation）** | 只向模型揭露 `r` 份標註、隱藏其餘的實驗設定。本專題 `r=2` |
+| **Reveal protocol** | 決定哪 `r` 份標註可見的程序。本專題為隨機抽取，重複多個 seeds |
+| **Reveal seed** | 一次隨機揭露的亂數種子。不同 seed 產生不同的 `O_i`，但 `z_i` 不變 |
+| **Item-level split** | 以 `item_id` 分組切分資料，同一 item 的所有 annotation 留在同一 split |
+| **複核預算（review budget）** | 可人工複核的資料比例 `b`，對應排序後的前 `K=\lfloor bN\rfloor` 筆 |
+| **`Recall@K`** | 排序前 `K` 筆涵蓋了多少真正分歧的 item。本專題主要指標為 `Recall@10%` |
+| **`Lift@K`** | `Precision@K` 相對於隨機抽查盛行率 `\pi` 的倍數 |
+| **難題子集** | 可見 2 份標註一致、但完整標註出現分歧的 item。定案資料佔全體 66.6% 中的 24.4% |
+| **Target leakage** | 特徵中混入由完整標註推得的資訊，導致測試分數虛高而無法上線。禁止清單見 6.4 |
+| **冷啟動（cold start）** | 測試 annotator 完全不在 training graph 中的情境 |
+| **Soft label** | 保留完整標籤分布而非壓成單一標籤的表示方式 |
+| **Le-Wi-Di** | SemEval-2023 Task 11（Learning With Disagreements），本專題最接近的既有研究 |
+| **TID-8** | 整合八個具有真實分歧的英文語言理解資料集的集合，保留 annotator 與個別 annotation 的關係 |
+| **Label Suite** | 本專題的下游標註平台，期末專題是它的技術調研與離線原型 |
 
 ## 13. 待釐清事項
 
 完整清單在 [90-open-questions.mdx](./90-open-questions.mdx)，全文的 `Qn` 一律指該文件的編號；已決議者留在原位改狀態，編號不重排、不回收。
 
 ## 14. Change Log
+
+### [0.2.0] - 2026-10-29
+
+- **Added**: 依 notecraft 筆記《機器學習實作系列第 16 週－期末專案》填入第 2–12 章全部內容。
+- **Added**: 第 1.3 節區分「課堂版」與「論文延伸」兩個版本，全文標明適用範圍。
+- **Added**: 第 2.4 節納入課程規範（分組、登記期限、發表時間、評分、簡報六段）作為課堂版的範圍約束。
+- **Added**: 第 6.4 節把洩漏禁止事項整理成七條編號清單，供自動化測試逐條對應。
+- **Added**: 第 10.4 節 Label Suite 資料需求，作為第二項貢獻的主體。
+- **Changed**: 課堂版範圍縮為英文單語。繁體中文 pilot、annotator 歷史特徵與 GraphSAGE 自「必做」改列論文延伸。**理由**：繁中 pilot 需至少 3 位組外標註者，一延誤就無法在 12/21 前完成；annotator 歷史是最容易發生 target leakage 的部分；三者都放不進 12 分鐘簡報。此變更於 2026-10-19 在筆記中定案，本次搬入規格。
+- **Changed**: 主要 target 固定為 `z_i`（任何分歧），移除切換到 `z_i^{(\tau)}` 的條件分支。**理由**：定案資料每題恰好 3 份標註、4 個類別，`H_i` 只有少數離散值，門檻版本沒有意義。
+- **Changed**: 第 1.2 節宣告自本版起以本文件為規格真相，notecraft 筆記降為推導過程與原始實測紀錄。
+- **Added**: 拆出 `docs/10-dataset-card-goemotions.mdx`，承接資料集來源、授權、統計與已知代價。
 
 ### [0.1.0] - 2026-10-13
 
