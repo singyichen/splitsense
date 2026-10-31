@@ -6,7 +6,7 @@ createdAt: "2026-10-13"
 updatedAt: "2026-10-31"
 Project Name: SplitSense
 文件類型: Research Specification
-文件版本: v0.5.0
+文件版本: v0.6.0
 文件狀態: 草稿
 文件作者: 陳欣怡
 建立日期: 2026-10-13
@@ -25,7 +25,7 @@ Project Name: SplitSense
 | --- | --- |
 | 專案名稱 | SplitSense |
 | 文件類型 | Research Specification |
-| 文件版本 | v0.5.0 |
+| 文件版本 | v0.6.0 |
 | 文件狀態 | 草稿 |
 | 文件作者 | 陳欣怡 |
 | 建立日期 | 2026-10-13 |
@@ -41,7 +41,10 @@ Project Name: SplitSense
 | --- | --- |
 | `docs/00-research-spec.mdx`（本文件） | 研究決策：研究問題、形式化、資料協議、方法、評估、時程與停損 |
 | `docs/10-dataset-card-goemotions.mdx` | 定案資料集的來源、授權、統計與已知限制 |
+| `docs/20-progress.mdx` | **進度的單一真相**：做了沒、缺什麼 |
 | `docs/90-open-questions.mdx` | 待釐清事項的單一清單（`Qn` 編號，不重排、不回收） |
+
+本文件管「要做什麼」，不管「做了沒」。各章一律不帶狀態欄——唯一的例外是 1.4，那追的是本文件自己的章節完成度。
 
 ### 1.3 兩個版本
 
@@ -55,6 +58,8 @@ Project Name: SplitSense
 課堂版沿用論文延伸的問題形式化（第 5 章）與資料協議核心（第 6 章），其餘延伸項目全部後推。
 
 ### 1.4 章節完成度
+
+追本文件各章寫完了沒。工作進度在 [`20-progress.mdx`](./20-progress.mdx)。
 
 | # | 章節 | 狀態 | 卡在什麼 |
 | --- | --- | --- | --- |
@@ -376,17 +381,19 @@ GNN 另有兩條（論文延伸）：test item 的 hidden edges 不得進圖；�
 
 ### 6.7 階段產出
 
-| 產出 | 實作 | 狀態 |
-| --- | --- | --- |
-| 固定的 split manifest | `scripts/build_dataset.py` → `artifacts/manifests/split.parquet` | :badge[已完成]{variant="success"} |
-| Reveal seed manifest | 同上 → `reveal_seed{0..4}.parquet` | :badge[已完成]{variant="success"} |
-| 自動洩漏檢查測試 | `tests/test_leakage.py`（6.4 第 1、2、7 條與 split 不變量） | :badge[部分完成]{variant="warning"} 第 3–5 條待論文延伸實作時啟用 |
-| 重現性測試 | `tests/test_reproducibility.py` | :badge[已完成]{variant="success"} |
-| 樣本統計與 EDA | `scripts/run_eda.py` → `artifacts/eda/` | :badge[已完成]{variant="success"} |
-| TF-IDF 與可見標註特徵 | `src/splitsense/features.py` | :badge[已完成]{variant="success"} |
-| 階梯 0、1 基準 | `scripts/run_baselines.py` → `artifacts/baselines/` | :badge[已完成]{variant="success"} |
-| 階梯 2、3 模型與調參 | `scripts/run_models.py` → `artifacts/models/` | :badge[已完成]{variant="success"} |
-| 繁中標註規範與資料字典 | — | :badge[論文延伸]{variant="neutral"} |
+狀態見 [`20-progress.mdx`](./20-progress.mdx)。
+
+| 產出 | 實作位置 |
+| --- | --- |
+| 固定的 split manifest | `scripts/build_dataset.py` → `artifacts/manifests/split.parquet` |
+| Reveal seed manifest | 同上 → `reveal_seed{0..4}.parquet` |
+| 自動洩漏檢查測試 | `tests/test_leakage.py`（6.4 第 1、2、7 條與 split 不變量；第 3–5 條待論文延伸實作時啟用） |
+| 重現性測試 | `tests/test_reproducibility.py` |
+| 樣本統計與 EDA | `scripts/run_eda.py` → `artifacts/eda/` |
+| TF-IDF 與可見標註特徵 | `src/splitsense/features.py` |
+| 階梯 0、1 基準 | `scripts/run_baselines.py` → `artifacts/baselines/` |
+| 階梯 2、3 模型與調參 | `scripts/run_models.py` → `artifacts/models/` |
+| 繁中標註規範與資料字典 | 論文延伸 |
 
 Split 的實際結果（`SPLIT_SEED = 20261031`）：
 
@@ -786,16 +793,18 @@ TID-8 的 Dataset Card 授權欄標示 `unknown`，其論文也沒有授權聲�
 
 ### 10.1 課堂版時程
 
-| 日期 | 工作 | 狀態 |
-| --- | --- | --- |
-| 10/19–10/25 | 下載 TID-8、EDA、選定子資料集、確認授權 | :badge[已完成]{variant="success"} 定案 GoEmotions；EDA 已補成可重跑腳本（Q10） |
-| 10/26–11/01 | Item split、reveal 2 份標註、TF-IDF；完成隨機與 entropy 兩個基準 | :badge[已完成]{variant="success"} |
-| 11/02–11/15 | Logistic Regression、Gradient Boosting，加上超參數調整 | :badge[已完成]{variant="success"} 提前於 10/31 完成 |
-| 11/16–11/22 | BGE-M3 + PCA 比較（選做，來不及整週刪除） | :badge[未開始]{variant="neutral"} |
-| 11/23–11/29 | 5 個 seeds 評估、錯誤分析 | :badge[未開始]{variant="neutral"} |
-| **11/30 前** | **填表單登記主題** | :badge[未完成]{variant="danger"} |
-| 11/30–12/06 | 製作簡報 | :badge[未開始]{variant="neutral"} |
-| 12/07–12/13 | 排練與緩衝，以防排在第 15 週（12/14）發表 | :badge[未開始]{variant="neutral"} |
+狀態見 [`20-progress.mdx`](./20-progress.mdx) 第 3 節。
+
+| 日期 | 工作 |
+| --- | --- |
+| 10/19–10/25 | 下載 TID-8、EDA、選定子資料集、確認授權 |
+| 10/26–11/01 | Item split、reveal 2 份標註、TF-IDF；完成隨機與 entropy 兩個基準 |
+| 11/02–11/15 | Logistic Regression、Gradient Boosting，加上超參數調整 |
+| 11/16–11/22 | BGE-M3 + PCA 比較（選做，來不及整週刪除） |
+| 11/23–11/29 | 5 個 seeds 評估、錯誤分析 |
+| **11/30 前** | **填表單登記主題** |
+| 11/30–12/06 | 製作簡報 |
+| 12/07–12/13 | 排練與緩衝，以防排在第 15 週（12/14）發表 |
 
 進度落後時的刪減順序：
 
@@ -944,6 +953,12 @@ uv run ruff check src/ scripts/ tests/
 完整清單在 [90-open-questions.mdx](./90-open-questions.mdx)，全文的 `Qn` 一律指該文件的編號；已決議者留在原位改狀態，編號不重排、不回收。
 
 ## 14. Change Log
+
+### [0.6.0] - 2026-10-31
+
+- **Added**: 拆出 `docs/20-progress.mdx` 當進度的單一真相，追課程規範必做 9 項、課堂版時程 8 格、最低成功線、交付物、待實作清單與擋路的 `Qn`。
+- **Changed**: 第 6.7 與 10.1 節移除狀態欄，改為指向 `20-progress.mdx`。**理由**：原本進度散在六處（本文件 1.4／6.7／10.1、`90-open-questions.mdx`、`README.md`、`CLAUDE.md`），而規範六段、最低成功線與交付物三張表完全沒有狀態欄，要回答「目前到哪」必須交叉比對再 grep 程式庫。本文件管「要做什麼」，進度文件管「做了沒」。
+- **Note**: 1.4 章節完成度保留，因為它追的是本文件自己的章節，不是工作進度。
 
 ### [0.5.0] - 2026-10-31
 

@@ -34,6 +34,7 @@ uv run ruff check src/ scripts/ tests/
 | --- | --- |
 | `docs/00-research-spec.mdx` | 研究決策：研究問題與假設、問題形式化、資料協議、評估方法、時程與停損、術語表（十四章，改自 TrendMile PRD 骨架） |
 | `docs/10-dataset-card-goemotions.mdx` | 定案資料集的來源、授權、實測統計與已知限制 |
+| `docs/20-progress.mdx` | **進度的單一真相**：做了沒、缺什麼。其他文件一律不帶狀態欄 |
 | `docs/90-open-questions.mdx` | 待釐清事項與決議紀錄（`Qn` 編號，不重排、不回收） |
 | `src/splitsense/config.py` | 實驗參數：路徑、split 比例與 seed、reveal 設定、預算與指標常數 |
 | `tests/` | 實驗程式的不變量：洩漏檢查（研究規格 6.4）與重現性 |
@@ -75,6 +76,7 @@ uv run ruff check src/ scripts/ tests/
 - 文件用繁體中文書寫，技術名詞保留英文原文。
 - Commit 訊息用繁體中文 Conventional Commits。
 - **`docs/` 的數學式一律用 fenced ` ```math ` 區塊，不要用 `$$`。** notecraftapp 1.13.0 沒有 `remark-math` / `rehype-katex`，`$$` 區塊裡的 `{` 會被當成 JSX expression——行首的 `{\log ...}` 直接讓 build 失敗，而剛好是合法 JS 的 `{C}` 會被靜默吞掉。改完 `docs/` 一律跑 `npm run docs:build` 確認。
+- 任何影響進度的 commit 都要同步改 `docs/20-progress.mdx` 的狀態與頂部日期，與程式一起 commit。不要在其他文件新增狀態欄。
 - 洩漏檢查（研究規格 6.4）的七條每條都要有測試。這類錯誤出錯時結果看起來更漂亮、而且不會報錯，整篇結論會直接失效卻不被發現。
 - 排序分數同分一律隨機打散（`metrics.rank_with_random_tiebreak`）。可見 entropy 這類規則只有少數離散值，依資料順序排會讓分數變成資料載入順序的函數。
 - 比較兩個方法時確認它們跑在**同一批 reveal seed** 上。hard 子集的成員由 reveal 決定，少了這點兩列就不在同一份資料上。

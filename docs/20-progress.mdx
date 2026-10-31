@@ -1,0 +1,129 @@
+---
+title: "進度追蹤"
+description: "課程規範必做項目、課堂版時程、最低成功線與交付物的單一進度真相"
+tags: ["進度", "交付物", "課程規範"]
+createdAt: "2026-10-31"
+updatedAt: "2026-10-31"
+---
+
+# 進度追蹤
+
+> 進度以 **2026-10-31** 為準。
+
+本文件是**進度的單一真相**。其他文件不再帶狀態欄，需要知道「做了沒」一律看這裡。
+
+範圍界線：
+
+| 問題 | 看哪裡 |
+| --- | --- |
+| 做了沒、缺什麼 | **本文件** |
+| 為什麼這樣做、要做什麼 | [研究規格](./00-research-spec.mdx) |
+| 某個決策拍板了沒 | [待釐清事項](./90-open-questions.mdx) |
+| 研究規格本身寫完了沒 | [研究規格 1.4](./00-research-spec.mdx) |
+
+狀態只有四種：:badge[完成]{variant="success"}、:badge[部分]{variant="warning"}、:badge[未開始]{variant="neutral"}、:badge[逾期風險]{variant="danger"}。每一列的「證據」欄要指到檔案、指令或數字，不寫感覺。
+
+## 1. 總覽
+
+課堂版的分析工作超前約兩週——原訂 11/15 的模型階梯在 10/31 完成。剩餘缺口集中在三處：**錯誤分析、混淆矩陣、簡報**，加上一張**還沒送的登記表單**。
+
+| 面向 | 進度 |
+| --- | --- |
+| 課程規範必做（9 項） | 完成 6、部分 2、未開始 1 |
+| 課堂版時程（8 格） | 完成 3、部分 1、未開始 4 |
+| 最低成功線（課堂版，6 項） | 完成 5、**缺 1：錯誤分析** |
+| 最終交付物（課堂版，6 項） | 完成 4、未開始 2 |
+| 待釐清事項（11 題） | 已決議 7、待拍板 4 |
+
+關鍵日期：**11/30** 登記截止（剩 30 天）、**12/13** 簡報須完成（剩 43 天，假設排在 12/14 發表）。
+
+## 2. 課程規範必做項目
+
+| # | 項目 | 狀態 | 證據與缺口 |
+| --- | --- | --- | --- |
+| 1 | 問題描述 | :badge[完成]{variant="success"} | 研究規格 3.1、5：二元分類 `z_i`，機率用於排序 |
+| 2 | 資料收集 | :badge[完成]{variant="success"} | [Dataset Card](./10-dataset-card-goemotions.mdx)：來源、Apache-2.0、授權追溯 |
+| 3 | 資料分析與前處理 | :badge[完成]{variant="success"} | `scripts/run_eda.py` 重現全部統計；文字去重、item-level split 70/15/15、reveal 2 份、TF-IDF 都已實作 |
+| 4 | 模型訓練 | :badge[完成]{variant="success"} | `scripts/run_models.py`：四層階梯 ＋ `GridSearchCV` + `GroupKFold` 調參 |
+| 5 | 模型評估 | :badge[部分]{variant="warning"} | PR-AUC、`Recall@10%`、5 reveal seeds 平均 ± 標準差都有（研究規格 8.4）。**缺混淆矩陣**——研究規格 8.2 明列「課堂版另報」，`metrics.py` 尚未實作 |
+| 6 | 結論 | :badge[部分]{variant="warning"} | H1、H2 已有實測結論（研究規格 8.4 判讀）。**缺錯誤案例分析** |
+| 7 | 主題與組員登記 | :badge[逾期風險]{variant="danger"} | **表單尚未送出**，截止 11/30。三個欄位的內容 2026-10-19 就定了，見研究規格 2.4 末段 |
+| 8 | 發表簡報 | :badge[未開始]{variant="neutral"} | 12 分鐘 ＋ Q&A 3 分鐘；六段對應見研究規格 2.4 |
+| 9 | 專題程式 | :badge[完成]{variant="success"} | 規範未要求交付。`uv run pytest` 53 passed、2 skipped；從零（無 `data/`、無 `artifacts/`）可完整重跑 |
+
+## 3. 課堂版時程
+
+日期與工作內容見研究規格 10.1，此處只記狀態。
+
+| 日期 | 工作 | 狀態 | 備註 |
+| --- | --- | --- | --- |
+| 10/19–10/25 | 資料、EDA、子資料集、授權 | :badge[完成]{variant="success"} | EDA 於 10/31 補成可重跑腳本（Q10） |
+| 10/26–11/01 | Split、reveal、TF-IDF、隨機與 entropy 基準 | :badge[完成]{variant="success"} | 提前 1 天 |
+| 11/02–11/15 | Logistic Regression、Gradient Boosting、調參 | :badge[完成]{variant="success"} | **提前 15 天**，於 10/31 完成 |
+| 11/16–11/22 | BGE-M3 + PCA 比較 | :badge[未開始]{variant="neutral"} | 選做。刪減順序第 1 條 |
+| 11/23–11/29 | 5 個 seeds 評估、錯誤分析 | :badge[部分]{variant="warning"} | 5 seeds 已內建在所有指標裡。**錯誤分析未做** |
+| 11/30 前 | 填表單登記主題 | :badge[逾期風險]{variant="danger"} | 見第 2 節第 7 項 |
+| 11/30–12/06 | 製作簡報 | :badge[未開始]{variant="neutral"} | 受 Q11 擋住 |
+| 12/07–12/13 | 排練與緩衝 | :badge[未開始]{variant="neutral"} | 按最壞情況（12/14 發表）規劃 |
+
+## 4. 最低成功線（課堂版）
+
+研究規格 10.3 的六項。**全部完成，專題結論即成立。**
+
+| 項目 | 狀態 |
+| --- | --- |
+| GoEmotions | :badge[完成]{variant="success"} |
+| Item-level split | :badge[完成]{variant="success"} |
+| Reveal protocol | :badge[完成]{variant="success"} |
+| 隨機／entropy／Logistic Regression（含調參） | :badge[完成]{variant="success"} |
+| 5 seeds 評估 | :badge[完成]{variant="success"} |
+| **錯誤分析** | :badge[未開始]{variant="neutral"} |
+
+→ **錯誤分析是唯一缺口。** 它同時也是簡報第 6 段的素材，優先度最高。
+
+## 5. 最終交付物（課堂版）
+
+對應研究規格 10.5。
+
+| 項目 | 狀態 | 位置 |
+| --- | --- | --- |
+| 可重現的資料處理與實驗程式 | :badge[完成]{variant="success"} | `src/splitsense/`、`scripts/`、`tests/` |
+| 固定 split 與 reveal manifests | :badge[完成]{variant="success"} | `artifacts/manifests/`（不進版控） |
+| Dataset Card（英文） | :badge[完成]{variant="success"} | [`10-dataset-card-goemotions.mdx`](./10-dataset-card-goemotions.mdx) |
+| Baseline 比較表 | :badge[完成]{variant="success"} | 研究規格 8.4；`artifacts/models/summary_hard.csv` |
+| 錯誤案例分析 | :badge[未開始]{variant="neutral"} | — |
+| 簡報（12 分鐘 ＋ Q&A 3 分鐘） | :badge[未開始]{variant="neutral"} | — |
+
+## 6. 待實作清單
+
+具體還要寫的程式。完成後回來改狀態，並在研究規格的 Change Log 記一筆。
+
+| # | 項目 | 為什麼需要 | 規模 | 狀態 |
+| --- | --- | --- | --- | --- |
+| 1 | **錯誤分析模組** | 簡報第 6 段 ＋ 最低成功線唯一缺口。抽 false positive／false negative，按研究規格 8.6 的錯誤類型分類 | 中 | :badge[未開始]{variant="neutral"} |
+| 2 | **混淆矩陣** | 研究規格 8.2 明列「課堂版另報」 | 小 | :badge[未開始]{variant="neutral"} |
+| 3 | **val split 目前閒置** | 切了 4,740 筆但從未使用——調參在 train 內 CV、評估在 test。可用來選分類門檻或當第二道確認 | 小 | :badge[未開始]{variant="neutral"} |
+
+## 7. 擋路關係
+
+只列目前擋住工作的待釐清事項，完整清單與決議理由在 [`90-open-questions.mdx`](./90-open-questions.mdx)。
+
+| # | 題目 | 擋住什麼 | 期限 |
+| --- | --- | --- | --- |
+| **Q11** | 主要指標的評估範圍：full 還是 hard | **簡報第 5、6 段的主張**與 H2 的檢驗方式 | 11/15 |
+| Q9 | 零樣本 LLM 對照線是否納入課堂版 | 11/16 之後的時間分配 | 11/15 |
+| Q8 | 發表排 12/14 還是 12/21 | 排練與緩衝安排 | 待教師公布 |
+| Q7 | 繁中 pilot 的題目來源 | 繁中 pilot 設計（論文階段） | — |
+
+## 8. 論文延伸
+
+決議於 12/21 之後才啟動（Q2），全部 :badge[未開始]{variant="neutral"}，不影響課堂版結論成立。
+
+繁中 pilot、annotator 歷史特徵、多語 Embedding 雙語比較、GraphSAGE、零樣本 LLM 對照線、跨資料集穩健性、Label Suite 資料需求落實、論文 11 章。
+
+## 9. 更新慣例
+
+- 任何影響進度的 commit 都要同步改本文件的狀態與頂部日期，與程式一起 commit。
+- 狀態只用那四種 badge。「差一點就好了」算 :badge[部分]{variant="warning"}，不算完成。
+- 「證據」欄指到檔案、指令或數字。無法指出證據的項目，狀態就不是完成。
+- 不在其他文件新增狀態欄。研究規格管「要做什麼」，本文件管「做了沒」。
