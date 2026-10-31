@@ -7,6 +7,13 @@ context: |
   shared multilingual embedding (BAAI/bge-m3). Course final project, due
   2026-12-21.
 
+  STATUS (2026-10-31): OpenSpec is PAUSED for the duration of the course
+  version (through 2026-12-21). Do not write change proposals and do not run
+  /opsx:* commands. See docs/90-open-questions.mdx Q6. During this period the
+  schedule in docs/00-research-spec.mdx section 10.1 acts as the plan, and
+  tests/test_leakage.py plus tests/test_reproducibility.py act as the
+  behavioral spec. Re-evaluate if the paper extension starts after 2026-12-21.
+
   Division of truth (no duplication):
   - docs/00-research-spec.mdx owns research decisions (why / what): questions,
     hypotheses, data protocol, evaluation, schedule, glossary.

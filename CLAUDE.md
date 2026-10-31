@@ -10,24 +10,34 @@
 
 研究設計的原始脈絡在 notecraft 筆記 `機器學習實作系列第16週-期末專案.mdx` 的「期末專案定案」一節（`~/mandy/project/notecraft/src/content/notes/`）。規格搬進本 repo 之後，**以本 repo 的文件為準**；與筆記有出入時在本 repo 文件記下變更理由。
 
-## 現況
+## 現況（2026-10-31）
 
-- 2026-10-13 建立 repo，處於設計階段：研究規格骨架已建立、內容待填，尚無實驗程式碼。
-- Python 工具鏈（uv / pip、版本、目錄佈局）尚未拍板；等寫第一行實驗程式碼時再定，不預先猜。
+- 研究規格已填完（v0.3.0），資料協議完成：split 與 reveal manifest 可重現，洩漏檢查與重現性測試通過。
+- 下一步是 TF-IDF 特徵與隨機／entropy 兩個基準（課堂版時程 `10/26–11/01` 那格的剩餘部分）。
+- 工具鏈已定案：**uv + `src/splitsense/` 佈局 + `pyproject.toml`**，Python `>=3.12`（本機釘 3.13），版本鎖在 `uv.lock`。所有實驗參數集中在 `src/splitsense/config.py`。
 
-## 文件分工（2026-10-13 定案）
+```bash
+uv sync --extra dev
+uv run python scripts/run_eda.py        # 重現 Dataset Card 第 3 節
+uv run python scripts/build_dataset.py  # split 與 reveal manifest
+uv run pytest                           # 洩漏檢查與重現性
+uv run ruff check src/ scripts/ tests/
+```
 
-兩層各管一件事、內容不重疊，讓每一項決策只有一份真相：
+## 文件分工
+
+每一項決策只有一份真相，內容不重疊：
 
 | 位置 | 管什麼 |
 | --- | --- |
 | `docs/00-research-spec.mdx` | 研究決策：研究問題與假設、問題形式化、資料協議、評估方法、時程與停損、術語表（十四章，改自 TrendMile PRD 骨架） |
-| `docs/90-open-questions.mdx` | 待釐清事項的單一清單（`Qn` 編號，不重排、不回收） |
-| `openspec/specs/` | 實驗程式的行為：每個 capability 的 Requirement（SHALL）與 Scenario |
+| `docs/10-dataset-card-goemotions.mdx` | 定案資料集的來源、授權、實測統計與已知限制 |
+| `docs/90-open-questions.mdx` | 待釐清事項與決議紀錄（`Qn` 編號，不重排、不回收） |
+| `src/splitsense/config.py` | 實驗參數：路徑、split 比例與 seed、reveal 設定、預算與指標常數 |
+| `tests/` | 實驗程式的不變量：洩漏檢查（研究規格 6.4）與重現性 |
+| `openspec/specs/` | 暫停：課堂版期間不使用 |
 
-- OpenSpec 的 change proposal 引用研究規格的章節或 `Qn`，不重述也不改動研究決策；需要不同決策時先改 `docs/`。
-- 書寫風格沿用 TrendMile `prd-writing` skill 的「書寫風格」七條（`~/mandy/project/trendmile/.claude/skills/prd-writing/SKILL.md`）。
-- OpenSpec 指令：`/opsx:propose`、`/opsx:apply`、`/opsx:archive` 等；CLI 為全域安裝的 `openspec`（1.14.1）。
+**OpenSpec 於課堂版期間暫停使用（2026-10-31，Q6）**，`openspec/` 目錄保留，12/21 之後若接論文延伸再評估。期間不寫 change proposal，也不要用 `/opsx:*` 指令。課堂版的驅動方式是：研究規格 10.1 的時程當計畫，`tests/test_leakage.py` 與 `tests/test_reproducibility.py` 當不變量規格，`docs/90-open-questions.mdx` 當決策紀錄。
 
 ## 用 notecraftapp 檢視文件
 
@@ -44,8 +54,12 @@
 - split 一律 item-level，讓同一筆資料的標註不會同時出現在訓練與測試。
 - 英文與繁中分開報告指標，不只報 pooled score，讓英文樣本量不會遮住繁中的弱點。
 - 機器翻譯資料只能當跨語壓力測試，不得當作繁中主證據。
-- 最低成功線：英文真實資料 ＋ 繁中 pilot ＋ 完整 baseline ＋ 一個多語 Embedding 模型 ＋ 雙語獨立評估。GraphSAGE 沒做完或沒改善都不影響結論成立。
-- 交件：2026-12-21（第 16 週）。
+- **課堂版只做英文**（2026-10-19 定案）。繁中 pilot、annotator 歷史特徵與 GraphSAGE 都在論文延伸；繁中 pilot 於 2026-10-31 決議不與課堂版並行。
+- 最低成功線（課堂版）：GoEmotions ＋ item-level split ＋ reveal protocol ＋ 隨機／entropy／Logistic Regression（含調參）＋ 5 seeds 評估 ＋ 錯誤分析。
+- 最低成功線（論文延伸）：英文真實資料 ＋ 繁中 pilot ＋ 完整 baseline ＋ 一個多語 Embedding 模型 ＋ 雙語獨立評估。GraphSAGE 沒做完或沒改善都不影響結論成立。
+- 只取恰好 3 份標註的 item，分母固定。**標註數本身洩漏答案**（4 份 88.1%、5 份 85.5% 分歧率），不得混入其他標註數的 item，也不得把標註數當特徵。
+- 文字去重後保留 31,603 個 item；上游 TID-8 的 split 不可沿用（test 有 96.0% 也出現在 train）。
+- 交件：2026-12-21（第 16 週），發表可能排在 12/14，簡報須在 12/13 前完成。
 
 ## 資料治理（public repo）
 
@@ -58,3 +72,5 @@
 
 - 文件用繁體中文書寫，技術名詞保留英文原文。
 - Commit 訊息用繁體中文 Conventional Commits。
+- **`docs/` 的數學式一律用 fenced ` ```math ` 區塊，不要用 `$$`。** notecraftapp 1.13.0 沒有 `remark-math` / `rehype-katex`，`$$` 區塊裡的 `{` 會被當成 JSX expression——行首的 `{\log ...}` 直接讓 build 失敗，而剛好是合法 JS 的 `{C}` 會被靜默吞掉。改完 `docs/` 一律跑 `npm run docs:build` 確認。
+- 洩漏檢查（研究規格 6.4）的七條每條都要有測試。這類錯誤出錯時結果看起來更漂亮、而且不會報錯，整篇結論會直接失效卻不被發現。

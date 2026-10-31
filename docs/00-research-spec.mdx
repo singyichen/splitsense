@@ -3,14 +3,14 @@ title: "SplitSense 研究規格"
 description: "在部分標註下預測標註分歧、協助安排人工複核的研究問題、資料協議、評估方法與時程"
 tags: ["研究規格", "標註分歧", "複核排序"]
 createdAt: "2026-10-13"
-updatedAt: "2026-10-29"
+updatedAt: "2026-10-31"
 Project Name: SplitSense
 文件類型: Research Specification
-文件版本: v0.2.0
+文件版本: v0.3.0
 文件狀態: 草稿
 文件作者: 陳欣怡
 建立日期: 2026-10-13
-更新日期: 2026-10-29
+更新日期: 2026-10-31
 ---
 
 # SplitSense（歧見預判）
@@ -25,11 +25,11 @@ Project Name: SplitSense
 | --- | --- |
 | 專案名稱 | SplitSense |
 | 文件類型 | Research Specification |
-| 文件版本 | v0.2.0 |
+| 文件版本 | v0.3.0 |
 | 文件狀態 | 草稿 |
 | 文件作者 | 陳欣怡 |
 | 建立日期 | 2026-10-13 |
-| 更新日期 | 2026-10-29 |
+| 更新日期 | 2026-10-31 |
 
 ### 1.2 文件分工
 
@@ -63,12 +63,12 @@ Project Name: SplitSense
 | 3 | 研究問題與假設 | :badge[已定案]{variant="success"} | — |
 | 4 | 範圍 | :badge[已定案]{variant="success"} | — |
 | 5 | 問題形式化 | :badge[已定案]{variant="success"} | — |
-| 6 | 資料協議 | :badge[部分待定]{variant="warning"} | 繁中 pilot 題目來源未定（Q7）；文字去重策略未定（Q5） |
+| 6 | 資料協議 | :badge[已定案]{variant="success"} | 繁中 pilot 題目來源待論文階段（Q7） |
 | 7 | 方法與實驗矩陣 | :badge[部分待定]{variant="warning"} | 樹模型二選一未定（Q3）；TF-IDF 設定未定（Q4） |
 | 8 | 評估方法 | :badge[已定案]{variant="success"} | — |
 | 9 | 外部依賴與授權 | :badge[已定案]{variant="success"} | — |
 | 10 | 時程與停損 | :badge[已定案]{variant="success"} | 發表週次依學號排定，尚未公布（Q8） |
-| 11 | 技術選型 | :badge[待拍板]{variant="danger"} | Python 工具鏈與目錄佈局未定（Q1） |
+| 11 | 技術選型 | :badge[已定案]{variant="success"} | — |
 | 12 | 術語表 | :badge[已定案]{variant="success"} | — |
 | 13 | 待釐清事項 | :badge[持續更新]{variant="neutral"} | — |
 | 14 | Change Log | :badge[持續更新]{variant="neutral"} | — |
@@ -328,7 +328,7 @@ source_dataset
 
 - 同一個 item 的所有 annotation 必須留在同一 split。不能逐 annotation 隨機切分，否則模型在訓練時已看過測試 item 的其他標註。
 - **不得沿用 TID-8 自帶的 split**。已實測確認 `goemotions-atr` 的 test item 有 96.0% 同時出現在 train；TID-8 的兩種切法是為「從分歧中學習」設計的，不是為本專題的排序任務設計。
-- 切 split 前先處理 163 筆重複文字，避免同一段文字同時落在 train 與 test（去重或合併，見 Q5）。
+- 切 split 前先以文字去重，每段文字只保留第一個 item；去重後為 31,603 個 item（Q5 已決議）。不採合併，因為合併會讓標註數不等於 3，破壞固定分母。
 
 ### 6.3 部分標註 reveal protocol
 
@@ -376,11 +376,24 @@ GNN 另有兩條（論文延伸）：test item 的 hidden edges 不得進圖；�
 
 ### 6.7 階段產出
 
-- 固定的 split manifest。
-- Reveal seed manifest。
-- 自動洩漏檢查測試（對應 6.4 的七條）。
-- 資料流程圖與樣本統計。
-- 繁中標註規範與資料字典（論文延伸）。
+| 產出 | 實作 | 狀態 |
+| --- | --- | --- |
+| 固定的 split manifest | `scripts/build_dataset.py` → `artifacts/manifests/split.parquet` | :badge[已完成]{variant="success"} |
+| Reveal seed manifest | 同上 → `reveal_seed{0..4}.parquet` | :badge[已完成]{variant="success"} |
+| 自動洩漏檢查測試 | `tests/test_leakage.py`（6.4 第 1、2、7 條與 split 不變量） | :badge[部分完成]{variant="warning"} 第 3–5 條待論文延伸實作時啟用 |
+| 重現性測試 | `tests/test_reproducibility.py` | :badge[已完成]{variant="success"} |
+| 樣本統計與 EDA | `scripts/run_eda.py` → `artifacts/eda/` | :badge[已完成]{variant="success"} |
+| 繁中標註規範與資料字典 | — | :badge[論文延伸]{variant="neutral"} |
+
+Split 的實際結果（`SPLIT_SEED = 20261031`）：
+
+| split | item 數 | 佔比 | 分歧盛行率 |
+| --- | ---: | ---: | ---: |
+| train | 22,122 | 70.0% | 49.81% |
+| val | 4,740 | 15.0% | 49.81% |
+| test | 4,741 | 15.0% | 49.82% |
+
+以 `z` 分層切分，讓三個 split 的分歧盛行率一致——否則 `Recall@K` 的分母會隨 split 浮動，模型之間的比較失去意義。
 
 ## 7. 方法與實驗矩陣
 
@@ -692,8 +705,8 @@ TID-8 的 Dataset Card 授權欄標示 `unknown`，其論文也沒有授權聲�
 
 | 日期 | 工作 | 狀態 |
 | --- | --- | --- |
-| 10/19–10/25 | 下載 TID-8、EDA、選定子資料集、確認授權 | :badge[已完成]{variant="success"}（定案 GoEmotions；EDA 尚無可重跑腳本，見 Q10） |
-| 10/26–11/01 | Item split、reveal 2 份標註、TF-IDF；完成隨機與 entropy 兩個基準 | :badge[進行中]{variant="warning"} |
+| 10/19–10/25 | 下載 TID-8、EDA、選定子資料集、確認授權 | :badge[已完成]{variant="success"} 定案 GoEmotions；EDA 已補成可重跑腳本（Q10） |
+| 10/26–11/01 | Item split、reveal 2 份標註、TF-IDF；完成隨機與 entropy 兩個基準 | :badge[進行中]{variant="warning"} split 與 reveal manifest 已完成；TF-IDF 與兩個基準未開始 |
 | 11/02–11/15 | Logistic Regression、Random Forest 或 Gradient Boosting，加上超參數調整 | :badge[未開始]{variant="neutral"} |
 | 11/16–11/22 | BGE-M3 + PCA 比較（選做，來不及整週刪除） | :badge[未開始]{variant="neutral"} |
 | 11/23–11/29 | 5 個 seeds 評估、錯誤分析 | :badge[未開始]{variant="neutral"} |
@@ -720,7 +733,7 @@ TID-8 的 Dataset Card 授權欄標示 `unknown`，其論文也沒有授權聲�
 | 12/07–12/13 | 階段 7 | 多 seeds、bootstrap、雙語錯誤分析 |
 | 12/14–12/20 | 階段 8 | 報告、簡報與 Label Suite 決策建議 |
 
-> 這份時程是 10/19 課堂版定案前的原始規劃，期末發表的部分已由 10.1 取代。繁中 pilot 的啟動時機未定（Q2）。
+> 這份時程是 10/19 課堂版定案前的原始規劃，期末發表的部分已由 10.1 取代。繁中 pilot 於 2026-10-31 決議不與課堂版並行，整段在 12/21 之後才啟動（Q2）。
 
 論文延伸的刪減順序：先刪 GAT、HGT 等第二種圖模型；再刪跨資料集泛化；保留單一 GraphSAGE，仍來不及就整段刪除；API Embedding 對照只留一個或完全不做。**不可刪除**：item-level split、隨機與規則 baseline、繁中 pilot、主要指標與錯誤分析。
 
@@ -785,11 +798,35 @@ visible_annotation_count
 | Embedding | `BAAI/bge-m3` 本機推論 | 開源、多語、可本機跑，英文與繁中共用同一管線 |
 | 圖模型框架 | PyTorch Geometric [`HeteroData`](https://pytorch-geometric.readthedocs.io/en/latest/notes/heterogeneous.html) | 可分別保存不同 node 與 edge type，支援異質 GraphSAGE |
 
-### 11.2 未定案
+### 11.2 工具鏈與目錄佈局
 
-Python 工具鏈（uv／pip）、版本與目錄佈局尚未拍板，見 Q1。此決定在寫第一行實驗程式碼時一併拍板，不預先猜。
+2026-10-31 定案（Q1）：**uv + `src/splitsense/` 套件佈局 + `pyproject.toml`**，Python `>=3.12`（本機釘 3.13），版本鎖在 `uv.lock`。
 
-### 11.3 Repo 邊界
+| 目錄 | 內容 |
+| --- | --- |
+| `src/splitsense/` | `config.py`（路徑與全域常數）、`data.py`、`eda.py`、`split.py`、`reveal.py` |
+| `scripts/` | `run_eda.py`、`build_dataset.py` |
+| `tests/` | `test_leakage.py`、`test_reproducibility.py` |
+| `data/` | 原始 parquet，`.gitignore` |
+| `artifacts/` | `eda/`、`manifests/`，`.gitignore` |
+
+常用指令：
+
+```text
+uv sync --extra dev                        # 建環境
+uv run python scripts/run_eda.py           # 重現 Dataset Card 第 3 節
+uv run python scripts/build_dataset.py     # 產生 split 與 reveal manifest
+uv run pytest                              # 洩漏檢查與重現性
+uv run ruff check src/ scripts/ tests/
+```
+
+所有實驗參數集中在 `config.py`，不散落在各腳本，讓 split 與 reveal 可以重現。
+
+### 11.3 OpenSpec
+
+課堂版期間暫停使用（Q6）。`openspec/` 目錄保留，12/21 之後若接論文延伸再評估。課堂版的驅動方式是：10.1 的時程當計畫，`tests/` 的洩漏檢查與重現性測試當不變量規格，`90-open-questions.mdx` 當決策紀錄。
+
+### 11.4 Repo 邊界
 
 目前不把實驗程式拆成新 repo。期末專題定位為 Label Suite 的技術調研與離線原型，先把資料處理、設定、模型與結果放在獨立實驗目錄，避免未驗證模型直接成為正式功能。
 
@@ -822,6 +859,14 @@ Python 工具鏈（uv／pip）、版本與目錄佈局尚未拍板，見 Q1。�
 完整清單在 [90-open-questions.mdx](./90-open-questions.mdx)，全文的 `Qn` 一律指該文件的編號；已決議者留在原位改狀態，編號不重排、不回收。
 
 ## 14. Change Log
+
+### [0.3.0] - 2026-10-31
+
+- **Added**: 第 6.7 節改為產出對照表，列出各項的實作位置與狀態，並補上實際的 split 結果（22,122／4,740／4,741，分歧盛行率三邊一致）。
+- **Added**: 第 11.2 節填入工具鏈定案（Q1）：uv + `src/splitsense/` 佈局、Python `>=3.12`、常用指令。第 11.3 節記 OpenSpec 於課堂版期間暫停（Q6）。
+- **Changed**: 第 6.2 節的重複文字處理從「去重或合併」改為確定去重，每段文字保留第一個 item，去重後 31,603 個 item（Q5）。**理由**：合併會讓標註數不等於 3，破壞固定分母——而固定分母正是切斷「標註數洩漏答案」的手段（6.4 第 7 條）。
+- **Changed**: 第 10.2 節的繁中 pilot 啟動時機由「未定」改為決議不與課堂版並行（Q2）。
+- **Note**: Dataset Card 第 3 節的原始統計是**文字去重前**算的，與管線實際使用的數字有 0.1 至 0.6 個百分點差異。已在 Dataset Card 3.4 併列兩組，引用以去重後為準。
 
 ### [0.2.0] - 2026-10-29
 
