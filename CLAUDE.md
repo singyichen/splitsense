@@ -12,9 +12,10 @@
 
 ## 現況（2026-10-31）
 
-- 研究規格 v0.5.0。課堂版四層模型階梯全部跑通（原訂 11/15，提前於 10/31 完成），53 個測試通過。
-- 下一步是 5 seeds 評估與錯誤分析（原訂 11/23–11/29），以及簡報。
-- 結果：hard 範圍 `R@10%`，隨機 10.1、entropy 規則 10.6、Logistic Regression 19.4、Gradient Boosting 19.4。**H2 成立但非線性沒有實質增益**，結論採 Logistic Regression。
+- 研究規格 v0.7.0。**課堂版最低成功線六項全部完成**（分析工作超前約四週），70 個測試通過。
+- 下一步只剩簡報，沒有待寫的程式。進度看 `docs/20-progress.mdx`。
+- 結果：hard 範圍 `R@10%`，隨機 9.5、entropy 規則 9.9、**同意標籤先驗（四列查表）18.5**、Logistic Regression 19.4、Gradient Boosting 19.4。
+- **查表已拿到模型 95% 的效果。** entropy 在 hard 子集恆為常數、等於隨機，所以不能拿它當「不用 ML」的對照——那會高估 ML 貢獻。真正該比的是「前兩人同意了哪個標籤」。文字模型的優勢是真的（配對 5/5 全勝）但只有 0.85 個百分點。
 - **評估範圍有一題待拍板（Q11）**：`Recall@10%` 在整個 test split 上已飽和（33.5% 的 item 可見已不一致、必然分歧，遠超過 K=474），entropy 規則就拿到 `P@10%` = 100%。真正可檢驗的範圍是「可見 2 份一致」的 hard 子集，entropy 在那裡恆為 0、退化成隨機。兩個範圍都要報，以哪個為主待定。
 - 工具鏈已定案：**uv + `src/splitsense/` 佈局 + `pyproject.toml`**，Python `>=3.12`（本機釘 3.13），版本鎖在 `uv.lock`。所有實驗參數集中在 `src/splitsense/config.py`。
 
@@ -81,3 +82,7 @@ uv run ruff check src/ scripts/ tests/
 - 排序分數同分一律隨機打散（`metrics.rank_with_random_tiebreak`）。可見 entropy 這類規則只有少數離散值，依資料順序排會讓分數變成資料載入順序的函數。
 - 比較兩個方法時確認它們跑在**同一批 reveal seed** 上。hard 子集的成員由 reveal 決定，少了這點兩列就不在同一份資料上。
 - 訓練集疊加 5 個 reveal seed，`GroupKFold` 的 group 必須是 `item_id`。不疊加的話每個 item 只出現一次，`GroupKFold` 會退化成一般 `KFold`。
+- **比較兩個方法一律用配對比較**（`metrics.paired_comparison`），不要只比平均 ± 標準差。配對標準差通常小得多：LR 對查表是 +0.85 ± 0.26、5/5 全勝，但各自的標準差都是 ±0.8，只看後者會誤判成無差異。
+- 分數全同分的方法（hard 子集上的 entropy）要跑多個排序 seed，否則報出來的只是一次抽樣。
+- 比例要在跨 seed **相加之後**才算，不要先算比例再相加——百分比會被一起加總。
+- 「某組在錯誤中被高估」這類判斷，基準必須取自同一群體。拿 FN 佔分歧的比例去對 Dataset Card 佔全體 item 的比例，分母不同。

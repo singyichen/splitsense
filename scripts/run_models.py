@@ -16,10 +16,14 @@ import numpy as np
 import pandas as pd
 
 from splitsense import config as cfg
-from splitsense.baselines import evaluate_random, evaluate_visible_entropy
+from splitsense.baselines import (
+    agreed_label_prior,
+    agreed_label_scores,
+    visible_entropy_scores,
+)
 from splitsense.data import build_items, load_annotations
 from splitsense.features import build_matrix
-from splitsense.metrics import aggregate, ranking_metrics
+from splitsense.metrics import aggregate, paired_comparison, ranking_metrics
 from splitsense.models import (
     GB_GRID,
     LOGREG_GRID,
@@ -36,19 +40,14 @@ from splitsense.split import build_split_manifest
 REPORT_KEYS = ["PR-AUC", "P@5%", "R@5%", "P@10%", "R@10%", "Lift@10%"]
 
 
-def evaluate_model(estimator, items, manifests, test_ids, vectorizer) -> pd.DataFrame:
-    """在每個 reveal seed 的 hard test 子集上評估。"""
+def model_scores(estimator, items, manifests, vectorizer) -> dict[int, np.ndarray]:
+    """每個 reveal seed 的 hard test 子集上的預測機率。"""
     text_by_id = items.set_index("item_id")["text"]
-    runs = []
-    for seed, manifest in manifests.items():
-        rows = manifest[manifest["item_id"].isin(test_ids) & manifest["visible_agree"]]
-        rows = rows.reset_index(drop=True)
+    out = {}
+    for seed, rows in manifests.items():
         texts = text_by_id.loc[rows["item_id"]].reset_index(drop=True)
-        X = build_matrix(texts, rows, vectorizer)
-        scores = estimator.predict_proba(X)[:, 1]
-        rng = np.random.default_rng(30_000 + seed)
-        runs.append(ranking_metrics(rows["z"].to_numpy(), scores, rng))
-    return aggregate(runs)
+        out[seed] = estimator.predict_proba(build_matrix(texts, rows, vectorizer))[:, 1]
+    return out
 
 
 def main() -> int:
@@ -83,9 +82,29 @@ def main() -> int:
         hard_m[seed] = rows
         hard_y[seed] = rows["z"].to_numpy()
 
-    results = {
-        "Random": evaluate_random(hard_y),
-        "Visible entropy": evaluate_visible_entropy(hard_y, hard_m),
+    prior = agreed_label_prior(manifests, train_ids)
+    print("\n[models] 同意標籤先驗（由 training 算出的分歧率）：")
+    for label, rate in sorted(prior.items(), key=lambda kv: -kv[1]):
+        print(f"  同意 {label}: {rate * 100:.1f}%")
+
+    prior = agreed_label_prior(manifests, train_ids)
+    print("\n[models] 同意標籤先驗（由 training 算出的分歧率）：")
+    for label, rate in sorted(prior.items(), key=lambda kv: -kv[1]):
+        print(f"  同意 {label}: {rate * 100:.1f}%")
+
+    # 先把每個方法在每個 seed 的分數算出來，再從同一批分數算所有指標。
+    # 這樣聚合表與配對比較必定一致，不會各算一次而對不起來。
+    scores_by_model: dict[str, dict[int, np.ndarray]] = {
+        "Random": {
+            seed: np.random.default_rng(10_000 + seed).random(len(hard_m[seed]))
+            for seed in hard_m
+        },
+        "Visible entropy": {
+            seed: visible_entropy_scores(hard_m[seed]) for seed in hard_m
+        },
+        "Agreed-label prior": {
+            seed: agreed_label_scores(hard_m[seed], prior) for seed in hard_m
+        },
     }
 
     searches = {}
@@ -100,9 +119,22 @@ def main() -> int:
         print(f"[models] {name} 最佳參數 {search.best_params_}")
         print(f"[models] CV Recall@10% {search.best_score_ * 100:.2f}%，耗時 {elapsed:.0f}s")
         searches[name] = search
-        results[name] = evaluate_model(
-            search.best_estimator_, table.items, manifests, test_ids, vectorizer
+        scores_by_model[name] = model_scores(
+            search.best_estimator_, table.items, hard_m, vectorizer
         )
+
+    # Random 與 Visible entropy 的排序完全由同分打散決定（entropy 在 hard 子集
+    # 恆為常數），所以它們要跑多個排序 seed，否則報出來的數字只是一次抽樣。
+    TIEBREAK_RUNS = {"Random": cfg.N_RANDOM_SEEDS, "Visible entropy": cfg.N_RANDOM_SEEDS}
+
+    results = {}
+    for name, by_seed in scores_by_model.items():
+        runs = []
+        for seed, scores in by_seed.items():
+            for draw in range(TIEBREAK_RUNS.get(name, 1)):
+                rng = np.random.default_rng(30_000 + 1_000 * seed + draw)
+                runs.append(ranking_metrics(hard_y[seed], scores, rng))
+        results[name] = aggregate(runs)
 
     rows = []
     for name, summary in results.items():
@@ -120,6 +152,11 @@ def main() -> int:
     print(f"\n=== 範圍 hard：test item {n:,}、盛行率 {prevalence * 100:.2f}%、K={k} ===")
     print(f"R@10% 的理論上限 {min(1.0, k / (prevalence * n)) * 100:.1f}%")
     print(report.to_string())
+
+    paired = paired_comparison(hard_y, scores_by_model, reference="Agreed-label prior")
+    print("\n=== 配對比較：以「同意標籤先驗」為參考（研究規格 8.5）===")
+    print(paired.to_string())
+    paired.to_csv(out_dir / "paired_vs_agreed_label_prior.csv")
 
     coefficients = visible_feature_coefficients(searches["Logistic Regression"], train_data)
     if coefficients is not None:

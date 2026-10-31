@@ -60,6 +60,62 @@ def ranking_metrics(
     return out
 
 
+def threshold_at_budget(scores: np.ndarray, budget: float = cfg.PRIMARY_BUDGET) -> float:
+    """預算 b 下的操作點：取第 K 高分作為門檻。
+
+    研究規格 6.4 第 6 條要求門檻只能由非測試資料決定，所以這個函式應該餵
+    validation 的分數，再把結果套到 test 上。
+    """
+    scores = np.asarray(scores, dtype=float)
+    k = max(1, int(np.floor(budget * len(scores))))
+    # 第 k 高分（1-indexed），即剛好讓 k 筆被選中的門檻
+    return float(np.sort(scores)[::-1][k - 1])
+
+
+def confusion_at_threshold(
+    y_true: np.ndarray, scores: np.ndarray, threshold: float
+) -> pd.DataFrame:
+    """混淆矩陣（研究規格 8.2：課堂版另報）。
+
+    列為實際、欄為預測；「預測送複核」表示分數 >= 門檻。
+    """
+    y_true = np.asarray(y_true).astype(int)
+    flagged = np.asarray(scores, dtype=float) >= threshold
+    return pd.DataFrame(
+        [
+            [int((~flagged & (y_true == 0)).sum()), int((flagged & (y_true == 0)).sum())],
+            [int((~flagged & (y_true == 1)).sum()), int((flagged & (y_true == 1)).sum())],
+        ],
+        index=pd.Index(["實際一致 (z=0)", "實際分歧 (z=1)"], name="實際"),
+        columns=pd.Index(["預測安全", "預測送複核"], name="預測"),
+    )
+
+
+def confusion_rates(confusion: pd.DataFrame) -> dict[str, float]:
+    """從混淆矩陣導出 precision、recall、specificity 與 flag rate。"""
+    tn, fp = int(confusion.iloc[0, 0]), int(confusion.iloc[0, 1])
+    fn, tp = int(confusion.iloc[1, 0]), int(confusion.iloc[1, 1])
+    total = tn + fp + fn + tp
+    return {
+        "precision": tp / (tp + fp) if tp + fp else 0.0,
+        "recall": tp / (tp + fn) if tp + fn else 0.0,
+        "specificity": tn / (tn + fp) if tn + fp else 0.0,
+        "flag_rate": (tp + fp) / total if total else 0.0,
+    }
+
+
+def outcome_labels(y_true: np.ndarray, scores: np.ndarray, threshold: float) -> pd.Series:
+    """把每一筆標成 TP / FP / FN / TN，供錯誤分析分組。"""
+    y_true = np.asarray(y_true).astype(int)
+    flagged = np.asarray(scores, dtype=float) >= threshold
+    out = np.where(
+        y_true == 1,
+        np.where(flagged, "TP", "FN"),
+        np.where(flagged, "FP", "TN"),
+    )
+    return pd.Series(out, name="outcome")
+
+
 def aggregate(runs: list[dict[str, float]]) -> pd.DataFrame:
     """多個 seed 的平均、標準差與 95% confidence interval（研究規格 8.3）。"""
     df = pd.DataFrame(runs)
@@ -76,6 +132,43 @@ def aggregate(runs: list[dict[str, float]]) -> pd.DataFrame:
     summary["ci95_low"] = summary["mean"] - half
     summary["ci95_high"] = summary["mean"] + half
     return summary
+
+
+def paired_comparison(
+    y_by_seed: dict[int, np.ndarray],
+    scores_by_model: dict[str, dict[int, np.ndarray]],
+    reference: str,
+    key: str = "R@10%",
+) -> pd.DataFrame:
+    """以 reveal seed 配對比較各模型與參考模型的差距。
+
+    所有模型跑在同一批 seed、同一份資料上，所以可以逐 seed 相減。配對差的
+    標準差通常遠小於各自分數的標準差——用後者比較會低估差異的可信度，也會
+    高估（研究規格 8.5 要求 paired bootstrap，這是其單機版）。
+    """
+    per_seed: dict[str, dict[int, float]] = {}
+    for name, by_seed in scores_by_model.items():
+        per_seed[name] = {}
+        for seed, scores in by_seed.items():
+            rng = np.random.default_rng(40_000 + seed)
+            per_seed[name][seed] = ranking_metrics(y_by_seed[seed], scores, rng)[key]
+
+    seeds = sorted(y_by_seed)
+    ref = np.array([per_seed[reference][s] for s in seeds])
+    rows = []
+    for name in scores_by_model:
+        values = np.array([per_seed[name][s] for s in seeds])
+        diff = values - ref
+        diff_text = f"{diff.mean() * 100:+.2f} ± {diff.std(ddof=1) * 100:.2f}"
+        rows.append(
+            {
+                "model": name,
+                key: f"{values.mean() * 100:.1f} ± {values.std(ddof=1) * 100:.1f}",
+                "配對差": diff_text,
+                "勝的 seed 數": f"{int((diff > 0).sum())}/{len(seeds)}",
+            }
+        )
+    return pd.DataFrame(rows).set_index("model")
 
 
 def format_summary(summary: pd.DataFrame, keys: list[str] | None = None) -> str:

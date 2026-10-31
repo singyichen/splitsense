@@ -27,6 +27,49 @@ def visible_entropy_scores(manifest: pd.DataFrame) -> np.ndarray:
     return visible_features(manifest)["visible_entropy"].to_numpy()
 
 
+def agreed_label_prior(train_manifests: dict[int, pd.DataFrame], train_ids: set[str]) -> dict:
+    """從 training 算出「前兩人同意某標籤時的分歧率」。
+
+    只用 training item，不碰 val／test（研究規格 6.4 第 3、6 條）。
+    """
+    rows = []
+    for manifest in train_manifests.values():
+        subset = manifest[manifest["item_id"].isin(train_ids) & manifest["visible_agree"]]
+        rows.append(
+            pd.DataFrame(
+                {
+                    "agreed": subset["visible_labels"].apply(lambda ls: ls[0]).to_numpy(),
+                    "z": subset["z"].to_numpy(),
+                }
+            )
+        )
+    df = pd.concat(rows, ignore_index=True)
+    return df.groupby("agreed")["z"].mean().to_dict()
+
+
+def agreed_label_scores(manifest: pd.DataFrame, prior: dict) -> np.ndarray:
+    """階梯 1.5：只看「前兩人同意了哪個標籤」的透明規則。
+
+    這條規則不需要文字模型，也不需要訓練——只要一張四列的查表。它存在的理由
+    是把「ML 的增益有多少來自文字」這個問題問清楚：如果它已經接近 Logistic
+    Regression，那文字特徵的貢獻就很有限。
+    """
+    agreed = manifest["visible_labels"].apply(lambda ls: ls[0])
+    default = float(np.mean(list(prior.values()))) if prior else 0.0
+    return agreed.map(prior).fillna(default).to_numpy(dtype=float)
+
+
+def evaluate_agreed_label_prior(
+    y_true_by_seed: dict[int, np.ndarray], manifests: dict[int, pd.DataFrame], prior: dict
+) -> pd.DataFrame:
+    runs = []
+    for seed, manifest in manifests.items():
+        rng = np.random.default_rng(25_000 + seed)
+        scores = agreed_label_scores(manifest, prior)
+        runs.append(ranking_metrics(y_true_by_seed[seed], scores, rng))
+    return aggregate(runs)
+
+
 def evaluate_random(
     y_true_by_seed: dict[int, np.ndarray], n_seeds: int = cfg.N_RANDOM_SEEDS
 ) -> pd.DataFrame:
