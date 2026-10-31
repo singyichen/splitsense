@@ -52,6 +52,16 @@ uv run ruff check src/ scripts/ tests/
 - `@ai-visualize` 生成元件放專案根的 `.notecraft/components/`，跟著文件一起 commit；互動元件掛 `client:idle`，不要用 `client:visible`。
 - `npm run skill:init` 會覆寫 `content-visualize`、`content-present` 與 `trendlink-design`，本地修改會被蓋掉。
 
+## 畫圖表用 diagram-design
+
+`.claude/skills/diagram-design/` 是從 [cathrynlavery/diagram-design](https://github.com/cathrynlavery/diagram-design) 複製進來的（MIT，v2.6.136），版本釘在 repo 裡，細節見該目錄的 `VENDOR.md`。**不要直接改那個目錄**，要更新就照 `VENDOR.md` 的步驟重新複製。
+
+- 產出自包含 `.html` ＋ inline SVG，可再輸出 SVG／PNG；適合給教授與同學看的流程圖與示意圖。
+- **首次產圖前要先設定 style guide**（`references/style-guide.md`）。預設色票是 paper `#f5f5f5`、ink `#2d3142`、accent `#bf4520`，不要就這樣出圖——SplitSense 目前的視覺基準是 `trendlink-design` 的 navy `#1b4f9c` ＋ 金 `#ed9b26`，`.notecraft/components/` 的六個元件都照這套，**兩者擇一、不要混用**。
+- 只有 `scripts/export_png.py` 需要 `playwright`（會啟動 chromium）；HTML 與 SVG 只用 Python 標準庫。沒裝就改用瀏覽器開 HTML 截圖。
+- `npm run skill:init` 不會動到這個目錄（它只覆寫 `content-visualize`、`content-present`、`trendlink-design`）。
+- 分工：簡報與文件內的**互動**元件用 `content-visualize`（輸出到 `.notecraft/components/`）；**靜態**流程圖與要放進投影片的圖用 `diagram-design`。
+
 ## 已定案的研究決策
 
 - 專題目標是**排序**較可能分歧的項目，不是分類哪個標籤正確。
