@@ -42,7 +42,15 @@ Python **3.13.0**（`pyproject.toml` 要求 `>=3.12`），套件管理 **uv 0.12
 - **`certifi` 是被迫加的。** macOS 的 python.org 版 Python 不讀系統鑰匙串，`urllib` 預設下載會 `CERTIFICATE_VERIFY_FAILED`。`data.download_raw()` 明確指定 `ssl.create_default_context(cafile=certifi.where())`。
 - **`playwright` 只有 PNG 匯出用得到**（會啟動 chromium）。沒裝不影響任何實驗，也不影響 HTML 與 SVG 出圖。
 
-## 2. 目錄佈局
+## 2. 管線總覽
+
+![四層管線：取得資料、資料協議、特徵、模型與分析。每層標明負責的模組、要跑的腳本與產出目錄；層與層之間的箭頭寫的是不得違反的不變量；底部是被多處共用的 config 與 metrics](./assets/module-pipeline.svg)
+
+要知道「跑哪支腳本會產出什麼」看這張就夠。箭頭上寫的四條不變量每條都有對應的測試（見第 6 節），相依關係由 `import` 反查而來，不是手寫的。
+
+`config.py` 被 19 處 import、`metrics.py` 被 6 處——扇入太密，畫成連線會比方塊還多，所以用數字陳述而不是畫線。
+
+## 3. 目錄佈局
 
 | 目錄 | 內容 | 進版控 |
 | --- | --- | --- |
@@ -57,7 +65,7 @@ Python **3.13.0**（`pyproject.toml` 要求 `>=3.12`），套件管理 **uv 0.12
 
 所有實驗參數集中在 `src/splitsense/config.py`，不散落在各腳本——split 與 reveal 要能重現就靠這一點。
 
-## 3. 常用指令
+## 4. 常用指令
 
 ```text
 uv sync --extra dev                             # 建環境
@@ -72,7 +80,7 @@ uv run ruff check src/ scripts/ tests/
 
 從零（刪掉 `data/` 與 `artifacts/`）可完整跑通，所有 seed 固定。
 
-## 4. 程式盤點
+## 5. 程式盤點
 
 2,531 行。
 
@@ -99,7 +107,7 @@ train_test_split · average_precision_score · make_scorer
 
 `Recall@10%` 不是內建指標，是自寫函式包成 `make_scorer(response_method="predict_proba")`，讓 `GridSearchCV` 直接拿主要指標調參，而不是用 accuracy 之類的代理。
 
-## 5. 測試盤點
+## 6. 測試盤點
 
 70 passed、2 skipped。兩個 skip 是刻意的（annotator 歷史與 GraphSAGE 的洩漏檢查，標了原因，論文延伸實作時才啟用）。
 
@@ -113,7 +121,7 @@ train_test_split · average_precision_score · make_scorer
 | `test_baselines.py` | entropy 在難題組恆為常數、低預算指標已飽和 |
 | `test_error_analysis.py` | 混淆矩陣、比率在相加後才算、邊界組合用同一群體當基準 |
 
-## 6. 文件與視覺化
+## 7. 文件與視覺化
 
 | 工具 | 版本 | 用途 |
 | --- | --- | --- |
@@ -148,7 +156,7 @@ diagrams/<name>.html          原始檔，改圖改這個
 
 > **notecraftapp 沒有 `remark-math` 與 `rehype-katex`。** `docs/` 的數學式一律用 fenced ` ```math ` 區塊，不要用 `$$`——`$$` 裡的大括號會被當成 JSX expression，行首的會讓 build 失敗，剛好是合法 JS 的會被靜默吞掉。
 
-## 7. 流程與治理
+## 8. 流程與治理
 
 | 項目 | 內容 |
 | --- | --- |
@@ -157,7 +165,7 @@ diagrams/<name>.html          原始檔，改圖改這個
 | OpenSpec | 課堂版期間暫停（Q6），`openspec/config.yaml` 已註明 |
 | 資料治理 | `data/`、`artifacts/` 不進版控；`author` 載入後立刻丟棄；commit 前掃原始文字 |
 
-## 8. 刻意沒有用的技術
+## 9. 刻意沒有用的技術
 
 | 技術 | 為什麼不用 |
 | --- | --- |

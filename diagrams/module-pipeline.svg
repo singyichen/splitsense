@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 1000 640" width="2000" height="1280" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="module-pipeline-title module-pipeline-desc" id="module-pipeline-root">
+        <title id="module-pipeline-title">從上游資料到產物</title>
+        <desc id="module-pipeline-desc">四層管線：取得資料、資料協議、特徵、模型與分析。每層標明負責的模組、要跑的腳本與產出目錄。層與層之間的箭頭寫的是不得違反的不變量。底部是被多處共用的 config 與 metrics。</desc>
+        <style>
+          text { font-family: 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', sans-serif; }
+          .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+          .h    { font-size: 13px; font-weight: 700; }
+          .q    { font-size: 11px; }
+          .sub  { font-size: 9px; }
+          .lg   { font-size: 8px; }
+          .chip { font-size: 10px; font-weight: 700; }
+          .ink   { fill: #262e3d; }
+          .muted { fill: #4f5b6e; }
+          .soft  { fill: #9aa6b8; }
+          .navy  { fill: #1b4f9c; }
+          .acc   { fill: #a04f15; }
+          .inv   { fill: #ffffff; }
+        </style>
+        <defs>
+      <style>@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&amp;family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400;500;600&amp;family=Noto+Serif:ital@0;1&amp;family=Noto+Sans+KR:wght@400;500;600&amp;family=Noto+Serif+KR:wght@400&amp;family=Noto+Sans+TC:wght@400;500;600&amp;family=Noto+Serif+TC:wght@400&amp;display=swap');
+      #module-pipeline-root { --color-paper:   #f6f8fb;
+      --color-ink:     #262e3d;
+      --color-muted:   #4f5b6e;
+      --font-sans:     'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', sans-serif;
+      --font-serif:    'Noto Serif TC', serif;
+      --font-mono:     ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+      #module-pipeline-root { font-family: var(--font-sans); color: var(--color-ink); }
+      #module-pipeline-root .diagram-container { width: 100%; overflow-x: auto; }
+      @media print {
+#module-pipeline-root .diagram-container { overflow-x: visible; }
+}
+      #module-pipeline-root text { font-family: 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', sans-serif; }
+      #module-pipeline-root .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+      #module-pipeline-root .h { font-size: 13px; font-weight: 700; }
+      #module-pipeline-root .q { font-size: 11px; }
+      #module-pipeline-root .sub { font-size: 9px; }
+      #module-pipeline-root .lg { font-size: 8px; }
+      #module-pipeline-root .chip { font-size: 10px; font-weight: 700; }
+      #module-pipeline-root .ink { fill: #262e3d; }
+      #module-pipeline-root .muted { fill: #4f5b6e; }
+      #module-pipeline-root .soft { fill: #9aa6b8; }
+      #module-pipeline-root .navy { fill: #1b4f9c; }
+      #module-pipeline-root .acc { fill: #a04f15; }
+      #module-pipeline-root .inv { fill: #ffffff; }</style>
+          <marker id="module-pipeline-mp" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto">
+            <path d="M 0 0.5 L 7.5 4 L 0 7.5 z" fill="#6c798e"/>
+          </marker>
+        </defs>
+
+        <rect x="0.5" y="0.5" width="999" height="639" rx="10" fill="#ffffff" stroke="#e1e6ee"/>
+
+        <!-- 左側方向軸 -->
+        <text x="44" y="62" text-anchor="middle" class="lg soft">上游</text>
+        <line x1="44" y1="72" x2="44" y2="488" stroke="#cbd3df" stroke-width="1.5"/>
+        <path d="M 38 476 L 44 489 L 50 476" fill="none" stroke="#cbd3df" stroke-width="1.5"/>
+        <text x="44" y="506" text-anchor="middle" class="lg soft">產物</text>
+
+        <!-- 1 取得資料 -->
+        <rect x="76" y="72" width="664" height="80" rx="10" fill="#eef4fb" stroke="#1b4f9c"/>
+        <rect x="76" y="84" width="4" height="56" rx="2" fill="#1b4f9c"/>
+        <text x="96" y="98" class="h ink">1　取得資料</text>
+        <text x="96" y="120" class="q muted">下載上游 parquet、丟棄 author、篩出恰好 3 份標註、文字去重</text>
+        <text x="96" y="140" class="mono sub muted">data.py · eda.py</text>
+        <rect x="756" y="86" width="208" height="24" rx="12" fill="#1b4f9c"/>
+        <text x="860" y="102" text-anchor="middle" class="chip mono inv">run_eda.py</text>
+        <text x="860" y="130" text-anchor="middle" class="mono sub muted">artifacts/eda/</text>
+        <text x="860" y="146" text-anchor="middle" class="lg soft">31,603 題 · 79 位標註者</text>
+
+        <line x1="408" y1="152" x2="408" y2="184" stroke="#6c798e" stroke-width="1.5" marker-end="url(#module-pipeline-mp)"/>
+        <text x="420" y="173" class="lg muted">切 split 前先文字去重，同一段文字不得同時落在 train 與 test</text>
+
+        <!-- 2 資料協議（焦點） -->
+        <rect x="76" y="188" width="664" height="80" rx="10" fill="#ed9b26" stroke="#c7641a" fill-opacity="0.10"/>
+        <rect x="76" y="200" width="4" height="56" rx="2" fill="#c7641a"/>
+        <text x="96" y="214" class="h ink">2　資料協議</text>
+        <text x="96" y="236" class="q muted">item-level 切 70／15／15、每題隨機揭露 2 份標註、其餘隱藏</text>
+        <text x="96" y="256" class="mono sub muted">split.py · reveal.py</text>
+        <rect x="756" y="202" width="208" height="24" rx="12" fill="#c7641a"/>
+        <text x="860" y="218" text-anchor="middle" class="chip mono inv">build_dataset.py</text>
+        <text x="860" y="246" text-anchor="middle" class="mono sub muted">artifacts/manifests/</text>
+        <text x="860" y="262" text-anchor="middle" class="lg soft">split ＋ 5 個 reveal seed</text>
+
+        <line x1="408" y1="268" x2="408" y2="300" stroke="#6c798e" stroke-width="1.5" marker-end="url(#module-pipeline-mp)"/>
+        <text x="420" y="289" class="lg muted">只用可見的 2 份建特徵；隱藏標註不得進入特徵、統計或圖 adjacency</text>
+
+        <!-- 3 特徵 -->
+        <rect x="76" y="304" width="664" height="64" rx="10" fill="#ffffff" stroke="#2c6ebb"/>
+        <rect x="76" y="314" width="4" height="44" rx="2" fill="#2c6ebb"/>
+        <text x="96" y="328" class="h ink">3　特徵</text>
+        <text x="96" y="350" class="q muted">TF-IDF（31,451 維）＋ 可見標註統計；只在 training 文字上 fit</text>
+        <text x="620" y="350" text-anchor="end" class="mono sub muted">features.py</text>
+        <text x="860" y="340" text-anchor="middle" class="lg soft">無獨立腳本</text>
+        <text x="860" y="356" text-anchor="middle" class="lg soft">被下一層直接呼叫</text>
+
+        <line x1="408" y1="368" x2="408" y2="400" stroke="#6c798e" stroke-width="1.5" marker-end="url(#module-pipeline-mp)"/>
+        <text x="420" y="389" class="lg muted">訓練集疊 5 個 reveal seed；GroupKFold 的 group 必須是 item_id</text>
+
+        <!-- 4 模型與分析 -->
+        <rect x="76" y="404" width="664" height="96" rx="10" fill="#ffffff" stroke="#2c6ebb"/>
+        <rect x="76" y="416" width="4" height="72" rx="2" fill="#2c6ebb"/>
+        <text x="96" y="430" class="h ink">4　模型與分析</text>
+        <text x="96" y="452" class="q muted">階梯 0–3 與配對比較、混淆矩陣、錯誤分析</text>
+        <text x="96" y="472" class="mono sub muted">baselines.py · models.py · error_analysis.py</text>
+        <text x="96" y="490" class="lg soft">測試集只在最後評估一次</text>
+        <rect x="756" y="414" width="208" height="20" rx="10" fill="#2c6ebb"/>
+        <text x="860" y="428" text-anchor="middle" class="chip mono inv">run_baselines.py</text>
+        <rect x="756" y="440" width="208" height="20" rx="10" fill="#2c6ebb"/>
+        <text x="860" y="454" text-anchor="middle" class="chip mono inv">run_models.py</text>
+        <rect x="756" y="466" width="208" height="20" rx="10" fill="#2c6ebb"/>
+        <text x="860" y="480" text-anchor="middle" class="chip mono inv">run_error_analysis.py</text>
+        <text x="860" y="496" text-anchor="middle" class="mono sub muted">artifacts/ 下三個目錄</text>
+
+        <!-- 共用層 -->
+        <rect x="76" y="536" width="888" height="60" rx="10" fill="#f6f8fb" stroke="#cbd3df"/>
+        <rect x="76" y="548" width="4" height="36" rx="2" fill="#9aa6b8"/>
+        <text x="96" y="562" class="h ink">共用層</text>
+        <text x="176" y="562" class="q muted">四層全部依賴，不畫連線是因為連線會比方塊多</text>
+        <text x="96" y="584" class="mono sub muted">config.py</text>
+        <text x="176" y="584" class="lg muted">路徑、split 比例與 seed、reveal 設定、預算與指標常數 — 被 19 處 import</text>
+        <text x="612" y="584" class="mono sub muted">metrics.py</text>
+        <text x="684" y="584" class="lg muted">排序指標、門檻、混淆矩陣、配對比較 — 被 6 處 import</text>
+
+        <!-- LEGEND -->
+        <line x1="32" y1="612" x2="968" y2="612" stroke="#262e3d" stroke-width="0.8" stroke-opacity="0.12"/>
+        <text x="32" y="630" class="lg muted mono" letter-spacing="0.14em">LEGEND</text>
+        <rect x="128" y="620" width="16" height="10" rx="2" fill="#ed9b26" stroke="#c7641a" fill-opacity="0.10"/>
+        <text x="152" y="630" class="lg muted">品質比選哪個模型更重要的一層</text>
+        <text x="420" y="630" class="lg muted">箭頭上寫的是不得違反的不變量，每條都有對應的測試</text>
+        <text x="968" y="630" text-anchor="end" class="lg muted mono">相依關係由 import 反查，見 diagrams/README.md</text>
+      </svg>

@@ -11,6 +11,7 @@
 | `baseline-results.html` | 長條圖 | 第 5 段 主結果 |
 | `baseline-paired.html` | 斜線圖 | 第 5 段 配對證據 |
 | `neutral-only-flagging.html` | 分組長條圖 | 第 5 段 錯誤分析 |
+| `module-pipeline.html` | 管線圖 | 技術棧文件第 2 節（非簡報用） |
 
 ## 重新匯出
 
@@ -87,6 +88,7 @@ text { font-family: 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', sans-se
 | `metric-saturation`、`review-routing-flow` | `scripts/run_baselines.py` 的範圍統計 |
 | `baseline-results`、`baseline-paired` | `artifacts/models/summary_hard.csv`、`paired_vs_agreed_label_prior.csv` |
 | `neutral-only-flagging` | `artifacts/error_analysis/agreed_label_profile.csv` |
+| `module-pipeline` | 由 `import` 反查，見下方指令 |
 
 `baseline-paired` 用的是**逐 seed 實測值**（17.83／18.96／19.41／17.79／18.88 對 18.60／19.72／20.56／18.84／19.39），不是從平均反推。
 
@@ -95,3 +97,16 @@ text { font-family: 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', sans-se
 - **長條圖焦點色只能一根。** 多根會讓「什麼是重點」失效。`baseline-results` 的焦點給查表，因為那是最反直覺的發現。
 - **斜線圖沒有「列序」。** 線的位置由資料決定，不要寫列序說明——那是 dumbbell 的規則。
 - **零值就是沒有長條。** `annotation-count-leakage` 的「1 份」與 `neutral-only-flagging` 的三組送複核率都是 0，只標數字、不畫假高度。
+
+## 重新反查模組相依
+
+`module-pipeline` 的內容來自程式碼，不是手寫的。要確認有沒有漂移：
+
+```bash
+# 模組之間
+for f in src/splitsense/*.py; do n=$(basename $f .py); [ "$n" = "__init__" ] && continue;
+  printf "%-18s %s\n" "$n" "$(grep -oE 'from splitsense\.[a-z_]+ import' $f | sed -E 's/from splitsense\.([a-z_]+) import/\1/' | sort -u | tr '\n' ' ')"; done
+
+# 誰被 import 最多次
+grep -rhoE "from splitsense\.[a-z_]+ import" src/ scripts/ tests/ | sed -E 's/.*\.([a-z_]+) import/\1/' | sort | uniq -c | sort -rn
+```
