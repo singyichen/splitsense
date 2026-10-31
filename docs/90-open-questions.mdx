@@ -16,7 +16,7 @@ updatedAt: "2026-10-31"
 | --- | --- | --- | --- | --- |
 | Q1 | Python 工具鏈與目錄佈局 | 第一行實驗程式碼 | — | :badge[已決議]{variant="success"} 2026-10-31：uv + src 佈局 |
 | Q2 | 繁中 pilot 是否與課堂版並行啟動 | 標註者招募前置期 | — | :badge[已決議]{variant="success"} 2026-10-31：不並行 |
-| Q3 | 階梯 3 選 Random Forest 還是 Gradient Boosting | 調參格線與 11/02 起的訓練 | 11/02 | :badge[待拍板]{variant="warning"} |
+| Q3 | 階梯 3 選 Random Forest 還是 Gradient Boosting | 調參格線與模型訓練 | — | :badge[已決議]{variant="success"} 2026-10-31：Gradient Boosting |
 | Q4 | TF-IDF 的具體設定 | 特徵建立 | — | :badge[已決議]{variant="success"} 2026-10-31 |
 | Q5 | 163 筆重複文字要去重還是合併 | Split manifest | — | :badge[已決議]{variant="success"} 2026-10-31：去重 |
 | Q6 | OpenSpec 是否在課堂版期間續用 | 開發流程 | — | :badge[已決議]{variant="success"} 2026-10-31：暫停 |
@@ -88,7 +88,13 @@ artifacts/        eda/  manifests/（.gitignore）
 
 **提醒**：進度落後時的刪減順序第 2 條是「樹模型只留一個」，所以即使兩個都做，也要先決定哪一個是會留下來的那個。
 
-**狀態**：:badge[待拍板]{variant="warning"}
+**決議（2026-10-31）：Gradient Boosting**，實作為 `HistGradientBoostingClassifier` + `TruncatedSVD(n_components=200)`，調 `learning_rate` 與 `max_depth`。
+
+**理由**：TF-IDF 是 31,451 維稀疏矩陣，Random Forest 的 `max_depth` 格線在這種高維稀疏輸入上很難調得好，而 `HistGradientBoostingClassifier` 搭配降維後速度與表現都更可控。
+
+**實測後的附帶結論**：非線性模型在這個任務上**沒有實質增益**。PR-AUC 44.6 對 Logistic Regression 的 42.8（+1.8 個百分點），但主要指標 `R@10%` 完全相同（都是 19.4，標準差重疊），調參耗時 111 秒對 10 秒。依研究規格 8.7 的決策規則，結論採 Logistic Regression——透明、快、係數可讀。樹模型留在報告裡當「檢查過非線性」的證據。
+
+**狀態**：:badge[已決議]{variant="success"}
 
 ---
 
@@ -233,6 +239,17 @@ artifacts/        eda/  manifests/（.gitignore）
 | 兩者並列，**以 hard 為主要** | 直接對應研究規格 2.2 的問題；H2 可檢驗；full 的飽和本身是個結論 | 主要指標在專案中途改過，簡報要交代清楚 |
 | 只報 full | 不動原訂指標 | H2 無法檢驗，「ML 勝不過規則」的結論會是指標假象，不是真實發現 |
 | 只報 full 但把預算提高到 40% | 不必改範圍 | 「只能複核 40% 資料」不符合研究規格 8.2 設定主要指標時的實務問句 |
+
+**2026-10-31 補充的證據**：階梯 2 與 3 跑完後，hard 範圍的結果證實這個範圍可以區分模型——
+
+| 模型 | PR-AUC | `R@10%` | `Lift@10%` |
+| --- | ---: | ---: | ---: |
+| Random | 24.9 ± 0.8 | 10.1 ± 0.9 | 1.02 |
+| Visible entropy | 24.7 ± 0.3 | 10.6 ± 0.6 | 1.06 |
+| Logistic Regression | 42.8 ± 1.4 | 19.4 ± 0.8 | 1.95 |
+| Gradient Boosting | 44.6 ± 1.3 | 19.4 ± 0.6 | 1.94 |
+
+模型把 `R@10%` 從規則的 10.6% 提到 19.4%，接近兩倍，而這個差距在 full 範圍下**完全看不到**（那裡所有方法都是 20.1%）。所以這不只是指標選擇的偏好問題：只報 full 範圍會讓整個專案的核心發現消失。
 
 **建議**：第一個方案。full 的飽和不是壞消息——它正好對應研究規格 8.7 決策規則的第一列（「可見 entropy 已經最好 → 先採透明規則排序，不導入模型」），可以寫成「低預算時規則就夠了，真正需要模型的是前兩人暫時一致的那批」。這個敘事比原本的「比較四個模型的分數」更有說服力。
 

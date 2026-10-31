@@ -6,7 +6,7 @@ createdAt: "2026-10-13"
 updatedAt: "2026-10-31"
 Project Name: SplitSense
 文件類型: Research Specification
-文件版本: v0.4.0
+文件版本: v0.5.0
 文件狀態: 草稿
 文件作者: 陳欣怡
 建立日期: 2026-10-13
@@ -25,7 +25,7 @@ Project Name: SplitSense
 | --- | --- |
 | 專案名稱 | SplitSense |
 | 文件類型 | Research Specification |
-| 文件版本 | v0.4.0 |
+| 文件版本 | v0.5.0 |
 | 文件狀態 | 草稿 |
 | 文件作者 | 陳欣怡 |
 | 建立日期 | 2026-10-13 |
@@ -64,7 +64,7 @@ Project Name: SplitSense
 | 4 | 範圍 | :badge[已定案]{variant="success"} | — |
 | 5 | 問題形式化 | :badge[已定案]{variant="success"} | — |
 | 6 | 資料協議 | :badge[已定案]{variant="success"} | 繁中 pilot 題目來源待論文階段（Q7） |
-| 7 | 方法與實驗矩陣 | :badge[部分待定]{variant="warning"} | 樹模型二選一未定（Q3） |
+| 7 | 方法與實驗矩陣 | :badge[已定案]{variant="success"} | — |
 | 8 | 評估方法 | :badge[部分待定]{variant="warning"} | 主要指標在 full 範圍已飽和，評估範圍待拍板（Q11） |
 | 9 | 外部依賴與授權 | :badge[已定案]{variant="success"} | — |
 | 10 | 時程與停損 | :badge[已定案]{variant="success"} | 發表週次依學號排定，尚未公布（Q8） |
@@ -385,6 +385,7 @@ GNN 另有兩條（論文延伸）：test item 的 hidden edges 不得進圖；�
 | 樣本統計與 EDA | `scripts/run_eda.py` → `artifacts/eda/` | :badge[已完成]{variant="success"} |
 | TF-IDF 與可見標註特徵 | `src/splitsense/features.py` | :badge[已完成]{variant="success"} |
 | 階梯 0、1 基準 | `scripts/run_baselines.py` → `artifacts/baselines/` | :badge[已完成]{variant="success"} |
+| 階梯 2、3 模型與調參 | `scripts/run_models.py` → `artifacts/models/` | :badge[已完成]{variant="success"} |
 | 繁中標註規範與資料字典 | — | :badge[論文延伸]{variant="neutral"} |
 
 Split 的實際結果（`SPLIT_SEED = 20261031`）：
@@ -408,10 +409,10 @@ Split 的實際結果（`SPLIT_SEED = 20261031`）：
 | 0 | 隨機排序 | 地板線 | 無 |
 | 1 | 可見標籤 entropy（只看前 2 份一不一致） | 「不用機器學習」的對照組 | 無 |
 | 2 | Logistic Regression | 第一個真正的 ML 模型 | `C` |
-| 3 | Random Forest 或 Gradient Boosting | 檢查非線性模型有無額外增益 | RF：`n_estimators`、`max_depth`；GB：`n_estimators`、`learning_rate`、`max_depth` |
+| 3 | **Gradient Boosting**（`HistGradientBoostingClassifier`，Q3 定案） | 檢查非線性模型有無額外增益 | `learning_rate`、`max_depth` |
 | 4（選做） | 零樣本大語言模型 | 回答「LLM 是不是早就會了」 | 無（只調提示詞） |
 
-階梯 3 的二選一尚未決定（Q3）。
+階梯 3 定案為 Gradient Boosting（Q3）。樹模型吃不下 31,451 維稀疏矩陣，先以 `TruncatedSVD(n_components=200)` 降維再接分類器——這讓它與 Logistic Regression 的輸入維度不同，判讀時要說明；7.2 對 Embedding 也採同樣做法。
 
 TF-IDF 不移除 stopwords 的理由：文字中位數只有 60 字元，否定詞、程度詞與模糊詞本身就是分歧訊號（見 8.6 的錯誤類型），移除等於丟掉要預測的東西。
 
@@ -435,6 +436,8 @@ TF-IDF 不移除 stopwords 的理由：文字中位數只有 60 字元，否定�
 | 範圍 | 只在訓練集內交叉驗證，測試集只在最後評估一次 |
 
 若改用一般的 `KFold`，同一題被揭露的不同 reveal seed 可能同時落在訓練折與驗證折，調參分數會偏高。
+
+這句話的前提是**訓練集疊了多個 reveal seed**：每個 training item 在 5 個 seed 下各出現一次，可見集合 `O_i` 不同、target `z_i` 相同。否則每個 item 只出現一次，`GroupKFold` 會退化成一般 `KFold`，那條警告也沒有意義。實際訓練資料為 **73,596 row、20,406 個 unique item**（hard 範圍），有測試守著「同一 item 不跨折」。
 
 ### 7.4 Embedding 消融（論文延伸）
 
@@ -652,14 +655,48 @@ hard 範圍才是 2.2 真正要解的問題。關鍵事實：**可見 entropy �
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
 | Random | 150 | 24.9 ± 0.8 | 25.0 ± 3.2 | 5.1 ± 0.6 | 25.0 ± 2.1 | 10.1 ± 0.9 | 101.5 ± 8.6 |
 | Visible entropy | 5 | 24.7 ± 0.3 | 26.9 ± 2.6 | 5.4 ± 0.5 | 26.1 ± 1.4 | 10.6 ± 0.6 | 105.9 ± 6.0 |
-| Logistic Regression | | | | | | | |
-| Random Forest / Gradient Boosting | | | | | | | |
+| Logistic Regression | 5 | 42.8 ± 1.4 | 47.8 ± 2.8 | 9.6 ± 0.5 | 48.0 ± 2.3 | **19.4 ± 0.8** | 194.5 ± 7.6 |
+| Gradient Boosting | 5 | **44.6 ± 1.3** | 47.3 ± 4.3 | 9.5 ± 0.8 | 47.9 ± 1.6 | **19.4 ± 0.6** | 194.3 ± 5.8 |
 
 判讀：
 
 - **H1（entropy 勝過隨機）在 full 範圍成立且幅度極大**：`R@10%` 20.1% 對 10.0%，`Lift@10%` 2.01 對 1.00。但這個勝幅全部來自「可見已不一致者必然分歧」這個定義，不是學到的訊號。
 - **entropy 在 hard 範圍等於隨機**：PR-AUC 24.7 對 24.9，兩者都約等於盛行率 24.67%，`Lift@10%` 約 1.0。entropy 在這個子集恆為常數，所以 5 個 reveal seed 的那一列實際上就是 5 次隨機抽樣，26.9 ± 2.6 與 25.0 ± 3.2 的差距落在雜訊內，不是優勢。
 - 因此 **hard 範圍的地板線是隨機（約 10%）**，H2 要在這條線上比。
+- **H2 成立，幅度接近兩倍**：Logistic Regression 與 Gradient Boosting 的 `R@10%` 都是 19.4%，對規則的 10.6%；`Lift@10%` 1.94 對 1.06；PR-AUC 42.8／44.6 對盛行率 24.67%。以 `R@10%` 的理論上限 40.5% 衡量，模型取到其中約 48%。
+- **非線性模型沒有實質增益**：Gradient Boosting 的 PR-AUC 比 Logistic Regression 高 1.8 個百分點，但主要指標 `R@10%` 完全相同（都是 19.4，標準差也重疊），而調參耗時 111 秒對 10 秒。依 8.7 的決策規則，結論採 Logistic Regression——透明、快、係數可讀。
+
+### 8.4.1 調參結果
+
+只在訓練集內以 `GroupKFold` 交叉驗證，測試集最後才評估一次。
+
+| 模型 | 最佳參數 | CV `Recall@10%` | 調參耗時 |
+| --- | --- | ---: | ---: |
+| Logistic Regression | `C=0.01`、`class_weight=None` | 19.42% | 10s |
+| Gradient Boosting | `learning_rate=0.05`、`max_depth=3` | 20.36% | 111s |
+
+CV 分數與 test 分數相當接近（19.42 對 19.4、20.36 對 19.4），沒有明顯過擬合。`C=0.01` 落在格線邊界，表示這個任務偏好強正則化；若要再調，格線該往更小的 `C` 延伸。
+
+### 8.4.2 可見標註特徵的係數
+
+Logistic Regression 在 hard 範圍的係數，由小到大：
+
+| 特徵 | 係數 |
+| --- | ---: |
+| `visible_count_positive` | −0.577 |
+| `visible_distinct` | −0.264 |
+| `visible_vote_margin` | −0.264 |
+| `visible_count_negative` | −0.253 |
+| `visible_disagree` | 0.000 |
+| `visible_entropy` | 0.000 |
+| `visible_count_ambiguous` | +0.054 |
+| `visible_count_neutral` | +0.248 |
+
+三件事值得寫進結論：
+
+1. **係數方向與 EDA 一致。** 前兩人同意 neutral（+0.248）或 ambiguous（+0.054）時分歧風險較高，同意 positive（−0.577）時較低。這對應 Dataset Card 3.1：分歧集中在 neutral↔positive、negative↔neutral、ambiguous↔neutral，而 positive 全一致是最大的單一群（27.4%）。模型學到的是「模糊地帶的一致比較脆弱」。
+2. **`visible_disagree` 與 `visible_entropy` 的係數恰為 0**，這是一個正確性檢查而非巧合：在 hard 子集上這兩欄全為零，L2 會把係數壓到 0。換句話說，規則特徵在這個子集真的沒有資訊。
+3. **`visible_distinct` 與 `visible_vote_margin` 的係數相同（−0.264）**，因為它們在 hard 子集是非零常數（1 與 1.0），只是吸收 intercept，不帶訊號。hard 範圍只有四個 `visible_count_*` 會變動，有測試守著這個事實。
 
 `Random` 的 runs 是 5 個 reveal seed × 30 個排序 seed。雖然隨機分數與 reveal 無關，但 hard 子集的成員由 reveal 決定，所以兩個基準必須跑在同一批 reveal seed 上，否則不在同一份資料上。
 
@@ -753,7 +790,7 @@ TID-8 的 Dataset Card 授權欄標示 `unknown`，其論文也沒有授權聲�
 | --- | --- | --- |
 | 10/19–10/25 | 下載 TID-8、EDA、選定子資料集、確認授權 | :badge[已完成]{variant="success"} 定案 GoEmotions；EDA 已補成可重跑腳本（Q10） |
 | 10/26–11/01 | Item split、reveal 2 份標註、TF-IDF；完成隨機與 entropy 兩個基準 | :badge[已完成]{variant="success"} |
-| 11/02–11/15 | Logistic Regression、Random Forest 或 Gradient Boosting，加上超參數調整 | :badge[未開始]{variant="neutral"} |
+| 11/02–11/15 | Logistic Regression、Gradient Boosting，加上超參數調整 | :badge[已完成]{variant="success"} 提前於 10/31 完成 |
 | 11/16–11/22 | BGE-M3 + PCA 比較（選做，來不及整週刪除） | :badge[未開始]{variant="neutral"} |
 | 11/23–11/29 | 5 個 seeds 評估、錯誤分析 | :badge[未開始]{variant="neutral"} |
 | **11/30 前** | **填表單登記主題** | :badge[未完成]{variant="danger"} |
@@ -850,9 +887,9 @@ visible_annotation_count
 
 | 目錄 | 內容 |
 | --- | --- |
-| `src/splitsense/` | `config.py`（路徑與全域常數）、`data.py`、`eda.py`、`split.py`、`reveal.py`、`features.py`、`metrics.py`、`baselines.py` |
-| `scripts/` | `run_eda.py`、`build_dataset.py`、`run_baselines.py` |
-| `tests/` | `test_leakage.py`、`test_reproducibility.py`、`test_metrics.py`、`test_features.py`、`test_baselines.py` |
+| `src/splitsense/` | `config.py`（路徑與全域常數）、`data.py`、`eda.py`、`split.py`、`reveal.py`、`features.py`、`metrics.py`、`baselines.py`、`models.py` |
+| `scripts/` | `run_eda.py`、`build_dataset.py`、`run_baselines.py`、`run_models.py` |
+| `tests/` | `test_leakage.py`、`test_reproducibility.py`、`test_metrics.py`、`test_features.py`、`test_baselines.py`、`test_models.py` |
 | `data/` | 原始 parquet，`.gitignore` |
 | `artifacts/` | `eda/`、`manifests/`，`.gitignore` |
 
@@ -863,6 +900,7 @@ uv sync --extra dev                        # 建環境
 uv run python scripts/run_eda.py           # 重現 Dataset Card 第 3 節
 uv run python scripts/build_dataset.py     # 產生 split 與 reveal manifest
 uv run python scripts/run_baselines.py     # 階梯 0 與 1 的結果表
+uv run python scripts/run_models.py        # 階梯 2 與 3，含調參
 uv run pytest                              # 洩漏檢查與重現性
 uv run ruff check src/ scripts/ tests/
 ```
@@ -906,6 +944,13 @@ uv run ruff check src/ scripts/ tests/
 完整清單在 [90-open-questions.mdx](./90-open-questions.mdx)，全文的 `Qn` 一律指該文件的編號；已決議者留在原位改狀態，編號不重排、不回收。
 
 ## 14. Change Log
+
+### [0.5.0] - 2026-10-31
+
+- **Added**: 第 8.4 節填入階梯 2 與 3 的實測結果。**H2 在 hard 範圍成立，幅度接近兩倍**：`R@10%` 19.4% 對規則的 10.6%，`Lift@10%` 1.94 對 1.06，取到理論上限 40.5% 的約 48%。
+- **Added**: 第 8.4.1 節調參結果；第 8.4.2 節可見標註特徵的係數與判讀。係數方向與 Dataset Card 3.1 一致（同意 neutral／ambiguous 時風險高、同意 positive 時風險低）；`visible_disagree` 與 `visible_entropy` 係數恰為 0，是「規則特徵在 hard 子集無資訊」的正確性檢查。
+- **Changed**: 第 7.1 節階梯 3 定案為 Gradient Boosting（`HistGradientBoostingClassifier` + `TruncatedSVD(200)`，Q3）。**但非線性模型沒有實質增益**：PR-AUC 高 1.8 個百分點，主要指標 `R@10%` 完全相同，調參耗時 11 倍。依 8.7 的決策規則，結論採 Logistic Regression。
+- **Added**: 第 7.3 節說明訓練集疊加 5 個 reveal seed（73,596 row、20,406 unique item）——這是 `GroupKFold` 有意義的前提，否則會退化成一般 `KFold`。
 
 ### [0.4.0] - 2026-10-31
 
