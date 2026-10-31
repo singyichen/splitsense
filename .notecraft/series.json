@@ -4,13 +4,14 @@
       "id": "research-spec",
       "title": "SplitSense 研究規格",
       "eyebrow": "RESEARCH",
-      "description": "研究問題與假設、雙語資料協議、評估方法、時程與停損，資料集 Dataset Card、進度追蹤與待拍板清單",
+      "description": "研究問題與假設、資料協議、評估方法，資料集 Dataset Card、進度追蹤、期末簡報內容與待拍板清單",
       "accent": "navy",
       "icon": "bookOpen",
       "slugs": [
         "00-research-spec",
         "10-dataset-card-goemotions",
         "20-progress",
+        "30-presentation",
         "90-open-questions"
       ]
     }

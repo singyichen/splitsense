@@ -36,6 +36,7 @@ uv run ruff check src/ scripts/ tests/
 | `docs/00-research-spec.mdx` | 研究決策：研究問題與假設、問題形式化、資料協議、評估方法、時程與停損、術語表（十四章，改自 TrendMile PRD 骨架） |
 | `docs/10-dataset-card-goemotions.mdx` | 定案資料集的來源、授權、實測統計與已知限制 |
 | `docs/20-progress.mdx` | **進度的單一真相**：做了沒、缺什麼。其他文件一律不帶狀態欄 |
+| `docs/30-presentation.mdx` | 期末簡報內容。**衍生品**：數字來自研究規格，那邊改了這邊要跟著改，不在這裡訂新決策 |
 | `docs/90-open-questions.mdx` | 待釐清事項與決議紀錄（`Qn` 編號，不重排、不回收） |
 | `src/splitsense/config.py` | 實驗參數：路徑、split 比例與 seed、reveal 設定、預算與指標常數 |
 | `tests/` | 實驗程式的不變量：洩漏檢查（研究規格 6.4）與重現性 |
