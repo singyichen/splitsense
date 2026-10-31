@@ -56,6 +56,8 @@ uv run ruff check src/ scripts/ tests/
 
 `.claude/skills/diagram-design/` 是從 [cathrynlavery/diagram-design](https://github.com/cathrynlavery/diagram-design) 複製進來的（MIT，v2.6.136），版本釘在 repo 裡，細節見該目錄的 `VENDOR.md`。**不要直接改那個目錄**，要更新就照 `VENDOR.md` 的步驟重新複製。
 
+**注意**：`~/.claude/skills/diagram-design` 另有一份較舊的（39 種圖型）。實測用 Skill 工具叫起來時載入的是**使用者層級**那份；`scripts/` 用絕對路徑呼叫才會走本目錄的新版。要統一就刪掉或同步使用者層級那份（見 `VENDOR.md`）。
+
 - 產出自包含 `.html` ＋ inline SVG，可再輸出 SVG／PNG；適合給教授與同學看的流程圖與示意圖。
 - **首次產圖前要先設定 style guide**（`references/style-guide.md`）。預設色票是 paper `#f5f5f5`、ink `#2d3142`、accent `#bf4520`，不要就這樣出圖——SplitSense 目前的視覺基準是 `trendlink-design` 的 navy `#1b4f9c` ＋ 金 `#ed9b26`，`.notecraft/components/` 的六個元件都照這套，**兩者擇一、不要混用**。
 - 只有 `scripts/export_png.py` 需要 `playwright`（會啟動 chromium）；HTML 與 SVG 只用 Python 標準庫。沒裝就改用瀏覽器開 HTML 截圖。

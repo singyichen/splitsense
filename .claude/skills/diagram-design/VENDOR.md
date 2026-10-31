@@ -33,6 +33,19 @@ uv pip install playwright && uv run playwright install chromium
 
 ## 與使用者層級那份的關係
 
-`~/.claude/skills/diagram-design` 另有一份較舊的打包版。專案層級優先，所以本目錄會蓋過它。這樣做的理由是把版本釘在 repo 裡，換機器或他人 clone 時產出的圖才會一致。
+`~/.claude/skills/diagram-design` 另有一份**較舊**的打包版（39 種圖型；本目錄是 45 種）。
+
+**實測結果：用 Skill 工具叫起來時載入的是使用者層級那份，不是本目錄。** 2026-10-31 驗證，skill 回報的 base directory 是 `~/.claude/skills/diagram-design`。所以本目錄目前的作用是：
+
+- 把版本與來源釘在 repo 裡，換機器或他人 clone 時有據可查
+- `scripts/` 可以直接用絕對路徑呼叫（`uv run python .claude/skills/diagram-design/scripts/...`），這條路徑確實走本目錄的新版
+
+要讓 Skill 工具也載入本目錄的版本，得把使用者層級那份移除或同步更新：
+
+```bash
+rm -rf ~/.claude/skills/diagram-design
+# 或同步成相同版本
+cp -R .claude/skills/diagram-design ~/.claude/skills/diagram-design
+```
 
 `npm run skill:init` 只會覆寫 `content-visualize`、`content-present` 與 `trendlink-design`，不會動到本目錄。

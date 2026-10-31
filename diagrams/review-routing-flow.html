@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>複核工作怎麼分流</title>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --color-paper:   #f6f8fb;
+      --color-ink:     #262e3d;
+      --color-muted:   #4f5b6e;
+      --color-accent:  #a04f15;
+      --font-sans:     'Geist', 'Noto Sans TC', system-ui, sans-serif;
+      --font-serif:    'Instrument Serif', 'Noto Sans TC', serif;
+      --font-mono:     'Geist Mono', ui-monospace, monospace;
+    }
+    body {
+      font-family: var(--font-sans);
+      background: var(--color-paper);
+      color: var(--color-ink);
+      min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      padding: 3rem 2rem;
+    }
+    .frame { max-width: 1200px; width: 100%; min-width: 0; }
+    .diagram-container { width: 100%; overflow-x: auto; }
+    .eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.66rem; font-weight: 500;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      color: var(--color-muted); margin-bottom: 0.5rem;
+    }
+    h1 {
+      font-family: var(--font-serif);
+      font-size: clamp(1.5rem, 2.4vw + 0.75rem, 2rem);
+      font-weight: 400; letter-spacing: -0.02em; line-height: 1.15;
+      color: var(--color-ink); margin-bottom: 1.5rem;
+    }
+    svg { width: 100%; min-width: 1000px; display: block; }
+    @media print {
+      .diagram-container { overflow-x: visible; }
+      svg { min-width: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <p class="eyebrow">Flowchart · SplitSense</p>
+    <h1>複核工作怎麼分流</h1>
+
+    <div class="diagram-container">
+      <svg viewBox="0 0 1000 680" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="review-routing-title review-routing-desc">
+        <title id="review-routing-title">複核工作怎麼分流</title>
+        <desc id="review-routing-desc">流程圖：標註進來後先判斷前兩人意見是否一致。不一致的必然有分歧，直接送複核、不需要模型；一致的交給模型排序並取前百分之十，兩條路徑都匯入人工複核佇列。</desc>
+        <defs>
+          <marker id="arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+            <polygon points="0 0, 8 3, 0 6" fill="#6c798e"/>
+          </marker>
+          <marker id="arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+            <polygon points="0 0, 8 3, 0 6" fill="#c7641a"/>
+          </marker>
+          <marker id="arrow-link" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+            <polygon points="0 0, 8 3, 0 6" fill="#1b4f9c"/>
+          </marker>
+        </defs>
+
+        <rect width="100%" height="100%" fill="#f6f8fb"/>
+
+        <!-- ARROWS (drawn before boxes) -->
+        <path d="M500 80 V120" stroke="#6c798e" stroke-width="1.2" fill="none" marker-end="url(#arrow)"/>
+        <path d="M360 176 H244 A8 8 0 0 0 236 184 V280" stroke="#c7641a" stroke-width="1.2" fill="none" marker-end="url(#arrow-accent)"/>
+        <path d="M640 176 H756 A8 8 0 0 1 764 184 V280" stroke="#1b4f9c" stroke-width="1.2" fill="none" marker-end="url(#arrow-link)"/>
+        <path d="M764 360 V408" stroke="#1b4f9c" stroke-width="1.2" fill="none" marker-end="url(#arrow-link)"/>
+        <path d="M236 360 V560 A8 8 0 0 0 244 568 H372" stroke="#c7641a" stroke-width="1.2" fill="none" marker-end="url(#arrow-accent)"/>
+        <path d="M764 488 V560 A8 8 0 0 1 756 568 H628" stroke="#1b4f9c" stroke-width="1.2" fill="none" marker-end="url(#arrow-link)"/>
+
+        <!-- ARROW LABELS (mask + 8px gap above stroke) -->
+        <rect x="256" y="154" width="72" height="14" rx="2" fill="#f6f8fb"/>
+        <text x="292" y="165" fill="#a04f15" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">否 · 33.5%</text>
+        <rect x="672" y="154" width="72" height="14" rx="2" fill="#f6f8fb"/>
+        <text x="708" y="165" fill="#1b4f9c" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">是 · 66.5%</text>
+
+        <!-- START -->
+        <rect x="380" y="32" width="240" height="48" rx="20" fill="#f6f8fb"/>
+        <rect x="380" y="32" width="240" height="48" rx="20" fill="#ffffff" stroke="#262e3d" stroke-width="1"/>
+        <text x="500" y="52" fill="#262e3d" font-size="12" font-weight="600" font-family="'Geist', 'Noto Sans TC', sans-serif" text-anchor="middle">標註陸續進來</text>
+        <text x="500" y="68" fill="#4f5b6e" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">4,741 items</text>
+
+        <!-- DECISION -->
+        <path d="M500 128 L640 176 L500 224 L360 176 Z" fill="#f6f8fb"/>
+        <path d="M500 128 L640 176 L500 224 L360 176 Z" fill="#ffffff" stroke="#262e3d" stroke-width="1"/>
+        <text x="500" y="180" fill="#262e3d" font-size="12" font-weight="600" font-family="'Geist', 'Noto Sans TC', sans-serif" text-anchor="middle">前兩人意見一致？</text>
+
+        <!-- NO BRANCH (focal) -->
+        <rect x="112" y="288" width="248" height="72" rx="6" fill="#f6f8fb"/>
+        <rect x="112" y="288" width="248" height="72" rx="6" fill="rgba(237,155,38,0.12)" stroke="#c7641a" stroke-width="1"/>
+        <rect x="120" y="296" width="52" height="12" rx="2" fill="transparent" stroke="rgba(199,100,26,0.40)" stroke-width="0.8"/>
+        <text x="146" y="305" fill="#a04f15" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">NO MODEL</text>
+        <text x="236" y="332" fill="#262e3d" font-size="12" font-weight="600" font-family="'Geist', 'Noto Sans TC', sans-serif" text-anchor="middle">直接送複核</text>
+        <text x="236" y="348" fill="#4f5b6e" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">1,588 · 100% 分歧</text>
+
+        <!-- YES BRANCH -->
+        <rect x="640" y="288" width="248" height="72" rx="6" fill="#f6f8fb"/>
+        <rect x="640" y="288" width="248" height="72" rx="6" fill="#ffffff" stroke="#1b4f9c" stroke-width="1"/>
+        <rect x="648" y="296" width="36" height="12" rx="2" fill="transparent" stroke="rgba(27,79,156,0.40)" stroke-width="0.8"/>
+        <text x="666" y="305" fill="#1b4f9c" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">MODEL</text>
+        <text x="764" y="332" fill="#262e3d" font-size="12" font-weight="600" font-family="'Geist', 'Noto Sans TC', sans-serif" text-anchor="middle">模型排序</text>
+        <text x="764" y="348" fill="#4f5b6e" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">3,153 · 24.7% 分歧</text>
+
+        <!-- TOP K -->
+        <rect x="640" y="416" width="248" height="72" rx="6" fill="#f6f8fb"/>
+        <rect x="640" y="416" width="248" height="72" rx="6" fill="#ffffff" stroke="#262e3d" stroke-width="1"/>
+        <text x="764" y="460" fill="#262e3d" font-size="12" font-weight="600" font-family="'Geist', 'Noto Sans TC', sans-serif" text-anchor="middle">取前 10%</text>
+        <text x="764" y="476" fill="#4f5b6e" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">315 items</text>
+
+        <!-- END -->
+        <rect x="380" y="544" width="240" height="48" rx="20" fill="#f6f8fb"/>
+        <rect x="380" y="544" width="240" height="48" rx="20" fill="rgba(38,46,61,0.05)" stroke="#4f5b6e" stroke-width="1"/>
+        <text x="500" y="572" fill="#262e3d" font-size="12" font-weight="600" font-family="'Geist', 'Noto Sans TC', sans-serif" text-anchor="middle">人工複核佇列</text>
+
+        <!-- LEGEND -->
+        <line x1="32" y1="620" x2="968" y2="620" stroke="rgba(38,46,61,0.12)" stroke-width="0.8"/>
+        <text x="32" y="644" fill="#4f5b6e" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.14em">LEGEND</text>
+        <rect x="128" y="634" width="16" height="12" rx="2" fill="rgba(237,155,38,0.12)" stroke="#c7641a" stroke-width="1"/>
+        <text x="152" y="644" fill="#4f5b6e" font-size="8" font-family="'Geist', 'Noto Sans TC', sans-serif">不需要模型</text>
+        <rect x="288" y="634" width="16" height="12" rx="2" fill="#ffffff" stroke="#1b4f9c" stroke-width="1"/>
+        <text x="312" y="644" fill="#4f5b6e" font-size="8" font-family="'Geist', 'Noto Sans TC', sans-serif">模型負責</text>
+        <path d="M448 640 L464 634 L480 640 L464 646 Z" fill="#ffffff" stroke="#262e3d" stroke-width="0.8"/>
+        <text x="492" y="644" fill="#4f5b6e" font-size="8" font-family="'Geist', 'Noto Sans TC', sans-serif">決策</text>
+      </svg>
+    </div>
+  </div>
+</body>
+</html>
