@@ -12,6 +12,8 @@
 | `baseline-paired.html` | 斜線圖 | 第 5 段 配對證據 |
 | `neutral-only-flagging.html` | 分組長條圖 | 第 5 段 錯誤分析 |
 | `module-pipeline.html` | 管線圖 | 技術棧文件第 2 節（非簡報用） |
+| `model-ladder.html` | 階梯圖 | 研究規格 7.1（非簡報用） |
+| `dataset-funnel.html` | 漏斗圖 | Dataset Card 第 5 節（非簡報用） |
 
 ## 重新匯出
 
@@ -89,6 +91,8 @@ text { font-family: 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', sans-se
 | `baseline-results`、`baseline-paired` | `artifacts/models/summary_hard.csv`、`paired_vs_agreed_label_prior.csv` |
 | `neutral-only-flagging` | `artifacts/error_analysis/agreed_label_profile.csv` |
 | `module-pipeline` | 由 `import` 反查，見下方指令 |
+| `model-ladder` | 研究規格 7.1 與 8.4 |
+| `dataset-funnel` | Dataset Card 第 3、5 節 |
 
 `baseline-paired` 用的是**逐 seed 實測值**（17.83／18.96／19.41／17.79／18.88 對 18.60／19.72／20.56／18.84／19.39），不是從平均反推。
 

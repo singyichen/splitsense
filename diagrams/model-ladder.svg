@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 1000 644" width="2000" height="1288" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="model-ladder-title model-ladder-desc" id="model-ladder-root">
+        <title id="model-ladder-title">模型階梯：每一層回答前一層答不了的問題</title>
+        <desc id="model-ladder-desc">五層模型階梯由笨到聰明：隨機排序 9.5、可見標籤 entropy 9.9、同意標籤查表 18.5、Logistic Regression 19.4、Gradient Boosting 19.4。層與層之間標明前一層不足之處。第四層零樣本大語言模型課堂版不做。</desc>
+        <style>
+          text { font-family: 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', sans-serif; }
+          .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+          .h { font-size: 13px; font-weight: 700; }
+          .q { font-size: 11px; }
+          .sub { font-size: 9px; }
+          .lg { font-size: 8px; }
+          .big { font-size: 17px; font-weight: 700; }
+          .chip { font-size: 10px; font-weight: 700; }
+          .ink { fill: #262e3d; } .muted { fill: #4f5b6e; } .soft { fill: #9aa6b8; }
+          .navy { fill: #1b4f9c; } .acc { fill: #a04f15; } .inv { fill: #ffffff; }
+        </style>
+        <defs>
+      <style>@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&amp;family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400;500;600&amp;family=Noto+Serif:ital@0;1&amp;family=Noto+Sans+KR:wght@400;500;600&amp;family=Noto+Serif+KR:wght@400&amp;family=Noto+Sans+TC:wght@400;500;600&amp;family=Noto+Serif+TC:wght@400&amp;display=swap');
+      #model-ladder-root { --color-paper: #f6f8fb; --color-ink: #262e3d; --color-muted: #4f5b6e;
+      --font-sans: 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', sans-serif;
+      --font-serif: 'Noto Serif TC', serif;
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+      #model-ladder-root { font-family: var(--font-sans); color: var(--color-ink); }
+      #model-ladder-root .diagram-container { width: 100%; overflow-x: auto; }
+      @media print {
+#model-ladder-root .diagram-container { overflow-x: visible; }
+}
+      #model-ladder-root text { font-family: 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', sans-serif; }
+      #model-ladder-root .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+      #model-ladder-root .h { font-size: 13px; font-weight: 700; }
+      #model-ladder-root .q { font-size: 11px; }
+      #model-ladder-root .sub { font-size: 9px; }
+      #model-ladder-root .lg { font-size: 8px; }
+      #model-ladder-root .big { font-size: 17px; font-weight: 700; }
+      #model-ladder-root .chip { font-size: 10px; font-weight: 700; }
+      #model-ladder-root .ink { fill: #262e3d; }
+      #model-ladder-root .muted { fill: #4f5b6e; }
+      #model-ladder-root .soft { fill: #9aa6b8; }
+      #model-ladder-root .navy { fill: #1b4f9c; }
+      #model-ladder-root .acc { fill: #a04f15; }
+      #model-ladder-root .inv { fill: #ffffff; }</style>
+          <marker id="model-ladder-mk" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto">
+            <path d="M 0 0.5 L 7.5 4 L 0 7.5 z" fill="#6c798e"/>
+          </marker>
+        </defs>
+        <rect x="0.5" y="0.5" width="999" height="643" rx="10" fill="#ffffff" stroke="#e1e6ee"/>
+        <text x="44" y="62" text-anchor="middle" class="lg soft">笨</text>
+        <line x1="44" y1="72" x2="44" y2="508" stroke="#cbd3df" stroke-width="1.5"/>
+        <path d="M 38 496 L 44 509 L 50 496" fill="none" stroke="#cbd3df" stroke-width="1.5"/>
+        <text x="44" y="526" text-anchor="middle" class="lg soft">聰明</text>
+        <rect x="76" y="72" width="664" height="64" rx="10" fill="#f6f8fb" stroke="#cbd3df"/>
+        <rect x="76" y="84" width="4" height="40" rx="2" fill="#9aa6b8"/>
+        <text x="96" y="96" class="h ink">0　隨機排序</text>
+        <text x="96" y="116" class="q muted">地板線</text>
+        <text x="96" y="132" class="mono sub soft">無超參數</text>
+        <text x="860" y="104" text-anchor="middle" class="big muted">9.5</text>
+        <text x="860" y="122" text-anchor="middle" class="lg soft">Recall@10%</text>
+        <line x1="408" y1="136" x2="408" y2="164" stroke="#6c798e" stroke-width="1.5" marker-end="url(#model-ladder-mk)"/>
+        <text x="420" y="154" class="lg muted">隨機沒有任何訊號，任何方法都該勝過它</text>
+        <rect x="76" y="164" width="664" height="64" rx="10" fill="#f6f8fb" stroke="#cbd3df"/>
+        <rect x="76" y="176" width="4" height="40" rx="2" fill="#9aa6b8"/>
+        <text x="96" y="188" class="h ink">1　可見標籤 entropy</text>
+        <text x="96" y="208" class="q muted">「不用機器學習」的對照組</text>
+        <text x="96" y="224" class="mono sub soft">無超參數</text>
+        <text x="860" y="196" text-anchor="middle" class="big muted">9.9</text>
+        <text x="860" y="214" text-anchor="middle" class="lg soft">Recall@10%</text>
+        <line x1="408" y1="228" x2="408" y2="256" stroke="#6c798e" stroke-width="1.5" marker-end="url(#model-ladder-mk)"/>
+        <text x="420" y="246" class="lg muted">entropy 在難題組恆為 0、等於亂猜——拿它當對照會誇大 ML 的功勞</text>
+        <rect x="76" y="256" width="664" height="72" rx="10" fill="#ed9b26" stroke="#c7641a" fill-opacity="0.10"/>
+        <rect x="76" y="268" width="4" height="48" rx="2" fill="#c7641a"/>
+        <text x="96" y="280" class="h ink">1.5　同意標籤查表</text>
+        <text x="96" y="300" class="q muted">更公平的透明規則：前兩人同意哪個標籤</text>
+        <text x="96" y="316" class="mono sub soft">四列查表，不用訓練</text>
+        <text x="860" y="288" text-anchor="middle" class="big acc">18.5</text>
+        <text x="860" y="306" text-anchor="middle" class="lg soft">Recall@10%</text>
+        <line x1="408" y1="328" x2="408" y2="356" stroke="#6c798e" stroke-width="1.5" marker-end="url(#model-ladder-mk)"/>
+        <text x="420" y="346" class="lg muted">查表只用了標籤，完全沒用到文字</text>
+        <rect x="76" y="356" width="664" height="64" rx="10" fill="#ffffff" stroke="#1b4f9c"/>
+        <rect x="76" y="368" width="4" height="40" rx="2" fill="#1b4f9c"/>
+        <text x="96" y="380" class="h ink">2　Logistic Regression</text>
+        <text x="96" y="400" class="q muted">第一個真正的 ML 模型</text>
+        <text x="96" y="416" class="mono sub soft">C（最佳 0.01）</text>
+        <text x="860" y="388" text-anchor="middle" class="big navy">19.4</text>
+        <text x="860" y="406" text-anchor="middle" class="lg soft">Recall@10%</text>
+        <line x1="408" y1="420" x2="408" y2="448" stroke="#6c798e" stroke-width="1.5" marker-end="url(#model-ladder-mk)"/>
+        <text x="420" y="438" class="lg muted">線性模型可能漏掉非線性關係</text>
+        <rect x="76" y="448" width="664" height="64" rx="10" fill="#ffffff" stroke="#2c6ebb"/>
+        <rect x="76" y="460" width="4" height="40" rx="2" fill="#2c6ebb"/>
+        <text x="96" y="472" class="h ink">3　Gradient Boosting</text>
+        <text x="96" y="492" class="q muted">檢查非線性模型有無額外增益</text>
+        <text x="96" y="508" class="mono sub soft">learning_rate、max_depth</text>
+        <text x="860" y="480" text-anchor="middle" class="big navy">19.4</text>
+        <text x="860" y="498" text-anchor="middle" class="lg soft">Recall@10%</text>
+        <rect x="76" y="532" width="664" height="48" rx="10" fill="#f6f8fb" stroke="#cbd3df" stroke-dasharray="5,4"/>
+        <text x="96" y="554" class="h soft">4　零樣本大語言模型</text>
+        <text x="96" y="572" class="q soft">課堂版不做（Q9）：資料污染使分數不可檢驗。論文階段必做</text>
+        <text x="860" y="562" text-anchor="middle" class="lg soft">未執行</text>
+        <line x1="32" y1="604" x2="968" y2="604" stroke="#262e3d" stroke-width="0.8" stroke-opacity="0.12"/>
+        <text x="32" y="624" class="lg muted mono" letter-spacing="0.14em">LEGEND</text>
+        <rect x="128" y="614" width="16" height="10" rx="2" fill="#ed9b26" stroke="#c7641a" fill-opacity="0.10"/>
+        <text x="152" y="624" class="lg muted">拿到模型 95% 效果的透明規則</text>
+        <text x="420" y="624" class="lg muted">結論採階梯 2：對查表只贏 0.85 個百分點，但 5 個 seed 全勝</text>
+        <text x="968" y="624" text-anchor="end" class="lg muted mono">難題組 3,153 題，上限 40.5%</text>
+      </svg>

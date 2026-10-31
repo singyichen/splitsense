@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 1000 580" width="2000" height="1160" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="dataset-funnel-title dataset-funnel-desc" id="dataset-funnel-root">
+        <title id="dataset-funnel-title">四個候選怎麼篩到剩一個</title>
+        <desc id="dataset-funnel-desc">四階段篩選：先從 TID-8 八個子資料集取出四個保留逐人標註的候選，授權篩選淘汰 md-agreement，資料品質篩選淘汰 sentiment 與 CommitmentBank，最後 GoEmotions 從 57,703 題篩到恰好 3 份標註的 31,766 題、去重後 31,603 題。</desc>
+        <style>
+          text { font-family: 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', sans-serif; }
+          .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+          .h { font-size: 13px; font-weight: 700; }
+          .q { font-size: 11px; }
+          .sub { font-size: 9px; }
+          .lg { font-size: 8px; }
+          .big { font-size: 17px; font-weight: 700; }
+          .chip { font-size: 10px; font-weight: 700; }
+          .ink { fill: #262e3d; } .muted { fill: #4f5b6e; } .soft { fill: #9aa6b8; }
+          .navy { fill: #1b4f9c; } .acc { fill: #a04f15; } .inv { fill: #ffffff; }
+        </style>
+        <defs>
+      <style>@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&amp;family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400;500;600&amp;family=Noto+Serif:ital@0;1&amp;family=Noto+Sans+KR:wght@400;500;600&amp;family=Noto+Serif+KR:wght@400&amp;family=Noto+Sans+TC:wght@400;500;600&amp;family=Noto+Serif+TC:wght@400&amp;display=swap');
+      #dataset-funnel-root { --color-paper: #f6f8fb; --color-ink: #262e3d; --color-muted: #4f5b6e;
+      --font-sans: 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', sans-serif;
+      --font-serif: 'Noto Serif TC', serif;
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+      #dataset-funnel-root { font-family: var(--font-sans); color: var(--color-ink); }
+      #dataset-funnel-root .diagram-container { width: 100%; overflow-x: auto; }
+      @media print {
+#dataset-funnel-root .diagram-container { overflow-x: visible; }
+}
+      #dataset-funnel-root text { font-family: 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', sans-serif; }
+      #dataset-funnel-root .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+      #dataset-funnel-root .h { font-size: 13px; font-weight: 700; }
+      #dataset-funnel-root .q { font-size: 11px; }
+      #dataset-funnel-root .sub { font-size: 9px; }
+      #dataset-funnel-root .lg { font-size: 8px; }
+      #dataset-funnel-root .big { font-size: 17px; font-weight: 700; }
+      #dataset-funnel-root .chip { font-size: 10px; font-weight: 700; }
+      #dataset-funnel-root .ink { fill: #262e3d; }
+      #dataset-funnel-root .muted { fill: #4f5b6e; }
+      #dataset-funnel-root .soft { fill: #9aa6b8; }
+      #dataset-funnel-root .navy { fill: #1b4f9c; }
+      #dataset-funnel-root .acc { fill: #a04f15; }
+      #dataset-funnel-root .inv { fill: #ffffff; }</style>
+          <marker id="dataset-funnel-mk" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto">
+            <path d="M 0 0.5 L 7.5 4 L 0 7.5 z" fill="#6c798e"/>
+          </marker>
+        </defs>
+        <rect x="0.5" y="0.5" width="999" height="579" rx="10" fill="#ffffff" stroke="#e1e6ee"/>
+        <text x="44" y="62" text-anchor="middle" class="lg soft">全部候選</text>
+        <line x1="44" y1="72" x2="44" y2="492" stroke="#cbd3df" stroke-width="1.5"/>
+        <path d="M 38 480 L 44 493 L 50 480" fill="none" stroke="#cbd3df" stroke-width="1.5"/>
+        <text x="44" y="510" text-anchor="middle" class="lg soft">定案資料</text>
+        <rect x="76" y="72" width="600" height="76" rx="10" fill="#eef4fb" stroke="#1b4f9c"/>
+        <rect x="76" y="84" width="4" height="52" rx="2" fill="#1b4f9c"/>
+        <text x="96" y="96" class="h ink">1　保留逐人標註的子資料集</text>
+        <text x="96" y="116" class="q muted">多數資料集只給投票後的最終答案，那樣看不到分歧怎麼形成</text>
+        <text x="96" y="134" class="mono sub soft">TID-8 八個子資料集 → 四個候選</text>
+        <text x="720" y="102" text-anchor="middle" class="big navy">4</text>
+        <text x="720" y="120" text-anchor="middle" class="lg soft">剩餘候選</text>
+        <line x1="408" y1="148" x2="408" y2="180" stroke="#6c798e" stroke-width="1.5" marker-end="url(#dataset-funnel-mk)"/>
+        <text x="420" y="168" class="lg muted">授權一律追到原始出處——不能因為 Hugging Face 可以下載就假設能用</text>
+        <rect x="76" y="180" width="600" height="76" rx="10" fill="#ffffff" stroke="#2c6ebb"/>
+        <rect x="76" y="192" width="4" height="52" rx="2" fill="#2c6ebb"/>
+        <text x="96" y="204" class="h ink">2　授權篩選</text>
+        <text x="96" y="224" class="q muted">TID-8 的 Dataset Card 授權欄標 unknown，其論文也沒有授權聲明</text>
+        <text x="720" y="210" text-anchor="middle" class="big navy">3</text>
+        <text x="720" y="228" text-anchor="middle" class="lg soft">剩餘候選</text>
+        <rect x="760" y="186" width="204" height="64" rx="8" fill="#f6f8fb" stroke="#cbd3df" stroke-dasharray="5,4"/>
+        <text x="776" y="206" class="chip soft">md-agreement 出局</text>
+        <text x="776" y="224" class="lg soft">上游無開源授權、限非商業</text>
+        <text x="776" y="240" class="lg soft">研究、須填表單申請</text>
+        <line x1="408" y1="256" x2="408" y2="288" stroke="#6c798e" stroke-width="1.5" marker-end="url(#dataset-funnel-mk)"/>
+        <text x="420" y="276" class="lg muted">目標分布要讓排序看得出差異；圖要連通，annotator 歷史才成立</text>
+        <rect x="76" y="288" width="600" height="84" rx="10" fill="#ffffff" stroke="#2c6ebb"/>
+        <rect x="76" y="300" width="4" height="60" rx="2" fill="#2c6ebb"/>
+        <text x="96" y="312" class="h ink">3　資料品質篩選</text>
+        <text x="96" y="332" class="q muted">分歧率太高會讓任何排序都撞到地雷，指標讀不出模型能力</text>
+        <text x="720" y="318" text-anchor="middle" class="big navy">1</text>
+        <text x="720" y="336" text-anchor="middle" class="lg soft">剩餘候選</text>
+        <rect x="760" y="292" width="204" height="36" rx="8" fill="#f6f8fb" stroke="#cbd3df" stroke-dasharray="5,4"/>
+        <text x="776" y="308" class="chip soft">sentiment 出局</text>
+        <text x="776" y="322" class="lg soft">93.7% 分歧、圖碎成 305 塊</text>
+        <rect x="760" y="334" width="204" height="36" rx="8" fill="#f6f8fb" stroke="#cbd3df" stroke-dasharray="5,4"/>
+        <text x="776" y="350" class="chip soft">CommitmentBank 出局</text>
+        <text x="776" y="364" class="lg soft">僅 1,200 題、97.9% 分歧</text>
+        <line x1="408" y1="372" x2="408" y2="404" stroke="#6c798e" stroke-width="1.5" marker-end="url(#dataset-funnel-mk)"/>
+        <text x="420" y="392" class="lg muted">標註數本身洩漏答案，只取恰好 3 份讓分母固定</text>
+        <rect x="76" y="404" width="888" height="96" rx="10" fill="#ed9b26" stroke="#c7641a" fill-opacity="0.10"/>
+        <rect x="76" y="416" width="4" height="72" rx="2" fill="#c7641a"/>
+        <text x="96" y="428" class="h ink">4　GoEmotions 子集篩選</text>
+        <text x="96" y="448" class="q muted">Apache-2.0、可直接下載、目標分布最平衡</text>
+        <text x="96" y="466" class="mono sub soft">TID-8 goemotions-atr</text>
+        <text x="460" y="448" text-anchor="middle" class="big acc">57,703</text>
+        <text x="460" y="466" text-anchor="middle" class="lg soft">整個 config</text>
+        <text x="545" y="443" text-anchor="middle" class="q soft">→</text>
+        <text x="630" y="448" text-anchor="middle" class="big acc">31,766</text>
+        <text x="630" y="466" text-anchor="middle" class="lg soft">恰好 3 份標註</text>
+        <text x="715" y="443" text-anchor="middle" class="q soft">→</text>
+        <text x="800" y="448" text-anchor="middle" class="big acc">31,603</text>
+        <text x="800" y="466" text-anchor="middle" class="lg soft">文字去重後</text>
+        <text x="96" y="488" class="lg soft">94,809 筆標註 · 79 位標註者 · 分歧率 49.8%</text>
+        <line x1="32" y1="528" x2="968" y2="528" stroke="#262e3d" stroke-width="0.8" stroke-opacity="0.12"/>
+        <text x="32" y="548" class="lg muted mono" letter-spacing="0.14em">LEGEND</text>
+        <rect x="128" y="538" width="16" height="10" rx="2" fill="#ed9b26" stroke="#c7641a" fill-opacity="0.10"/>
+        <text x="152" y="548" class="lg muted">定案資料集</text>
+        <rect x="280" y="538" width="16" height="10" rx="2" fill="#f6f8fb" stroke="#cbd3df" stroke-dasharray="4,3"/>
+        <text x="304" y="548" class="lg muted">出局，各有不同理由</text>
+        <text x="968" y="548" text-anchor="end" class="lg muted mono">統計見 Dataset Card 第 3、5 節</text>
+      </svg>
