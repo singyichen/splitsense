@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg viewBox="0 0 1000 540" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="baseline-results-title baseline-results-desc" id="baseline-results-root">
+<svg viewBox="0 0 1000 540" width="2000" height="1080" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="baseline-results-title baseline-results-desc" id="baseline-results-root">
         <title id="baseline-results-title">只複核 10% 時能抓到多少爭議題</title>
         <desc id="baseline-results-desc">長條圖：難題組上五個方法的 Recall@10%。隨機 9.5、可見 entropy 9.9、同意標籤查表 18.5、Logistic Regression 19.4、Gradient Boosting 19.4，理論上限 40.5%。</desc>
   <defs>
@@ -8,58 +8,92 @@
       --color-ink:     #262e3d;
       --color-muted:   #4f5b6e;
       --color-accent:  #a04f15;
-      --font-sans:     'Geist', 'Noto Sans TC', system-ui, sans-serif;
-      --font-serif:    'Instrument Serif', 'Noto Sans TC', serif;
-      --font-mono:     'Geist Mono', ui-monospace, monospace; }
+      --font-sans:     'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', sans-serif;
+      --font-serif:    'Noto Serif TC', serif;
+      --font-mono:     ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
       #baseline-results-root { font-family: var(--font-sans); color: var(--color-ink); }
       #baseline-results-root .diagram-container { width: 100%; overflow-x: auto; }
       @media print {
 #baseline-results-root .diagram-container { overflow-x: visible; }
-}</style>
+}
+      #baseline-results-root text { font-family: 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', sans-serif; }
+      #baseline-results-root .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+      #baseline-results-root .h { font-size: 12px; font-weight: 700; }
+      #baseline-results-root .h2 { font-size: 11px; font-weight: 700; }
+      #baseline-results-root .q { font-size: 11px; }
+      #baseline-results-root .n9 { font-size: 9px; }
+      #baseline-results-root .lg { font-size: 8px; }
+      #baseline-results-root .sub { font-size: 9px; }
+      #baseline-results-root .val { font-size: 8px; }
+      #baseline-results-root .chip { font-size: 7px; }
+      #baseline-results-root .ink { fill: #262e3d; }
+      #baseline-results-root .muted { fill: #4f5b6e; }
+      #baseline-results-root .navy { fill: #1b4f9c; }
+      #baseline-results-root .acc { fill: #a04f15; }
+      #baseline-results-root .inv { fill: #ffffff; }
+      #baseline-results-root .pale { fill: #d6e4f5; }</style>
   </defs>
-        <rect width="100%" height="100%" fill="#f6f8fb"/>
+        <style>
+          text { font-family: 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', sans-serif; }
+          .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+          .h    { font-size: 12px; font-weight: 700; }
+          .h2   { font-size: 11px; font-weight: 700; }
+          .q    { font-size: 11px; }
+          .n9   { font-size: 9px; }
+          .lg   { font-size: 8px; }
+          .sub  { font-size: 9px; }
+          .val  { font-size: 8px; }
+          .chip { font-size: 7px; }
+          .ink   { fill: #262e3d; }
+          .muted { fill: #4f5b6e; }
+          .navy  { fill: #1b4f9c; }
+          .acc   { fill: #a04f15; }
+          .inv   { fill: #ffffff; }
+          .pale  { fill: #d6e4f5; }
+        </style>
+        <rect x="0.5" y="0.5" width="999" height="539" rx="10" fill="#ffffff" stroke="#e1e6ee"/>
         <line x1="80" y1="420" x2="960" y2="420" stroke="#262e3d" stroke-width="1" stroke-opacity="0.25"/>
-        <text x="72" y="423" fill="#4f5b6e" font-size="8" font-family="'Geist Mono', monospace" text-anchor="end">0%</text>
+        <text x="72" y="423" text-anchor="end" class="val mono muted">0%</text>
         <line x1="80" y1="344" x2="960" y2="344" stroke="#262e3d" stroke-width="0.8" stroke-opacity="0.08"/>
-        <text x="72" y="347" fill="#4f5b6e" font-size="8" font-family="'Geist Mono', monospace" text-anchor="end">10%</text>
+        <text x="72" y="347" text-anchor="end" class="val mono muted">10%</text>
         <line x1="80" y1="268" x2="960" y2="268" stroke="#262e3d" stroke-width="0.8" stroke-opacity="0.08"/>
-        <text x="72" y="271" fill="#4f5b6e" font-size="8" font-family="'Geist Mono', monospace" text-anchor="end">20%</text>
+        <text x="72" y="271" text-anchor="end" class="val mono muted">20%</text>
         <line x1="80" y1="192" x2="960" y2="192" stroke="#262e3d" stroke-width="0.8" stroke-opacity="0.08"/>
-        <text x="72" y="195" fill="#4f5b6e" font-size="8" font-family="'Geist Mono', monospace" text-anchor="end">30%</text>
+        <text x="72" y="195" text-anchor="end" class="val mono muted">30%</text>
         <line x1="80" y1="116" x2="960" y2="116" stroke="#262e3d" stroke-width="0.8" stroke-opacity="0.08"/>
-        <text x="72" y="119" fill="#4f5b6e" font-size="8" font-family="'Geist Mono', monospace" text-anchor="end">40%</text>
+        <text x="72" y="119" text-anchor="end" class="val mono muted">40%</text>
         <line x1="80" y1="40" x2="80" y2="420" stroke="#262e3d" stroke-width="1" stroke-opacity="0.25"/>
         <line x1="80" y1="112" x2="960" y2="112" stroke="#6c798e" stroke-width="1" stroke-dasharray="5,4"/>
-        <rect x="760" y="92" width="196" height="14" rx="2" fill="#f6f8fb"/>
-        <text x="956" y="103" fill="#4f5b6e" font-size="8" font-family="'Geist Mono', monospace" text-anchor="end">理論上限 40.5%</text>
-        <rect x="112" y="348" width="112" height="72" fill="#f6f8fb"/>
+        <rect x="760" y="92" width="196" height="14" rx="2" fill="#ffffff"/>
+        <text x="956" y="103" text-anchor="end" class="val mono muted">理論上限 40.5%</text>
+        <rect x="112" y="348" width="112" height="72" fill="#ffffff"/>
         <rect x="112" y="348" width="112" height="72" fill="#4f5b6e" stroke="#6c798e" stroke-width="1" fill-opacity="0.15"/>
-        <text x="168" y="340" fill="#4f5b6e" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">9.5</text>
-        <text x="168" y="444" fill="#262e3d" font-size="11" font-weight="600" font-family="'Geist', 'Noto Sans TC', sans-serif" text-anchor="middle">隨機排序</text>
-        <text x="168" y="460" fill="#4f5b6e" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">1.0×</text>
-        <rect x="288" y="345" width="112" height="75" fill="#f6f8fb"/>
+        <text x="168" y="340" text-anchor="middle" class="val mono muted">9.5</text>
+        <text x="168" y="444" text-anchor="middle" class="h2 ink">隨機排序</text>
+        <text x="168" y="460" text-anchor="middle" class="val mono muted">1.0×</text>
+        <rect x="288" y="345" width="112" height="75" fill="#ffffff"/>
         <rect x="288" y="345" width="112" height="75" fill="#4f5b6e" stroke="#6c798e" stroke-width="1" fill-opacity="0.15"/>
-        <text x="344" y="337" fill="#4f5b6e" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">9.9</text>
-        <text x="344" y="444" fill="#262e3d" font-size="11" font-weight="600" font-family="'Geist', 'Noto Sans TC', sans-serif" text-anchor="middle">可見 entropy</text>
-        <text x="344" y="460" fill="#4f5b6e" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">1.0×</text>
-        <rect x="464" y="279" width="112" height="141" fill="#f6f8fb"/>
+        <text x="344" y="337" text-anchor="middle" class="val mono muted">9.9</text>
+        <text x="344" y="444" text-anchor="middle" class="h2 ink">可見 entropy</text>
+        <text x="344" y="460" text-anchor="middle" class="val mono muted">1.0×</text>
+        <rect x="464" y="279" width="112" height="141" fill="#ffffff"/>
         <rect x="464" y="279" width="112" height="141" fill="#ed9b26" stroke="#c7641a" stroke-width="1" fill-opacity="0.12"/>
-        <text x="520" y="271" fill="#a04f15" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">18.5</text>
-        <text x="520" y="444" fill="#262e3d" font-size="11" font-weight="600" font-family="'Geist', 'Noto Sans TC', sans-serif" text-anchor="middle">同意標籤查表</text>
-        <text x="520" y="460" fill="#4f5b6e" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">1.9×</text>
-        <rect x="640" y="273" width="112" height="147" fill="#f6f8fb"/>
+        <text x="520" y="271" text-anchor="middle" class="val mono acc">18.5</text>
+        <text x="520" y="444" text-anchor="middle" class="h2 ink">同意標籤查表</text>
+        <text x="520" y="460" text-anchor="middle" class="val mono muted">1.9×</text>
+        <rect x="640" y="273" width="112" height="147" fill="#ffffff"/>
         <rect x="640" y="273" width="112" height="147" fill="#4f5b6e" stroke="#6c798e" stroke-width="1" fill-opacity="0.15"/>
-        <text x="696" y="265" fill="#4f5b6e" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">19.4</text>
-        <text x="696" y="444" fill="#262e3d" font-size="11" font-weight="600" font-family="'Geist', 'Noto Sans TC', sans-serif" text-anchor="middle">Logistic Reg.</text>
-        <text x="696" y="460" fill="#4f5b6e" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">1.9×</text>
-        <rect x="816" y="273" width="112" height="147" fill="#f6f8fb"/>
+        <text x="696" y="265" text-anchor="middle" class="val mono muted">19.4</text>
+        <text x="696" y="444" text-anchor="middle" class="h2 ink">Logistic Reg.</text>
+        <text x="696" y="460" text-anchor="middle" class="val mono muted">1.9×</text>
+        <rect x="816" y="273" width="112" height="147" fill="#ffffff"/>
         <rect x="816" y="273" width="112" height="147" fill="#4f5b6e" stroke="#6c798e" stroke-width="1" fill-opacity="0.15"/>
-        <text x="872" y="265" fill="#4f5b6e" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">19.4</text>
-        <text x="872" y="444" fill="#262e3d" font-size="11" font-weight="600" font-family="'Geist', 'Noto Sans TC', sans-serif" text-anchor="middle">Gradient Boost.</text>
-        <text x="872" y="460" fill="#4f5b6e" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">1.9×</text>
+        <text x="872" y="265" text-anchor="middle" class="val mono muted">19.4</text>
+        <text x="872" y="444" text-anchor="middle" class="h2 ink">Gradient Boost.</text>
+        <text x="872" y="460" text-anchor="middle" class="val mono muted">1.9×</text>
         <line x1="32" y1="488" x2="968" y2="488" stroke="#262e3d" stroke-width="0.8" stroke-opacity="0.12"/>
-        <text x="32" y="512" fill="#4f5b6e" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.14em">LEGEND</text>
+        <text x="32" y="512" letter-spacing="0.14em" class="val mono muted">LEGEND</text>
         <rect x="128" y="502" width="16" height="10" rx="2" fill="#ed9b26" stroke="#c7641a" stroke-width="1" fill-opacity="0.12"/>
-        <text x="152" y="512" fill="#4f5b6e" font-size="8" font-family="'Geist', 'Noto Sans TC', sans-serif">不用訓練的透明規則</text>
-        <text x="968" y="512" fill="#4f5b6e" font-size="8" font-family="'Geist Mono', monospace" text-anchor="end">y 軸：Recall@10%，難題組 3,153 題</text>
+        <text x="152" y="512" class="lg muted">不用訓練的透明規則</text>
+        <text x="968" y="512" text-anchor="end" class="val mono muted">y 軸：Recall@10%，難題組 3,153 題</text>
       </svg>

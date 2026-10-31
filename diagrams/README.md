@@ -14,21 +14,55 @@
 
 ## 重新匯出
 
-改 `.html` 之後重跑，不要手改 `.svg` 或 `.png`：
+改 `.html` 之後重跑，不要手改 `.svg`：
 
 ```bash
 uv run python .claude/skills/diagram-design/scripts/self_check.py diagrams/<name>.html
 uv run python .claude/skills/diagram-design/scripts/export_svg.py diagrams/<name>.html
-uv run python .claude/skills/diagram-design/scripts/export_png.py diagrams/<name>.svg docs/assets/<name>.png 2
+cp diagrams/<name>.svg docs/assets/<name>.svg
 ```
 
-PNG 輸出到 `docs/assets/`，因為 notecraftapp 只會把**筆記資料夾內**的相對圖片路徑改寫成 `/notes-assets/*`。筆記裡要用 markdown 的 `![]()` 語法引用，raw `<img>` 不會被改寫。
+**筆記引用 SVG，不是 PNG。** SVG 約 7 KB、PNG 約 90 KB，而且 SVG 在任何解析度都銳利、文字可選取。七張合計 60 KB。
 
-PNG 匯出需要 `playwright`：
+只有要放進簡報軟體時才需要 PNG（`export_png.py`，需要 `playwright`）：
 
 ```bash
 uv pip install playwright && uv run playwright install chromium
+uv run python .claude/skills/diagram-design/scripts/export_png.py diagrams/<name>.svg /tmp/<name>.png 2
 ```
+
+notecraftapp 只會把**筆記資料夾內**的相對圖片路徑改寫成 `/notes-assets/*`，所以產物放 `docs/assets/`；筆記裡要用 markdown 的 `![]()` 語法，raw `<img>` 不會被改寫。
+
+## 排版慣例
+
+參考 `~/project/fullstack-ai-sdd-workflow-scaffold/docs/assets/illustrations/` 的做法調整過，七張都照這套：
+
+**字型：CJK 排第一。**
+
+```css
+text { font-family: 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', sans-serif; }
+.mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+```
+
+不要把 Geist 之類的拉丁字型排前面——它沒有中文字，結果會是同一行裡數字用 Geist、中文用 Noto，字重與字寬不協調。
+
+**樣式用 class，不要逐個 `<text>` 寫屬性。** `<style>` 區塊放在 `<desc>` 之後、`<defs>` 之前，這樣 `export_svg.py` 抽出 `<svg>` 節點時會一起帶走。目前的 class：
+
+| 排版 | | 顏色 | |
+| --- | --- | --- | --- |
+| `.h` | 12px 700 | `.ink` | `#262e3d` |
+| `.h2` | 11px 700 | `.muted` | `#4f5b6e` |
+| `.q` | 11px | `.navy` | `#1b4f9c` |
+| `.n9` / `.sub` | 9px | `.acc` | `#a04f15` |
+| `.lg` / `.val` | 8px | `.inv` | `#ffffff` |
+| `.chip` | 7px | `.pale` | `#d6e4f5` |
+| `.mono` | 等寬 | | |
+
+**固定尺寸、2 倍 viewBox。** `viewBox="0 0 1000 540"` 配 `width="2000" height="1080"`，retina 螢幕上銳利。
+
+**整張圖是一張白底卡片。** `<rect x="0.5" y="0.5" width="999" height="539" rx="10" fill="#ffffff" stroke="#e1e6ee"/>`，圖才有邊界、坐在頁面上。因為卡片是白的，所有防止線條穿透的遮罩也要是 `#ffffff`，不能用頁面底色。
+
+**圖與表並列，不是二選一。** 圖給形狀，表給查找，服務的是不同的閱讀行為。
 
 ## 色票
 

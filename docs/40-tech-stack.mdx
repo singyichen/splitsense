@@ -50,7 +50,7 @@ Python **3.13.0**（`pyproject.toml` 要求 `>=3.12`），套件管理 **uv 0.12
 | `scripts/` | 5 支可執行腳本 | 是 |
 | `tests/` | 7 個測試檔 ＋ `conftest.py` | 是 |
 | `diagrams/` | 圖表原始檔（`.html`／`.svg`） | 是 |
-| `docs/assets/` | 筆記引用的 PNG | 是 |
+| `docs/assets/` | 筆記引用的 SVG | 是 |
 | `.notecraft/components/` | 互動元件 `.tsx` | 是 |
 | `data/` | 上游 parquet | **否** |
 | `artifacts/` | `eda/`、`manifests/`、`baselines/`、`models/`、`error_analysis/` | **否** |
@@ -138,9 +138,11 @@ train_test_split · average_precision_score · make_scorer
 ```text
 diagrams/<name>.html          原始檔，改圖改這個
   → self_check.py             驗證無障礙 SVG 契約（標準庫）
-  → export_svg.py             → diagrams/<name>.svg（標準庫）
-  → export_png.py             → docs/assets/<name>.png（playwright + chromium）
+  → export_svg.py             → diagrams/<name>.svg → docs/assets/（標準庫）
+  → export_png.py             只在要放進簡報軟體時才跑（playwright + chromium）
 ```
+
+筆記引用 **SVG**：七張合計 60 KB，換成 PNG 是 516 KB，而且 SVG 在任何解析度都銳利。
 
 細節與色票規則見 [`diagrams/README.md`](../diagrams/README.md)。
 

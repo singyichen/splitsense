@@ -63,7 +63,16 @@ uv run ruff check src/ scripts/ tests/
 - **首次產圖前要先設定 style guide**（`references/style-guide.md`）。預設色票是 paper `#f5f5f5`、ink `#2d3142`、accent `#bf4520`，不要就這樣出圖——SplitSense 目前的視覺基準是 `trendlink-design` 的 navy `#1b4f9c` ＋ 金 `#ed9b26`，`.notecraft/components/` 的六個元件都照這套，**兩者擇一、不要混用**。
 - 只有 `scripts/export_png.py` 需要 `playwright`（會啟動 chromium）；HTML 與 SVG 只用 Python 標準庫。沒裝就改用瀏覽器開 HTML 截圖。
 - `npm run skill:init` 不會動到這個目錄（它只覆寫 `content-visualize`、`content-present`、`trendlink-design`）。
-- 分工：簡報與文件內的**互動**元件用 `content-visualize`（輸出到 `.notecraft/components/`）；**靜態**流程圖與要放進投影片的圖用 `diagram-design`。
+- 分工**以用途切，不以位置切**：
+
+| 用途 | 工具 |
+| --- | --- |
+| 要讓讀者操作才懂的概念（拖動、逐步揭露、分頁對照） | `content-visualize` → `.notecraft/components/*.tsx` |
+| 投影片用圖 | `diagram-design` → `diagrams/*.html` |
+| 參考圖（架構、相依、流程，看一眼就走） | `diagram-design` |
+
+- 筆記引用 **SVG 不是 PNG**（7 KB 對 90 KB，且任何解析度都銳利）。PNG 只在要放進簡報軟體時才產。
+- 圖的排版慣例（CJK 字型排第一、用 class 不用逐個屬性、白底卡片、2 倍 viewBox）見 `diagrams/README.md`。
 
 ## 已定案的研究決策
 

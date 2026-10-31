@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>模型看得到什麼、看不到什麼</title>
-  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@400;600&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
@@ -12,9 +12,9 @@
       --color-ink:     #262e3d;
       --color-muted:   #4f5b6e;
       --color-accent:  #a04f15;
-      --font-sans:     'Geist', 'Noto Sans TC', system-ui, sans-serif;
-      --font-serif:    'Instrument Serif', 'Noto Sans TC', serif;
-      --font-mono:     'Geist Mono', ui-monospace, monospace;
+      --font-sans:     'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', sans-serif;
+      --font-serif:    'Noto Serif TC', serif;
+      --font-mono:     ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
     }
     body {
       font-family: var(--font-sans); background: var(--color-paper); color: var(--color-ink);
@@ -26,7 +26,7 @@
       letter-spacing: 0.18em; text-transform: uppercase; color: var(--color-muted); margin-bottom: 0.5rem; }
     h1 { font-family: var(--font-serif); font-size: clamp(1.5rem, 2.4vw + 0.75rem, 2rem);
       font-weight: 400; letter-spacing: -0.02em; line-height: 1.15; color: var(--color-ink); margin-bottom: 1.5rem; }
-    svg { width: 100%; min-width: 1000px; display: block; }
+    svg { width: 100%; height: auto; max-width: 1000px; display: block; }
     @media print { .diagram-container { overflow-x: visible; } svg { min-width: 0; } }
   </style>
 </head>
@@ -36,48 +36,66 @@
     <h1>模型看得到什麼、看不到什麼</h1>
 
     <div class="diagram-container">
-      <svg viewBox="0 0 1000 540" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="annotation-reveal-setup-title annotation-reveal-setup-desc">
+      <svg viewBox="0 0 1000 540" width="2000" height="1080" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="annotation-reveal-setup-title annotation-reveal-setup-desc">
         <title id="annotation-reveal-setup-title">模型看得到什麼、看不到什麼</title>
         <desc id="annotation-reveal-setup-desc">示意圖：一則留言發給三位標註者，前兩位都標 neutral、第三位標 positive。模型只看得到前兩份，第三份藏起來只用來計算答案。</desc>
-        <rect width="100%" height="100%" fill="#f6f8fb"/>
+        <style>
+          text { font-family: 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', sans-serif; }
+          .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+          .h    { font-size: 12px; font-weight: 700; }
+          .h2   { font-size: 11px; font-weight: 700; }
+          .q    { font-size: 11px; }
+          .n9   { font-size: 9px; }
+          .lg   { font-size: 8px; }
+          .sub  { font-size: 9px; }
+          .val  { font-size: 8px; }
+          .chip { font-size: 7px; }
+          .ink   { fill: #262e3d; }
+          .muted { fill: #4f5b6e; }
+          .navy  { fill: #1b4f9c; }
+          .acc   { fill: #a04f15; }
+          .inv   { fill: #ffffff; }
+          .pale  { fill: #d6e4f5; }
+        </style>
+        <rect x="0.5" y="0.5" width="999" height="539" rx="10" fill="#ffffff" stroke="#e1e6ee"/>
         <defs>
           <marker id="a1" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
             <polygon points="0 0, 8 3, 0 6" fill="#6c798e"/>
           </marker>
         </defs>
         <rect x="360" y="32" width="280" height="48" rx="6" fill="#ffffff" stroke="#262e3d" stroke-width="1"/>
-        <text x="500" y="52" fill="#262e3d" font-size="12" font-weight="600" font-family="'Geist', 'Noto Sans TC', sans-serif" text-anchor="middle">一則 Reddit 留言</text>
-        <text x="500" y="68" fill="#4f5b6e" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">發給 3 個人標情緒</text>
+        <text x="500" y="52" text-anchor="middle" class="h ink">一則 Reddit 留言</text>
+        <text x="500" y="68" text-anchor="middle" class="sub mono muted">發給 3 個人標情緒</text>
         <path d="M500 80 V104" stroke="#6c798e" stroke-width="1.2" fill="none"/>
         <path d="M240 104 H760" stroke="#6c798e" stroke-width="1.2" fill="none"/>
         <path d="M240 104 V124" stroke="#6c798e" stroke-width="1.2" fill="none"/>
         <path d="M440 104 V124" stroke="#6c798e" stroke-width="1.2" fill="none"/>
         <path d="M760 104 V124" stroke="#6c798e" stroke-width="1.2" fill="none"/>
         <circle cx="240" cy="156" r="28" fill="rgba(27,79,156,0.10)" stroke="#1b4f9c" stroke-width="1.5"/>
-        <text x="240" y="161" fill="#262e3d" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">A</text>
-        <text x="240" y="204" fill="#262e3d" font-size="11" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">neutral</text>
+        <text x="240" y="161" text-anchor="middle" class="h ink">A</text>
+        <text x="240" y="204" text-anchor="middle" class="h2 ink">neutral</text>
         <circle cx="440" cy="156" r="28" fill="rgba(27,79,156,0.10)" stroke="#1b4f9c" stroke-width="1.5"/>
-        <text x="440" y="161" fill="#262e3d" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">B</text>
-        <text x="440" y="204" fill="#262e3d" font-size="11" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">neutral</text>
+        <text x="440" y="161" text-anchor="middle" class="h ink">B</text>
+        <text x="440" y="204" text-anchor="middle" class="h2 ink">neutral</text>
         <circle cx="760" cy="156" r="28" fill="#ffffff" stroke="#c7641a" stroke-width="1.5" stroke-dasharray="5,4"/>
-        <text x="760" y="161" fill="#262e3d" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">C</text>
-        <text x="760" y="204" fill="#a04f15" font-size="11" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">positive</text>
+        <text x="760" y="161" text-anchor="middle" class="h ink">C</text>
+        <text x="760" y="204" text-anchor="middle" class="h2 acc">positive</text>
         <path d="M212 232 V244 H468 V232" fill="none" stroke="#1b4f9c" stroke-width="1.5"/>
-        <text x="340" y="268" fill="#1b4f9c" font-size="11" font-weight="600" font-family="'Geist', 'Noto Sans TC', sans-serif" text-anchor="middle">模型看得到這兩份</text>
+        <text x="340" y="268" text-anchor="middle" class="h2 navy">模型看得到這兩份</text>
         <path d="M760 232 V256" stroke="#c7641a" stroke-width="1.5" stroke-dasharray="5,4" fill="none"/>
-        <text x="760" y="268" fill="#a04f15" font-size="11" font-weight="600" font-family="'Geist', 'Noto Sans TC', sans-serif" text-anchor="middle">藏起來</text>
-        <text x="760" y="284" fill="#4f5b6e" font-size="9" font-family="'Geist', 'Noto Sans TC', sans-serif" text-anchor="middle">只用來算答案</text>
+        <text x="760" y="268" text-anchor="middle" class="h2 acc">藏起來</text>
+        <text x="760" y="284" text-anchor="middle" class="n9 muted">只用來算答案</text>
         <path d="M340 276 V312" stroke="#6c798e" stroke-width="1.2" fill="none" marker-end="url(#a1)"/>
         <path d="M760 292 V312" stroke="#6c798e" stroke-width="1.2" fill="none" marker-end="url(#a1)"/>
         <rect x="200" y="320" width="280" height="72" rx="6" fill="#1b4f9c"/>
-        <text x="340" y="352" fill="#ffffff" font-size="12" font-weight="600" font-family="'Geist', 'Noto Sans TC', sans-serif" text-anchor="middle">預測：這題會不會分歧？</text>
-        <text x="340" y="372" fill="#d6e4f5" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">輸出機率 → 排複核順序</text>
+        <text x="340" y="352" text-anchor="middle" class="h inv">預測：這題會不會分歧？</text>
+        <text x="340" y="372" text-anchor="middle" class="sub mono pale">輸出機率 → 排複核順序</text>
         <rect x="620" y="320" width="280" height="72" rx="6" fill="rgba(237,155,38,0.12)" stroke="#c7641a" stroke-width="1"/>
-        <text x="760" y="352" fill="#262e3d" font-size="12" font-weight="600" font-family="'Geist', 'Noto Sans TC', sans-serif" text-anchor="middle">真實答案：有分歧</text>
-        <text x="760" y="372" fill="#a04f15" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">neutral · neutral · positive</text>
+        <text x="760" y="352" text-anchor="middle" class="h ink">真實答案：有分歧</text>
+        <text x="760" y="372" text-anchor="middle" class="sub mono acc">neutral · neutral · positive</text>
         <rect x="80" y="420" width="840" height="56" rx="6" fill="#ffffff" stroke="rgba(38,46,61,0.12)" stroke-width="1"/>
-        <text x="104" y="444" fill="#262e3d" font-size="12" font-weight="600" font-family="'Geist', 'Noto Sans TC', sans-serif">前兩人一致，但第三人不同——這種題用「看前兩人吵不吵」的規則會判成安全。</text>
-        <text x="104" y="464" fill="#4f5b6e" font-size="11" font-family="'Geist', 'Noto Sans TC', sans-serif">佔全部題目的 66.5%，其中 24.4% 最後其實有分歧。這批就是本專案要抓的對象。</text>
+        <text x="104" y="444" class="h ink">前兩人一致，但第三人不同——這種題用「看前兩人吵不吵」的規則會判成安全。</text>
+        <text x="104" y="464" class="q muted">佔全部題目的 66.5%，其中 24.4% 最後其實有分歧。這批就是本專案要抓的對象。</text>
       </svg>
     </div>
   </div>
