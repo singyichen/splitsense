@@ -6,7 +6,7 @@ createdAt: "2026-10-13"
 updatedAt: "2026-10-31"
 Project Name: SplitSense
 文件類型: Research Specification
-文件版本: v0.3.0
+文件版本: v0.4.0
 文件狀態: 草稿
 文件作者: 陳欣怡
 建立日期: 2026-10-13
@@ -25,7 +25,7 @@ Project Name: SplitSense
 | --- | --- |
 | 專案名稱 | SplitSense |
 | 文件類型 | Research Specification |
-| 文件版本 | v0.3.0 |
+| 文件版本 | v0.4.0 |
 | 文件狀態 | 草稿 |
 | 文件作者 | 陳欣怡 |
 | 建立日期 | 2026-10-13 |
@@ -64,8 +64,8 @@ Project Name: SplitSense
 | 4 | 範圍 | :badge[已定案]{variant="success"} | — |
 | 5 | 問題形式化 | :badge[已定案]{variant="success"} | — |
 | 6 | 資料協議 | :badge[已定案]{variant="success"} | 繁中 pilot 題目來源待論文階段（Q7） |
-| 7 | 方法與實驗矩陣 | :badge[部分待定]{variant="warning"} | 樹模型二選一未定（Q3）；TF-IDF 設定未定（Q4） |
-| 8 | 評估方法 | :badge[已定案]{variant="success"} | — |
+| 7 | 方法與實驗矩陣 | :badge[部分待定]{variant="warning"} | 樹模型二選一未定（Q3） |
+| 8 | 評估方法 | :badge[部分待定]{variant="warning"} | 主要指標在 full 範圍已飽和，評估範圍待拍板（Q11） |
 | 9 | 外部依賴與授權 | :badge[已定案]{variant="success"} | — |
 | 10 | 時程與停損 | :badge[已定案]{variant="success"} | 發表週次依學號排定，尚未公布（Q8） |
 | 11 | 技術選型 | :badge[已定案]{variant="success"} | — |
@@ -383,6 +383,8 @@ GNN 另有兩條（論文延伸）：test item 的 hidden edges 不得進圖；�
 | 自動洩漏檢查測試 | `tests/test_leakage.py`（6.4 第 1、2、7 條與 split 不變量） | :badge[部分完成]{variant="warning"} 第 3–5 條待論文延伸實作時啟用 |
 | 重現性測試 | `tests/test_reproducibility.py` | :badge[已完成]{variant="success"} |
 | 樣本統計與 EDA | `scripts/run_eda.py` → `artifacts/eda/` | :badge[已完成]{variant="success"} |
+| TF-IDF 與可見標註特徵 | `src/splitsense/features.py` | :badge[已完成]{variant="success"} |
+| 階梯 0、1 基準 | `scripts/run_baselines.py` → `artifacts/baselines/` | :badge[已完成]{variant="success"} |
 | 繁中標註規範與資料字典 | — | :badge[論文延伸]{variant="neutral"} |
 
 Split 的實際結果（`SPLIT_SEED = 20261031`）：
@@ -411,11 +413,13 @@ Split 的實際結果（`SPLIT_SEED = 20261031`）：
 
 階梯 3 的二選一尚未決定（Q3）。
 
+TF-IDF 不移除 stopwords 的理由：文字中位數只有 60 字元，否定詞、程度詞與模糊詞本身就是分歧訊號（見 8.6 的錯誤類型），移除等於丟掉要預測的東西。
+
 ### 7.2 特徵
 
 | 類別 | 內容 | 版本 |
 | --- | --- | --- |
-| 文字特徵 | TF-IDF（設定未定，見 Q4） | 課堂版主線 |
+| 文字特徵 | TF-IDF：`ngram_range=(1,2)`、`min_df=2`、`max_features=50000`、`sublinear_tf=True`、不移除 stopwords（Q4 已定案） | 課堂版主線 |
 | 可見標註特徵 | 前 2 份標註是否一致、可見標籤 entropy、標了什麼 | 課堂版 |
 | 文字表面與 metadata | 字元數與 token 數、問號、否定詞、模糊詞與程度詞數量、是否多句或含引號條件句、`subreddit` | 論文延伸 Baseline 2 |
 | Annotator 歷史 | 歷史標註數、各類別標註比例、與同組其他 annotator 的歷史分歧率、與 training majority label 的一致率、覆蓋 domain 數、歷史不足指示值 | 論文延伸 Baseline 3，**只從 training items 計算** |
@@ -598,6 +602,25 @@ b\in\{0.05,0.10,0.20\}
 
 **所有主要指標與門檻必須在看測試結果前固定。**
 
+### 8.2.1 評估範圍：full 與 hard
+
+:badge[待拍板]{variant="danger"} 見 Q11。
+
+2026-10-31 跑完兩個基準後發現：**`Recall@10%` 在整個 test split 上已經飽和，無法區分模型。**
+
+可見的 2 份標註不一致時，該 item 必然分歧（這是定義，不是模型能力）。test split 有 1,588 個這種 item，佔 33.5%；而預算 10% 的名額只有 `K=474`。確定陽性的數量遠超過名額，所以**任何把它們排在前面的方法都會得到 `P@10%` = 100%**，`Recall@10%` 也固定等於理論上限 `K/|P|` = 20.1%。可見標籤 entropy 規則就已經做到這個數字，標準差 0.0。
+
+要讓 full 範圍開始有區分力，預算必須大於 **33.5%**——遠高於研究規格原本設定的 `b ∈ {0.05, 0.10, 0.20}`。
+
+因此改為兩個範圍分開報告：
+
+| 範圍 | 定義 | 回答什麼 | test item 數 | 分歧盛行率 |
+| --- | --- | --- | ---: | ---: |
+| **full** | 整個 test split | 固定預算下實務上能涵蓋多少分歧 | 4,741 | 49.82% |
+| **hard** | 可見 2 份一致的子集 | 模型能不能找出前兩人暫時一致、但其實有爭議的題目 | 3,153 | 24.67% |
+
+hard 範圍才是 2.2 真正要解的問題。關鍵事實：**可見 entropy 在 hard 子集上恆為 0**（兩份可見標籤相同，比例分布必為 `(1,0,0,0)`），所以那條規則在這個子集上完全沒有排序資訊，退化成隨機。這正是文字特徵有機會贏的地方，也讓「ML 是否勝過規則」變成可檢驗的問題。
+
 ### 8.3 報告方式
 
 - 課堂版：5 個 reveal seeds，報平均 ± 標準差。
@@ -612,12 +635,35 @@ b\in\{0.05,0.10,0.20\}
 
 ### 8.4 結果表格式
 
-| 模型 | PR-AUC | P@5% | R@5% | P@10% | R@10% | Lift@10% |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| Random | | | | | | |
-| Visible entropy | | | | | | |
-| Logistic Regression | | | | | | |
-| Random Forest / Gradient Boosting | | | | | | |
+以 `uv run python scripts/run_baselines.py` 產生。單位 %，平均 ± 標準差。
+
+**範圍 full**（test item 4,741、盛行率 49.82%、`K=474`、`R@10%` 上限 20.1%）：
+
+| 模型 | runs | PR-AUC | P@5% | R@5% | P@10% | R@10% | Lift@10% |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| Random | 150 | 50.0 ± 0.7 | 49.7 ± 3.0 | 5.0 ± 0.3 | 50.0 ± 2.3 | 10.0 ± 0.5 | 100.3 ± 4.6 |
+| Visible entropy | 5 | 83.4 ± 0.3 | **100.0 ± 0.0** | 10.0 ± 0.0 | **100.0 ± 0.0** | **20.1 ± 0.0** | 200.7 ± 0.0 |
+| Logistic Regression | | | | | | | |
+| Random Forest / Gradient Boosting | | | | | | | |
+
+**範圍 hard**（test item 3,153、盛行率 24.67%、`K=315`、`R@10%` 上限 40.5%）：
+
+| 模型 | runs | PR-AUC | P@5% | R@5% | P@10% | R@10% | Lift@10% |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| Random | 150 | 24.9 ± 0.8 | 25.0 ± 3.2 | 5.1 ± 0.6 | 25.0 ± 2.1 | 10.1 ± 0.9 | 101.5 ± 8.6 |
+| Visible entropy | 5 | 24.7 ± 0.3 | 26.9 ± 2.6 | 5.4 ± 0.5 | 26.1 ± 1.4 | 10.6 ± 0.6 | 105.9 ± 6.0 |
+| Logistic Regression | | | | | | | |
+| Random Forest / Gradient Boosting | | | | | | | |
+
+判讀：
+
+- **H1（entropy 勝過隨機）在 full 範圍成立且幅度極大**：`R@10%` 20.1% 對 10.0%，`Lift@10%` 2.01 對 1.00。但這個勝幅全部來自「可見已不一致者必然分歧」這個定義，不是學到的訊號。
+- **entropy 在 hard 範圍等於隨機**：PR-AUC 24.7 對 24.9，兩者都約等於盛行率 24.67%，`Lift@10%` 約 1.0。entropy 在這個子集恆為常數，所以 5 個 reveal seed 的那一列實際上就是 5 次隨機抽樣，26.9 ± 2.6 與 25.0 ± 3.2 的差距落在雜訊內，不是優勢。
+- 因此 **hard 範圍的地板線是隨機（約 10%）**，H2 要在這條線上比。
+
+`Random` 的 runs 是 5 個 reveal seed × 30 個排序 seed。雖然隨機分數與 reveal 無關，但 hard 子集的成員由 reveal 決定，所以兩個基準必須跑在同一批 reveal seed 上，否則不在同一份資料上。
+
+同分一律隨機打散。可見 entropy 只有兩個離散值（0 與 0.5），若依資料順序排，分數會變成資料載入順序的函數——那是評估上的假訊號。
 
 完成條件是至少一個可訓練模型完整跑通，且重跑可以得到相同 split 與評估結果。
 
@@ -706,7 +752,7 @@ TID-8 的 Dataset Card 授權欄標示 `unknown`，其論文也沒有授權聲�
 | 日期 | 工作 | 狀態 |
 | --- | --- | --- |
 | 10/19–10/25 | 下載 TID-8、EDA、選定子資料集、確認授權 | :badge[已完成]{variant="success"} 定案 GoEmotions；EDA 已補成可重跑腳本（Q10） |
-| 10/26–11/01 | Item split、reveal 2 份標註、TF-IDF；完成隨機與 entropy 兩個基準 | :badge[進行中]{variant="warning"} split 與 reveal manifest 已完成；TF-IDF 與兩個基準未開始 |
+| 10/26–11/01 | Item split、reveal 2 份標註、TF-IDF；完成隨機與 entropy 兩個基準 | :badge[已完成]{variant="success"} |
 | 11/02–11/15 | Logistic Regression、Random Forest 或 Gradient Boosting，加上超參數調整 | :badge[未開始]{variant="neutral"} |
 | 11/16–11/22 | BGE-M3 + PCA 比較（選做，來不及整週刪除） | :badge[未開始]{variant="neutral"} |
 | 11/23–11/29 | 5 個 seeds 評估、錯誤分析 | :badge[未開始]{variant="neutral"} |
@@ -804,9 +850,9 @@ visible_annotation_count
 
 | 目錄 | 內容 |
 | --- | --- |
-| `src/splitsense/` | `config.py`（路徑與全域常數）、`data.py`、`eda.py`、`split.py`、`reveal.py` |
-| `scripts/` | `run_eda.py`、`build_dataset.py` |
-| `tests/` | `test_leakage.py`、`test_reproducibility.py` |
+| `src/splitsense/` | `config.py`（路徑與全域常數）、`data.py`、`eda.py`、`split.py`、`reveal.py`、`features.py`、`metrics.py`、`baselines.py` |
+| `scripts/` | `run_eda.py`、`build_dataset.py`、`run_baselines.py` |
+| `tests/` | `test_leakage.py`、`test_reproducibility.py`、`test_metrics.py`、`test_features.py`、`test_baselines.py` |
 | `data/` | 原始 parquet，`.gitignore` |
 | `artifacts/` | `eda/`、`manifests/`，`.gitignore` |
 
@@ -816,6 +862,7 @@ visible_annotation_count
 uv sync --extra dev                        # 建環境
 uv run python scripts/run_eda.py           # 重現 Dataset Card 第 3 節
 uv run python scripts/build_dataset.py     # 產生 split 與 reveal manifest
+uv run python scripts/run_baselines.py     # 階梯 0 與 1 的結果表
 uv run pytest                              # 洩漏檢查與重現性
 uv run ruff check src/ scripts/ tests/
 ```
@@ -859,6 +906,13 @@ uv run ruff check src/ scripts/ tests/
 完整清單在 [90-open-questions.mdx](./90-open-questions.mdx)，全文的 `Qn` 一律指該文件的編號；已決議者留在原位改狀態，編號不重排、不回收。
 
 ## 14. Change Log
+
+### [0.4.0] - 2026-10-31
+
+- **Added**: 第 8.2.1 節。跑完兩個基準後發現 `Recall@10%` 在整個 test split 上已飽和——1,588 個可見不一致的 item（33.5%）必然分歧，遠超過預算 10% 的 `K=474`，所以 `P@10%` 必為 100%、`R@10%` 固定等於上限 20.1%。改為 full 與 hard 兩個範圍分開報告，**評估範圍的最終決定待拍板（Q11）**。
+- **Added**: 第 8.4 節填入階梯 0 與 1 的實測結果，含判讀。關鍵事實：可見 entropy 在 hard 子集恆為 0，在那個子集上退化成隨機，所以 hard 範圍的地板線是隨機約 10%。
+- **Added**: 第 7.2 節填入 TF-IDF 定案參數（Q4）：`ngram_range=(1,2)`、`min_df=2`、`max_features=50000`、`sublinear_tf=True`、不移除 stopwords。**理由**：文字中位數只有 60 字元，否定詞與程度詞本身是分歧訊號。
+- **Note**: 同分一律隨機打散。可見 entropy 只有兩個離散值，若依資料順序排，分數會變成資料載入順序的函數。
 
 ### [0.3.0] - 2026-10-31
 

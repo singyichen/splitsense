@@ -12,8 +12,9 @@
 
 ## 現況（2026-10-31）
 
-- 研究規格已填完（v0.3.0），資料協議完成：split 與 reveal manifest 可重現，洩漏檢查與重現性測試通過。
-- 下一步是 TF-IDF 特徵與隨機／entropy 兩個基準（課堂版時程 `10/26–11/01` 那格的剩餘部分）。
+- 研究規格 v0.4.0。課堂版時程 `10/26–11/01` 完成：資料協議、TF-IDF 特徵、階梯 0 與 1 基準都跑通，43 個測試通過。
+- 下一步是階梯 2（Logistic Regression）與階梯 3（樹模型）加 `GridSearchCV` + `GroupKFold` 調參。
+- **評估範圍有一題待拍板（Q11）**：`Recall@10%` 在整個 test split 上已飽和（33.5% 的 item 可見已不一致、必然分歧，遠超過 K=474），entropy 規則就拿到 `P@10%` = 100%。真正可檢驗的範圍是「可見 2 份一致」的 hard 子集，entropy 在那裡恆為 0、退化成隨機。兩個範圍都要報，以哪個為主待定。
 - 工具鏈已定案：**uv + `src/splitsense/` 佈局 + `pyproject.toml`**，Python `>=3.12`（本機釘 3.13），版本鎖在 `uv.lock`。所有實驗參數集中在 `src/splitsense/config.py`。
 
 ```bash
@@ -74,3 +75,5 @@ uv run ruff check src/ scripts/ tests/
 - Commit 訊息用繁體中文 Conventional Commits。
 - **`docs/` 的數學式一律用 fenced ` ```math ` 區塊，不要用 `$$`。** notecraftapp 1.13.0 沒有 `remark-math` / `rehype-katex`，`$$` 區塊裡的 `{` 會被當成 JSX expression——行首的 `{\log ...}` 直接讓 build 失敗，而剛好是合法 JS 的 `{C}` 會被靜默吞掉。改完 `docs/` 一律跑 `npm run docs:build` 確認。
 - 洩漏檢查（研究規格 6.4）的七條每條都要有測試。這類錯誤出錯時結果看起來更漂亮、而且不會報錯，整篇結論會直接失效卻不被發現。
+- 排序分數同分一律隨機打散（`metrics.rank_with_random_tiebreak`）。可見 entropy 這類規則只有少數離散值，依資料順序排會讓分數變成資料載入順序的函數。
+- 比較兩個方法時確認它們跑在**同一批 reveal seed** 上。hard 子集的成員由 reveal 決定，少了這點兩列就不在同一份資料上。
