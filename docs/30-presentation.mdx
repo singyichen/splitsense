@@ -48,13 +48,37 @@ updatedAt: "2026-10-31"
 
 ### 投影片用的靜態圖
 
-互動元件是給你檢視調整用的；上台那份要靜態圖。已完成的第一張：
+七張，依講稿順序排列。原始檔在 `diagrams/`，用 `diagram-design` skill 產生；改圖與重新匯出的指令見 [`diagrams/README.md`](../diagrams/README.md)。
 
-![複核分流流程圖：標註進來後先判斷前兩人意見是否一致，不一致的直接送複核、不需要模型，一致的交給模型排序取前 10%](./assets/review-routing-flow.png)
+**第 1 段 · 問題描述**
 
-原始檔在 [`diagrams/review-routing-flow.html`](../diagrams/review-routing-flow.html)，用 `diagram-design` skill 產生，改圖與重新匯出的指令見 `diagrams/README.md`。
+![示意圖：一則留言發給三位標註者，前兩位都標 neutral、第三位標 positive。模型只看得到前兩份，第三份藏起來只用來計算答案](./assets/annotation-reveal-setup.png)
 
-這張對應第 5 段的 `review-routing-flow` 互動元件——**簡報放這張靜態圖，文件保留互動版**供你操作。
+**第 3 段 · 資料前處理**
+
+![長條圖：每題標註數 1 到 5 份對應的分歧率分別是 0.0%、30.7%、49.7%、88.1%、85.5%，本專案只取恰好 3 份那一組](./assets/annotation-count-leakage.png)
+
+**第 5 段 · 指標為什麼飽和**
+
+![比例圖：測試集 4,741 題中 1,588 題可見已不一致、必然分歧，10% 預算的 474 個名額完全落在這一塊](./assets/metric-saturation.png)
+
+**第 5 段 · 為什麼難題組才是正確範圍**
+
+![流程圖：標註進來後先判斷前兩人意見是否一致，不一致的直接送複核、不需要模型，一致的交給模型排序取前 10%](./assets/review-routing-flow.png)
+
+**第 5 段 · 主結果**
+
+![長條圖：難題組上五個方法的 Recall@10%，隨機 9.5、可見 entropy 9.9、同意標籤查表 18.5、Logistic Regression 19.4、Gradient Boosting 19.4，理論上限 40.5%](./assets/baseline-results.png)
+
+**第 5 段 · 配對證據**
+
+![斜線圖：五個 reveal seed 上查表與 Logistic Regression 的對照，五條線全部向上但幅度都很小](./assets/baseline-paired.png)
+
+**第 5 段 · 錯誤分析的機制**
+
+![分組長條圖：依前兩人同意的標籤分四組，模型送複核的比例只有 neutral 組是 36.5%，其餘三組皆為零](./assets/neutral-only-flagging.png)
+
+這七張對應上表的六個互動元件（`baseline-results` 拆成主結果與配對證據兩張）。**簡報放這些靜態圖，文件保留互動版**供你操作。
 
 **上台用的那份要輸出成靜態圖。** 投影時沒人會去點，而且互動元件會卡。這六個是給你檢視與調整用的；製作投影片時各截一張圖，每張只保留一個訊息、字放大、顏色只分「重點／其他」兩層。
 

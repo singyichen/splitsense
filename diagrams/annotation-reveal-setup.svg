@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 1000 540" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="annotation-reveal-setup-title annotation-reveal-setup-desc" id="annotation-reveal-setup-root">
+        <title id="annotation-reveal-setup-title">模型看得到什麼、看不到什麼</title>
+        <desc id="annotation-reveal-setup-desc">示意圖：一則留言發給三位標註者，前兩位都標 neutral、第三位標 positive。模型只看得到前兩份，第三份藏起來只用來計算答案。</desc>
+        <rect width="100%" height="100%" fill="#f6f8fb"/>
+        <defs>
+      <style>@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&amp;family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400;500;600&amp;family=Noto+Serif:ital@0;1&amp;family=Noto+Sans+KR:wght@400;500;600&amp;family=Noto+Serif+KR:wght@400&amp;family=Noto+Sans+TC:wght@400;500;600&amp;family=Noto+Serif+TC:wght@400&amp;display=swap');
+      #annotation-reveal-setup-root { --color-paper:   #f6f8fb;
+      --color-ink:     #262e3d;
+      --color-muted:   #4f5b6e;
+      --color-accent:  #a04f15;
+      --font-sans:     'Geist', 'Noto Sans TC', system-ui, sans-serif;
+      --font-serif:    'Instrument Serif', 'Noto Sans TC', serif;
+      --font-mono:     'Geist Mono', ui-monospace, monospace; }
+      #annotation-reveal-setup-root { font-family: var(--font-sans); color: var(--color-ink); }
+      #annotation-reveal-setup-root .diagram-container { width: 100%; overflow-x: auto; }
+      @media print {
+#annotation-reveal-setup-root .diagram-container { overflow-x: visible; }
+}</style>
+          <marker id="annotation-reveal-setup-a1" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+            <polygon points="0 0, 8 3, 0 6" fill="#6c798e"/>
+          </marker>
+        </defs>
+        <rect x="360" y="32" width="280" height="48" rx="6" fill="#ffffff" stroke="#262e3d" stroke-width="1"/>
+        <text x="500" y="52" fill="#262e3d" font-size="12" font-weight="600" font-family="'Geist', 'Noto Sans TC', sans-serif" text-anchor="middle">一則 Reddit 留言</text>
+        <text x="500" y="68" fill="#4f5b6e" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">發給 3 個人標情緒</text>
+        <path d="M500 80 V104" stroke="#6c798e" stroke-width="1.2" fill="none"/>
+        <path d="M240 104 H760" stroke="#6c798e" stroke-width="1.2" fill="none"/>
+        <path d="M240 104 V124" stroke="#6c798e" stroke-width="1.2" fill="none"/>
+        <path d="M440 104 V124" stroke="#6c798e" stroke-width="1.2" fill="none"/>
+        <path d="M760 104 V124" stroke="#6c798e" stroke-width="1.2" fill="none"/>
+        <circle cx="240" cy="156" r="28" fill="#1b4f9c" stroke="#1b4f9c" stroke-width="1.5" fill-opacity="0.10"/>
+        <text x="240" y="161" fill="#262e3d" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">A</text>
+        <text x="240" y="204" fill="#262e3d" font-size="11" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">neutral</text>
+        <circle cx="440" cy="156" r="28" fill="#1b4f9c" stroke="#1b4f9c" stroke-width="1.5" fill-opacity="0.10"/>
+        <text x="440" y="161" fill="#262e3d" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">B</text>
+        <text x="440" y="204" fill="#262e3d" font-size="11" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">neutral</text>
+        <circle cx="760" cy="156" r="28" fill="#ffffff" stroke="#c7641a" stroke-width="1.5" stroke-dasharray="5,4"/>
+        <text x="760" y="161" fill="#262e3d" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">C</text>
+        <text x="760" y="204" fill="#a04f15" font-size="11" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">positive</text>
+        <path d="M212 232 V244 H468 V232" fill="none" stroke="#1b4f9c" stroke-width="1.5"/>
+        <text x="340" y="268" fill="#1b4f9c" font-size="11" font-weight="600" font-family="'Geist', 'Noto Sans TC', sans-serif" text-anchor="middle">模型看得到這兩份</text>
+        <path d="M760 232 V256" stroke="#c7641a" stroke-width="1.5" stroke-dasharray="5,4" fill="none"/>
+        <text x="760" y="268" fill="#a04f15" font-size="11" font-weight="600" font-family="'Geist', 'Noto Sans TC', sans-serif" text-anchor="middle">藏起來</text>
+        <text x="760" y="284" fill="#4f5b6e" font-size="9" font-family="'Geist', 'Noto Sans TC', sans-serif" text-anchor="middle">只用來算答案</text>
+        <path d="M340 276 V312" stroke="#6c798e" stroke-width="1.2" fill="none" marker-end="url(#annotation-reveal-setup-a1)"/>
+        <path d="M760 292 V312" stroke="#6c798e" stroke-width="1.2" fill="none" marker-end="url(#annotation-reveal-setup-a1)"/>
+        <rect x="200" y="320" width="280" height="72" rx="6" fill="#1b4f9c"/>
+        <text x="340" y="352" fill="#ffffff" font-size="12" font-weight="600" font-family="'Geist', 'Noto Sans TC', sans-serif" text-anchor="middle">預測：這題會不會分歧？</text>
+        <text x="340" y="372" fill="#d6e4f5" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">輸出機率 → 排複核順序</text>
+        <rect x="620" y="320" width="280" height="72" rx="6" fill="#ed9b26" stroke="#c7641a" stroke-width="1" fill-opacity="0.12"/>
+        <text x="760" y="352" fill="#262e3d" font-size="12" font-weight="600" font-family="'Geist', 'Noto Sans TC', sans-serif" text-anchor="middle">真實答案：有分歧</text>
+        <text x="760" y="372" fill="#a04f15" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">neutral · neutral · positive</text>
+        <rect x="80" y="420" width="840" height="56" rx="6" fill="#ffffff" stroke="#262e3d" stroke-width="1" stroke-opacity="0.12"/>
+        <text x="104" y="444" fill="#262e3d" font-size="12" font-weight="600" font-family="'Geist', 'Noto Sans TC', sans-serif">前兩人一致，但第三人不同——這種題用「看前兩人吵不吵」的規則會判成安全。</text>
+        <text x="104" y="464" fill="#4f5b6e" font-size="11" font-family="'Geist', 'Noto Sans TC', sans-serif">佔全部題目的 66.5%，其中 24.4% 最後其實有分歧。這批就是本專案要抓的對象。</text>
+      </svg>

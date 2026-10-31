@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>標註數本身就洩漏答案</title>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --color-paper:   #f6f8fb;
+      --color-ink:     #262e3d;
+      --color-muted:   #4f5b6e;
+      --color-accent:  #a04f15;
+      --font-sans:     'Geist', 'Noto Sans TC', system-ui, sans-serif;
+      --font-serif:    'Instrument Serif', 'Noto Sans TC', serif;
+      --font-mono:     'Geist Mono', ui-monospace, monospace;
+    }
+    body {
+      font-family: var(--font-sans); background: var(--color-paper); color: var(--color-ink);
+      min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 3rem 2rem;
+    }
+    .frame { max-width: 1200px; width: 100%; min-width: 0; }
+    .diagram-container { width: 100%; overflow-x: auto; }
+    .eyebrow { font-family: var(--font-mono); font-size: 0.66rem; font-weight: 500;
+      letter-spacing: 0.18em; text-transform: uppercase; color: var(--color-muted); margin-bottom: 0.5rem; }
+    h1 { font-family: var(--font-serif); font-size: clamp(1.5rem, 2.4vw + 0.75rem, 2rem);
+      font-weight: 400; letter-spacing: -0.02em; line-height: 1.15; color: var(--color-ink); margin-bottom: 1.5rem; }
+    svg { width: 100%; min-width: 1000px; display: block; }
+    @media print { .diagram-container { overflow-x: visible; } svg { min-width: 0; } }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <p class="eyebrow">Bar chart · SplitSense</p>
+    <h1>標註數本身就洩漏答案</h1>
+
+    <div class="diagram-container">
+      <svg viewBox="0 0 1000 540" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="annotation-count-leakage-title annotation-count-leakage-desc">
+        <title id="annotation-count-leakage-title">標註數本身就洩漏答案</title>
+        <desc id="annotation-count-leakage-desc">長條圖：每題標註數 1 到 5 份對應的分歧率分別是 0.0%、30.7%、49.7%、88.1%、85.5%。本專案只取恰好 3 份的那一組，讓分母固定。</desc>
+        <rect width="100%" height="100%" fill="#f6f8fb"/>
+        <line x1="80" y1="420" x2="960" y2="420" stroke="rgba(38,46,61,0.25)" stroke-width="1"/>
+        <text x="72" y="423" fill="#4f5b6e" font-size="8" font-family="'Geist Mono', monospace" text-anchor="end">0%</text>
+        <line x1="80" y1="325" x2="960" y2="325" stroke="rgba(38,46,61,0.08)" stroke-width="0.8"/>
+        <text x="72" y="328" fill="#4f5b6e" font-size="8" font-family="'Geist Mono', monospace" text-anchor="end">25%</text>
+        <line x1="80" y1="230" x2="960" y2="230" stroke="rgba(38,46,61,0.08)" stroke-width="0.8"/>
+        <text x="72" y="233" fill="#4f5b6e" font-size="8" font-family="'Geist Mono', monospace" text-anchor="end">50%</text>
+        <line x1="80" y1="135" x2="960" y2="135" stroke="rgba(38,46,61,0.08)" stroke-width="0.8"/>
+        <text x="72" y="138" fill="#4f5b6e" font-size="8" font-family="'Geist Mono', monospace" text-anchor="end">75%</text>
+        <line x1="80" y1="40" x2="960" y2="40" stroke="rgba(38,46,61,0.08)" stroke-width="0.8"/>
+        <text x="72" y="43" fill="#4f5b6e" font-size="8" font-family="'Geist Mono', monospace" text-anchor="end">100%</text>
+        <line x1="80" y1="40" x2="80" y2="420" stroke="rgba(38,46,61,0.25)" stroke-width="1"/>
+        <text x="168" y="412" fill="#4f5b6e" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">0.0%</text>
+        <text x="168" y="444" fill="#262e3d" font-size="11" font-weight="600" font-family="'Geist', 'Noto Sans TC', sans-serif" text-anchor="middle">1 份</text>
+        <text x="168" y="460" fill="#4f5b6e" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">1,877</text>
+        <rect x="288" y="303" width="112" height="117" fill="#f6f8fb"/>
+        <rect x="288" y="303" width="112" height="117" fill="rgba(79,91,110,0.15)" stroke="#6c798e" stroke-width="1"/>
+        <text x="344" y="295" fill="#4f5b6e" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">30.7%</text>
+        <text x="344" y="444" fill="#262e3d" font-size="11" font-weight="600" font-family="'Geist', 'Noto Sans TC', sans-serif" text-anchor="middle">2 份</text>
+        <text x="344" y="460" fill="#4f5b6e" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">6,103</text>
+        <rect x="464" y="231" width="112" height="189" fill="#f6f8fb"/>
+        <rect x="464" y="231" width="112" height="189" fill="rgba(237,155,38,0.12)" stroke="#c7641a" stroke-width="1"/>
+        <text x="520" y="223" fill="#a04f15" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">49.7%</text>
+        <text x="520" y="444" fill="#262e3d" font-size="11" font-weight="600" font-family="'Geist', 'Noto Sans TC', sans-serif" text-anchor="middle">3 份</text>
+        <text x="520" y="460" fill="#4f5b6e" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">31,766</text>
+        <rect x="640" y="85" width="112" height="335" fill="#f6f8fb"/>
+        <rect x="640" y="85" width="112" height="335" fill="rgba(79,91,110,0.15)" stroke="#6c798e" stroke-width="1"/>
+        <text x="696" y="77" fill="#4f5b6e" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">88.1%</text>
+        <text x="696" y="444" fill="#262e3d" font-size="11" font-weight="600" font-family="'Geist', 'Noto Sans TC', sans-serif" text-anchor="middle">4 份</text>
+        <text x="696" y="460" fill="#4f5b6e" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">5,533</text>
+        <rect x="816" y="95" width="112" height="325" fill="#f6f8fb"/>
+        <rect x="816" y="95" width="112" height="325" fill="rgba(79,91,110,0.15)" stroke="#6c798e" stroke-width="1"/>
+        <text x="872" y="87" fill="#4f5b6e" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">85.5%</text>
+        <text x="872" y="444" fill="#262e3d" font-size="11" font-weight="600" font-family="'Geist', 'Noto Sans TC', sans-serif" text-anchor="middle">5 份</text>
+        <text x="872" y="460" fill="#4f5b6e" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">12,424</text>
+        <line x1="32" y1="488" x2="968" y2="488" stroke="rgba(38,46,61,0.12)" stroke-width="0.8"/>
+        <text x="32" y="512" fill="#4f5b6e" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.14em">LEGEND</text>
+        <rect x="128" y="502" width="16" height="10" rx="2" fill="rgba(237,155,38,0.12)" stroke="#c7641a" stroke-width="1"/>
+        <text x="152" y="512" fill="#4f5b6e" font-size="8" font-family="'Geist', 'Noto Sans TC', sans-serif">本專案只用這一組</text>
+        <rect x="312" y="502" width="16" height="10" rx="2" fill="rgba(79,91,110,0.15)" stroke="#6c798e" stroke-width="1"/>
+        <text x="336" y="512" fill="#4f5b6e" font-size="8" font-family="'Geist', 'Noto Sans TC', sans-serif">排除</text>
+        <text x="968" y="512" fill="#4f5b6e" font-size="8" font-family="'Geist Mono', monospace" text-anchor="end">y 軸：該組 item 的分歧率</text>
+      </svg>
+    </div>
+  </div>
+</body>
+</html>

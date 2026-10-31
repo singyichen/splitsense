@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>模型在操作點上只做一件事</title>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --color-paper:   #f6f8fb;
+      --color-ink:     #262e3d;
+      --color-muted:   #4f5b6e;
+      --color-accent:  #a04f15;
+      --font-sans:     'Geist', 'Noto Sans TC', system-ui, sans-serif;
+      --font-serif:    'Instrument Serif', 'Noto Sans TC', serif;
+      --font-mono:     'Geist Mono', ui-monospace, monospace;
+    }
+    body {
+      font-family: var(--font-sans); background: var(--color-paper); color: var(--color-ink);
+      min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 3rem 2rem;
+    }
+    .frame { max-width: 1200px; width: 100%; min-width: 0; }
+    .diagram-container { width: 100%; overflow-x: auto; }
+    .eyebrow { font-family: var(--font-mono); font-size: 0.66rem; font-weight: 500;
+      letter-spacing: 0.18em; text-transform: uppercase; color: var(--color-muted); margin-bottom: 0.5rem; }
+    h1 { font-family: var(--font-serif); font-size: clamp(1.5rem, 2.4vw + 0.75rem, 2rem);
+      font-weight: 400; letter-spacing: -0.02em; line-height: 1.15; color: var(--color-ink); margin-bottom: 1.5rem; }
+    svg { width: 100%; min-width: 1000px; display: block; }
+    @media print { .diagram-container { overflow-x: visible; } svg { min-width: 0; } }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <p class="eyebrow">Grouped bar · SplitSense</p>
+    <h1>模型在操作點上只做一件事</h1>
+
+    <div class="diagram-container">
+      <svg viewBox="0 0 1000 540" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="neutral-only-flagging-title neutral-only-flagging-desc">
+        <title id="neutral-only-flagging-title">模型在操作點上只做一件事</title>
+        <desc id="neutral-only-flagging-desc">分組長條圖：依前兩人同意的標籤分成四組。真實分歧率分別是 46.5%、29.3%、20.8%、12.3%，而模型送複核的比例只有 neutral 組是 36.5%，其餘三組皆為零。</desc>
+        <rect width="100%" height="100%" fill="#f6f8fb"/>
+        <line x1="80" y1="420" x2="960" y2="420" stroke="rgba(38,46,61,0.25)" stroke-width="1"/>
+        <text x="72" y="423" fill="#4f5b6e" font-size="8" font-family="'Geist Mono', monospace" text-anchor="end">0%</text>
+        <line x1="80" y1="344" x2="960" y2="344" stroke="rgba(38,46,61,0.08)" stroke-width="0.8"/>
+        <text x="72" y="347" fill="#4f5b6e" font-size="8" font-family="'Geist Mono', monospace" text-anchor="end">10%</text>
+        <line x1="80" y1="268" x2="960" y2="268" stroke="rgba(38,46,61,0.08)" stroke-width="0.8"/>
+        <text x="72" y="271" fill="#4f5b6e" font-size="8" font-family="'Geist Mono', monospace" text-anchor="end">20%</text>
+        <line x1="80" y1="192" x2="960" y2="192" stroke="rgba(38,46,61,0.08)" stroke-width="0.8"/>
+        <text x="72" y="195" fill="#4f5b6e" font-size="8" font-family="'Geist Mono', monospace" text-anchor="end">30%</text>
+        <line x1="80" y1="116" x2="960" y2="116" stroke="rgba(38,46,61,0.08)" stroke-width="0.8"/>
+        <text x="72" y="119" fill="#4f5b6e" font-size="8" font-family="'Geist Mono', monospace" text-anchor="end">40%</text>
+        <line x1="80" y1="40" x2="960" y2="40" stroke="rgba(38,46,61,0.08)" stroke-width="0.8"/>
+        <text x="72" y="43" fill="#4f5b6e" font-size="8" font-family="'Geist Mono', monospace" text-anchor="end">50%</text>
+        <line x1="80" y1="40" x2="80" y2="420" stroke="rgba(38,46,61,0.25)" stroke-width="1"/>
+        <rect x="110" y="67" width="72" height="353" fill="#f6f8fb"/>
+        <rect x="110" y="67" width="72" height="353" fill="rgba(79,91,110,0.15)" stroke="#6c798e" stroke-width="1"/>
+        <text x="146" y="59" fill="#4f5b6e" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">46.5</text>
+        <rect x="198" y="143" width="72" height="277" fill="#f6f8fb"/>
+        <rect x="198" y="143" width="72" height="277" fill="rgba(27,79,156,0.12)" stroke="#1b4f9c" stroke-width="1"/>
+        <text x="234" y="135" fill="#1b4f9c" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">36.5</text>
+        <text x="190" y="444" fill="#262e3d" font-size="11" font-weight="600" font-family="'Geist', 'Noto Sans TC', sans-serif" text-anchor="middle">neutral</text>
+        <text x="190" y="460" fill="#1b4f9c" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">送出精確率 48.1%</text>
+        <rect x="330" y="197" width="72" height="223" fill="#f6f8fb"/>
+        <rect x="330" y="197" width="72" height="223" fill="rgba(79,91,110,0.15)" stroke="#6c798e" stroke-width="1"/>
+        <text x="366" y="189" fill="#4f5b6e" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">29.3</text>
+        <text x="454" y="412" fill="#1b4f9c" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">0</text>
+        <text x="410" y="444" fill="#262e3d" font-size="11" font-weight="600" font-family="'Geist', 'Noto Sans TC', sans-serif" text-anchor="middle">ambiguous</text>
+        <rect x="550" y="262" width="72" height="158" fill="#f6f8fb"/>
+        <rect x="550" y="262" width="72" height="158" fill="rgba(79,91,110,0.15)" stroke="#6c798e" stroke-width="1"/>
+        <text x="586" y="254" fill="#4f5b6e" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">20.8</text>
+        <text x="674" y="412" fill="#1b4f9c" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">0</text>
+        <text x="630" y="444" fill="#262e3d" font-size="11" font-weight="600" font-family="'Geist', 'Noto Sans TC', sans-serif" text-anchor="middle">negative</text>
+        <rect x="770" y="327" width="72" height="93" fill="#f6f8fb"/>
+        <rect x="770" y="327" width="72" height="93" fill="rgba(79,91,110,0.15)" stroke="#6c798e" stroke-width="1"/>
+        <text x="806" y="319" fill="#4f5b6e" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">12.3</text>
+        <text x="894" y="412" fill="#1b4f9c" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">0</text>
+        <text x="850" y="444" fill="#262e3d" font-size="11" font-weight="600" font-family="'Geist', 'Noto Sans TC', sans-serif" text-anchor="middle">positive</text>
+        <line x1="32" y1="488" x2="968" y2="488" stroke="rgba(38,46,61,0.12)" stroke-width="0.8"/>
+        <text x="32" y="512" fill="#4f5b6e" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.14em">LEGEND</text>
+        <rect x="128" y="502" width="16" height="10" rx="2" fill="rgba(79,91,110,0.15)" stroke="#6c798e" stroke-width="1"/>
+        <text x="152" y="512" fill="#4f5b6e" font-size="8" font-family="'Geist', 'Noto Sans TC', sans-serif">該組真實分歧率</text>
+        <rect x="312" y="502" width="16" height="10" rx="2" fill="rgba(27,79,156,0.12)" stroke="#1b4f9c" stroke-width="1"/>
+        <text x="336" y="512" fill="#4f5b6e" font-size="8" font-family="'Geist', 'Noto Sans TC', sans-serif">模型送複核的比例</text>
+        <text x="968" y="512" fill="#4f5b6e" font-size="8" font-family="'Geist Mono', monospace" text-anchor="end">x 軸：前兩人同意的標籤</text>
+      </svg>
+    </div>
+  </div>
+</body>
+</html>
