@@ -6,7 +6,7 @@ createdAt: "2026-10-13"
 updatedAt: "2026-10-31"
 Project Name: SplitSense
 文件類型: Research Specification
-文件版本: v0.8.0
+文件版本: v0.9.0
 文件狀態: 草稿
 文件作者: 陳欣怡
 建立日期: 2026-10-13
@@ -25,7 +25,7 @@ Project Name: SplitSense
 | --- | --- |
 | 專案名稱 | SplitSense |
 | 文件類型 | Research Specification |
-| 文件版本 | v0.8.0 |
+| 文件版本 | v0.9.0 |
 | 文件狀態 | 草稿 |
 | 文件作者 | 陳欣怡 |
 | 建立日期 | 2026-10-13 |
@@ -43,6 +43,7 @@ Project Name: SplitSense
 | `docs/10-dataset-card-goemotions.mdx` | 定案資料集的來源、授權、統計與已知限制 |
 | `docs/20-progress.mdx` | **進度的單一真相**：做了沒、缺什麼 |
 | `docs/30-presentation.mdx` | 期末簡報內容。衍生品，數字來自本文件 |
+| `docs/40-tech-stack.mdx` | **技術棧實況**：裝了什麼、版本、指令、程式與測試盤點 |
 | `docs/90-open-questions.mdx` | 待釐清事項的單一清單（`Qn` 編號，不重排、不回收） |
 
 本文件管「要做什麼」，不管「做了沒」。各章一律不帶狀態欄——唯一的例外是 1.4，那追的是本文件自己的章節完成度。
@@ -985,36 +986,18 @@ visible_annotation_count
 | 項目 | 選擇 | 理由 |
 | --- | --- | --- |
 | 文字特徵 | TF-IDF（scikit-learn） | 課堂版主線，不依賴 GPU 與外部模型 |
-| 分類器 | scikit-learn `LogisticRegression`、`RandomForestClassifier` 或 `GradientBoostingClassifier` | 對應規範的「模型比較」 |
+| 分類器 | scikit-learn `LogisticRegression` 與 `HistGradientBoostingClassifier`（Q3） | 對應規範的「模型比較」；樹模型吃不下 31,451 維稀疏矩陣，先以 `TruncatedSVD(200)` 降維 |
 | 調參 | `GridSearchCV` + `GroupKFold`（group 為 `item_id`） | 避免同 item 跨折洩漏 |
 | Embedding | `BAAI/bge-m3` 本機推論 | 開源、多語、可本機跑，英文與繁中共用同一管線 |
 | 圖模型框架 | PyTorch Geometric [`HeteroData`](https://pytorch-geometric.readthedocs.io/en/latest/notes/heterogeneous.html) | 可分別保存不同 node 與 edge type，支援異質 GraphSAGE |
 
-### 11.2 工具鏈與目錄佈局
+### 11.2 工具鏈
 
-2026-10-31 定案（Q1）：**uv + `src/splitsense/` 套件佈局 + `pyproject.toml`**，Python `>=3.12`（本機釘 3.13），版本鎖在 `uv.lock`。
+2026-10-31 定案（Q1）：**uv + `src/splitsense/` 套件佈局 + `pyproject.toml`**，Python `>=3.12`，版本鎖在 `uv.lock`。
 
-| 目錄 | 內容 |
-| --- | --- |
-| `src/splitsense/` | `config.py`（路徑與全域常數）、`data.py`、`eda.py`、`split.py`、`reveal.py`、`features.py`、`metrics.py`、`baselines.py`、`models.py` |
-| `scripts/` | `run_eda.py`、`build_dataset.py`、`run_baselines.py`、`run_models.py` |
-| `tests/` | `test_leakage.py`、`test_reproducibility.py`、`test_metrics.py`、`test_features.py`、`test_baselines.py`、`test_models.py` |
-| `data/` | 原始 parquet，`.gitignore` |
-| `artifacts/` | `eda/`、`manifests/`，`.gitignore` |
+**理由**：第 8.4 節的重現性宣稱（固定 seed 重跑得到相同 split 與評估結果）需要鎖版本；6.4 的洩漏檢查七條要寫成 pytest，notebook 擺不下。所有實驗參數集中在 `config.py`，不散落在各腳本。
 
-常用指令：
-
-```text
-uv sync --extra dev                        # 建環境
-uv run python scripts/run_eda.py           # 重現 Dataset Card 第 3 節
-uv run python scripts/build_dataset.py     # 產生 split 與 reveal manifest
-uv run python scripts/run_baselines.py     # 階梯 0 與 1 的結果表
-uv run python scripts/run_models.py        # 階梯 2 與 3，含調參
-uv run pytest                              # 洩漏檢查與重現性
-uv run ruff check src/ scripts/ tests/
-```
-
-所有實驗參數集中在 `config.py`，不散落在各腳本，讓 split 與 reveal 可以重現。
+實際安裝的版本、目錄佈局、常用指令、程式與測試盤點，見 [`40-tech-stack.mdx`](./40-tech-stack.mdx)。本章只管「為什麼選」。
 
 ### 11.3 OpenSpec
 
@@ -1053,6 +1036,12 @@ uv run ruff check src/ scripts/ tests/
 完整清單在 [90-open-questions.mdx](./90-open-questions.mdx)，全文的 `Qn` 一律指該文件的編號；已決議者留在原位改狀態，編號不重排、不回收。
 
 ## 14. Change Log
+
+### [0.9.0] - 2026-10-31
+
+- **Added**: 拆出 `docs/40-tech-stack.mdx` 記錄技術棧實況（精確版本、目錄佈局、常用指令、程式與測試盤點、視覺化工具鏈、刻意沒用的技術）。
+- **Changed**: 第 11.2 節移除目錄佈局表與指令清單，改為指向 `40-tech-stack.mdx`，本章只留決策與理由。**理由**：原本同一章裝了「為什麼選」與「實際裝了什麼」兩件事，後者會隨程式變動而過時——盤點時就發現它漏了 `error_analysis.py`、`run_error_analysis.py` 與 `test_error_analysis.py`。
+- **Fixed**: 第 11.1 節的分類器敘述仍寫「`RandomForestClassifier` 或 `GradientBoostingClassifier`」，與 Q3 定案不符，已改為 `HistGradientBoostingClassifier` 並補上 `TruncatedSVD(200)` 降維。
 
 ### [0.8.0] - 2026-10-31
 

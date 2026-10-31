@@ -1,0 +1,166 @@
+---
+title: "技術棧"
+description: "實際安裝的工具與版本、目錄佈局、常用指令、程式與測試盤點、視覺化工具鏈"
+tags: ["技術棧", "工具鏈", "版本"]
+createdAt: "2026-10-31"
+updatedAt: "2026-10-31"
+---
+
+# 技術棧
+
+> 以 repo 實況為準，**2026-10-31** 盤點。
+
+本文件管**實際裝了什麼**；為什麼選它管在別處。
+
+| 問題 | 看哪裡 |
+| --- | --- |
+| 裝了什麼、版本多少、指令怎麼下 | **本文件** |
+| 為什麼選這個工具 | [研究規格 11](./00-research-spec.mdx) |
+| 模型階梯、特徵、指標的定義 | [研究規格 7、8](./00-research-spec.mdx) |
+| 資料集來源與授權 | [Dataset Card](./10-dataset-card-goemotions.mdx) |
+| 做了沒 | [進度追蹤](./20-progress.mdx) |
+
+## 1. Python 工具鏈
+
+Python **3.13.0**（`pyproject.toml` 要求 `>=3.12`），套件管理 **uv 0.12.18**，版本鎖在 `uv.lock`。
+
+| 套件 | 版本 | 用在哪 |
+| --- | --- | --- |
+| `numpy` | 2.5.4 | 全部 |
+| `pandas` | 3.1.0 | 資料處理、manifest |
+| `pyarrow` | 26.0.0 | 讀上游 parquet、寫 manifest |
+| `scikit-learn` | 1.9.1 | 特徵、模型、調參、指標 |
+| `scipy` | 1.18.1 | 稀疏矩陣串接 |
+| `matplotlib` | 3.11.2 | EDA 直方圖 |
+| `certifi` | 2026.10.23 | 下載憑證 |
+| `pytest` | 9.2.0 | 測試（dev） |
+| `ruff` | 0.17.3 | lint（dev） |
+| `playwright` | 1.64.1 | 圖表匯出 PNG（選配） |
+
+兩個相依值得說明：
+
+- **`certifi` 是被迫加的。** macOS 的 python.org 版 Python 不讀系統鑰匙串，`urllib` 預設下載會 `CERTIFICATE_VERIFY_FAILED`。`data.download_raw()` 明確指定 `ssl.create_default_context(cafile=certifi.where())`。
+- **`playwright` 只有 PNG 匯出用得到**（會啟動 chromium）。沒裝不影響任何實驗，也不影響 HTML 與 SVG 出圖。
+
+## 2. 目錄佈局
+
+| 目錄 | 內容 | 進版控 |
+| --- | --- | --- |
+| `src/splitsense/` | 套件本體，11 個模組 | 是 |
+| `scripts/` | 5 支可執行腳本 | 是 |
+| `tests/` | 7 個測試檔 ＋ `conftest.py` | 是 |
+| `diagrams/` | 圖表原始檔（`.html`／`.svg`） | 是 |
+| `docs/assets/` | 筆記引用的 PNG | 是 |
+| `.notecraft/components/` | 互動元件 `.tsx` | 是 |
+| `data/` | 上游 parquet | **否** |
+| `artifacts/` | `eda/`、`manifests/`、`baselines/`、`models/`、`error_analysis/` | **否** |
+
+所有實驗參數集中在 `src/splitsense/config.py`，不散落在各腳本——split 與 reveal 要能重現就靠這一點。
+
+## 3. 常用指令
+
+```text
+uv sync --extra dev                             # 建環境
+uv run python scripts/run_eda.py                # 重現 Dataset Card 第 3 節
+uv run python scripts/build_dataset.py          # split 與 reveal manifest
+uv run python scripts/run_baselines.py          # 階梯 0、1
+uv run python scripts/run_models.py             # 階梯 2、3，含調參
+uv run python scripts/run_error_analysis.py     # 混淆矩陣與錯誤分析
+uv run pytest                                   # 70 passed、2 skipped
+uv run ruff check src/ scripts/ tests/
+```
+
+從零（刪掉 `data/` 與 `artifacts/`）可完整跑通，所有 seed 固定。
+
+## 4. 程式盤點
+
+2,531 行。
+
+| 模組 | 負責 |
+| --- | --- |
+| `config.py` | 路徑與全域常數（split 比例與 seed、reveal 設定、預算、指標） |
+| `data.py` | 下載、正規化 schema、丟棄 `author`、篩恰好 3 份、文字去重 |
+| `eda.py` | Dataset Card 第 3 節的全部統計 |
+| `split.py` | item-level 70/15/15，以 `z` 分層 |
+| `reveal.py` | `r=2` 的 reveal manifest |
+| `features.py` | TF-IDF ＋ 可見標註特徵 |
+| `metrics.py` | 排序指標、門檻、混淆矩陣、配對比較 |
+| `baselines.py` | 階梯 0、1、1.5 |
+| `models.py` | 階梯 2、3，疊加 reveal seed 與調參 |
+| `error_analysis.py` | 文字訊號、同意標籤剖面、邊界組合、抽樣 |
+
+### scikit-learn 實際用到的 API
+
+```text
+TfidfVectorizer · LogisticRegression · HistGradientBoostingClassifier
+TruncatedSVD · Pipeline · GridSearchCV · GroupKFold
+train_test_split · average_precision_score · make_scorer
+```
+
+`Recall@10%` 不是內建指標，是自寫函式包成 `make_scorer(response_method="predict_proba")`，讓 `GridSearchCV` 直接拿主要指標調參，而不是用 accuracy 之類的代理。
+
+## 5. 測試盤點
+
+70 passed、2 skipped。兩個 skip 是刻意的（annotator 歷史與 GraphSAGE 的洩漏檢查，標了原因，論文延伸實作時才啟用）。
+
+| 檔案 | 守什麼 |
+| --- | --- |
+| `test_leakage.py` | 研究規格 6.4 的洩漏七條、split 不變量、`author` 已丟棄 |
+| `test_reproducibility.py` | 同 seed 重跑一致、比例與盛行率符合設定 |
+| `test_metrics.py` | 指標手算對照、同分隨機打散、Recall 理論上限 |
+| `test_features.py` | **改隱藏標註後特徵必須完全不變**、TF-IDF 只在 training 上 fit |
+| `test_models.py` | `GroupKFold` 不讓同一 item 跨折、疊加 seed 後同 item 出現多次 |
+| `test_baselines.py` | entropy 在難題組恆為常數、低預算指標已飽和 |
+| `test_error_analysis.py` | 混淆矩陣、比率在相加後才算、邊界組合用同一群體當基準 |
+
+## 6. 文件與視覺化
+
+| 工具 | 版本 | 用途 |
+| --- | --- | --- |
+| Node | ≥ 22 | notecraftapp 的執行環境 |
+| `notecraftapp` | ^1.13.0 | MDX 文件檢視，固定 port 4326 |
+| `content-visualize` skill | — | 由 `@ai-visualize` 標記產生互動元件 |
+| React | 18.3.1 | 互動元件本體，掛 `client:idle` |
+| `recharts` | 2.15.4 | 三個圖表元件 |
+| `lucide-react` | 0.469.0 | icon（skill 禁用 emoji） |
+| `diagram-design` skill | v2.6.136 | 七張投影片用靜態圖，vendored 進 repo（MIT） |
+| `trendlink-design` skill | — | 色票來源 |
+
+### 互動元件怎麼畫的
+
+| 元件 | 方式 |
+| --- | --- |
+| `annotation-count-leakage`、`baseline-results`、`neutral-only-flagging` | recharts |
+| `annotation-reveal-setup`、`metric-saturation`、`review-routing-flow` | 手寫 SVG |
+
+### 靜態圖的產生鏈
+
+```text
+diagrams/<name>.html          原始檔，改圖改這個
+  → self_check.py             驗證無障礙 SVG 契約（標準庫）
+  → export_svg.py             → diagrams/<name>.svg（標準庫）
+  → export_png.py             → docs/assets/<name>.png（playwright + chromium）
+```
+
+細節與色票規則見 [`diagrams/README.md`](../diagrams/README.md)。
+
+> **notecraftapp 沒有 `remark-math` 與 `rehype-katex`。** `docs/` 的數學式一律用 fenced ` ```math ` 區塊，不要用 `$$`——`$$` 裡的大括號會被當成 JSX expression，行首的會讓 build 失敗，剛好是合法 JS 的會被靜默吞掉。
+
+## 7. 流程與治理
+
+| 項目 | 內容 |
+| --- | --- |
+| 版控 | Git，繁體中文 Conventional Commits |
+| 規格 | 五層文件分工（研究決策／Dataset Card／進度／簡報／待釐清），每項決策只有一份真相 |
+| OpenSpec | 課堂版期間暫停（Q6），`openspec/config.yaml` 已註明 |
+| 資料治理 | `data/`、`artifacts/` 不進版控；`author` 載入後立刻丟棄；commit 前掃原始文字 |
+
+## 8. 刻意沒有用的技術
+
+| 技術 | 為什麼不用 |
+| --- | --- |
+| BERT、大語言模型 | GoEmotions 公開且被大量使用，LLM 預訓練幾乎確定看過這些留言甚至標籤，分數不可檢驗（Q9）。論文階段仍為必做 |
+| `BAAI/bge-m3` Embedding | 課堂版選做，時間投入打磨簡報；論文階段必做 |
+| PyTorch、PyTorch Geometric | GraphSAGE 屬論文延伸選做 |
+| GPU | 整條管線都在 CPU 上跑完，最慢的 Gradient Boosting 調參 102 秒 |
+| Random Forest | Q3 定案改用 `HistGradientBoostingClassifier`——TF-IDF 是 31,451 維稀疏矩陣，RF 的 `max_depth` 格線難調 |
