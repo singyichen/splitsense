@@ -33,6 +33,23 @@ updatedAt: "2026-10-31"
 | 5 模型評估 | 3.0 | **全場重點**：指標飽和、查表逼近、配對比較 |
 | 6 結論 | 1.5 | 建議不要上模型 |
 
+### 視覺化
+
+文件內嵌六個互動元件（`.notecraft/components/`），用 `npm run docs` 開 port 4326 可以操作。它們的順序對應講稿節奏：
+
+| 元件 | 位置 | 要解決的理解障礙 |
+| --- | --- | --- |
+| `annotation-reveal-setup` | 1 問題描述 | 「只看兩份、猜第三份」用講的要 30 秒，而且聽眾會建立錯誤的心智模型 |
+| `annotation-count-leakage` | 3 資料前處理 | 標註數洩漏答案，數字擺在一起才有戲劇性 |
+| `metric-saturation` | 5 模型評估 | 「確定會吵的 1,588 題 > 名額 474」純講很難懂；拖動預算就看得到 |
+| `review-routing-flow` | 5 模型評估 | 為什麼難題組才是正確的評估範圍。也可在 Q&A 重新叫出來 |
+| `baseline-results` | 5 模型評估 | 主結果與配對證據。配對分頁的五條斜線讓「又小又穩」一看就懂 |
+| `neutral-only-flagging` | 5 模型評估 | 為什麼查表能拿到 95% 的機制 |
+
+**上台用的那份要輸出成靜態圖。** 投影時沒人會去點，而且互動元件會卡。這六個是給你檢視與調整用的；製作投影片時各截一張圖，每張只保留一個訊息、字放大、顏色只分「重點／其他」兩層。
+
+刻意沒有做的：四個候選資料集比較（表格就夠）、洩漏檢查七條（不會講到）、混淆矩陣（2×2 做成熱圖沒有比表格清楚）、錯誤分析的文字訊號表（四類 × 七個訊號，做成圖更亂）。模型階梯建議做成版面角落的小進度條當全場骨架，不要獨立一頁。
+
 ### 尚未拍板，影響講法的事項
 
 - **Q11（評估範圍）**：本稿採「兩個範圍都報、以難題組為主」。若改成只報整體，第 5、6 段要整段重寫——那樣三個模型會並列在 20.1%，整個故事會消失。
@@ -79,6 +96,22 @@ updatedAt: "2026-10-31"
 實際數字：隨機抽兩個人的答案來看，**66.5% 的題目前兩人是一致的**，而這些題裡有 **24.4%** 第三個人給了不同答案。只看前兩人一不一致，這四分之一的爭議題全部會漏掉。
 
 **這批「看起來沒事、其實有事」的題目，就是整個專案要解的對象。**
+
+{/* @ai-visualize
+id: annotation-reveal-setup
+type: motion
+prompt: |
+  用互動方式說明本專案的問題設定：一則留言發給 3 位標註者，模型只看得到其中 2 份，第 3 份藏起來只用來算答案。提供兩個案例可切換——「前兩人一致但第三人不同」與「前兩人就已不一致」，並有一個按鈕可以揭露第三份標註，讓讀者親身體驗「看起來沒事、其實有事」這件事。
+caption: 切換案例、按下揭露，體驗模型看得到什麼、看不到什麼
+status: generated
+*/}
+
+import GeneratedFrame from '@/components/GeneratedFrame.astro'
+import AnnotationRevealSetup from '@notes/components/annotation-reveal-setup'
+
+<GeneratedFrame id="annotation-reveal-setup" type="motion" prompt={"用互動方式說明本專案的問題設定：一則留言發給 3 位標註者，模型只看得到其中 2 份，第 3 份藏起來只用來算答案。提供兩個案例可切換——「前兩人一致但第三人不同」與「前兩人就已不一致」，並有一個按鈕可以揭露第三份標註，讓讀者親身體驗「看起來沒事、其實有事」這件事。"} caption="切換案例、按下揭露，體驗模型看得到什麼、看不到什麼">
+  <AnnotationRevealSetup client:idle />
+</GeneratedFrame>
 
 ## 2. 數據收集（1.5 分鐘）
 
@@ -148,6 +181,21 @@ GoEmotions 除了授權乾淨，目標分布也最平衡，所以這個改動不
 4 份和 5 份的分歧率衝到 85% 以上。這不是巧合——**當初就是因為這題不清楚才被加派人手去標**。所以「標註數」這個欄位本身就洩漏答案。固定成 3 份，這條路徑才被切斷。
 
 > 這一頁值得多講 10 秒，它展示的是發現資料陷阱的能力。
+
+{/* @ai-visualize
+id: annotation-count-leakage
+type: chart
+prompt: |
+  長條圖呈現「每題標註數」與「分歧率」的關係：1 份 0.0%、2 份 30.7%、3 份 49.7%、4 份 88.1%、5 份 85.5%。把本專案保留的「3 份」標示為重點色，其餘灰階，凸顯標註數本身就洩漏答案。
+caption: 4 份與 5 份的分歧率衝到 85% 以上——標註數本身就是答案的代理變數
+status: generated
+*/}
+
+import AnnotationCountLeakage from '@notes/components/annotation-count-leakage'
+
+<GeneratedFrame id="annotation-count-leakage" type="chart" prompt={"長條圖呈現「每題標註數」與「分歧率」的關係：1 份 0.0%、2 份 30.7%、3 份 49.7%、4 份 88.1%、5 份 85.5%。把本專案保留的「3 份」標示為重點色，其餘灰階，凸顯標註數本身就洩漏答案。"} caption="4 份與 5 份的分歧率衝到 85% 以上——標註數本身就是答案的代理變數">
+  <AnnotationCountLeakage client:idle />
+</GeneratedFrame>
 
 #### ② 丟掉 `author` 欄位
 
@@ -258,9 +306,39 @@ GoEmotions 除了授權乾淨，目標分布也最平衡，所以這個改動不
 
 要讓整體指標有鑑別力，預算得超過 33.5%，遠高於實務會用的 10%。
 
+{/* @ai-visualize
+id: metric-saturation
+type: motion
+prompt: |
+  用一條比例尺呈現測試集 4,741 題的組成：1,588 題（33.5%）可見已不一致、必然分歧，其餘 3,153 題可見一致、其中 24.7% 有分歧。加上一個可拖動的「複核預算」slider，即時顯示 K、Precision@K 與 Recall@K，讓讀者看到預算低於 33.5% 時 Precision 恆為 100%、指標完全無法區分模型。
+caption: 拖動預算：超過 33.5% 之前，任何方法的 Precision 都是 100%
+status: generated
+*/}
+
+import MetricSaturation from '@notes/components/metric-saturation'
+
+<GeneratedFrame id="metric-saturation" type="motion" prompt={"用一條比例尺呈現測試集 4,741 題的組成：1,588 題（33.5%）可見已不一致、必然分歧，其餘 3,153 題可見一致、其中 24.7% 有分歧。加上一個可拖動的「複核預算」slider，即時顯示 K、Precision@K 與 Recall@K，讓讀者看到預算低於 33.5% 時 Precision 恆為 100%、指標完全無法區分模型。"} caption="拖動預算：超過 33.5% 之前，任何方法的 Precision 都是 100%">
+  <MetricSaturation client:idle />
+</GeneratedFrame>
+
 ### 所以改看「難題組」
 
 **難題組 ＝ 前兩人意見一致的題目**（可見已不一致的不需要模型，直接送複核就好）。
+
+{/* @ai-visualize
+id: review-routing-flow
+type: diagram
+prompt: |
+  逐步揭露的流程圖，說明實際部署時複核工作如何分流：標註進來（4,741 題）→ 判斷前兩人是否一致 → 否（1,588 題、33.5%）直接送複核、不需要模型 →是（3,153 題、66.5%）交給模型排序、取前 10%（315 題）→ 兩條路匯入人工複核佇列。用三個步驟分段點選，讓讀者理解為什麼「難題組」才是正確的評估範圍。
+caption: 逐步點選：為什麼模型只需要處理「看起來一致」的那批
+status: generated
+*/}
+
+import ReviewRoutingFlow from '@notes/components/review-routing-flow'
+
+<GeneratedFrame id="review-routing-flow" type="diagram" prompt={"逐步揭露的流程圖，說明實際部署時複核工作如何分流：標註進來（4,741 題）→ 判斷前兩人是否一致 → 否（1,588 題、33.5%）直接送複核、不需要模型 →是（3,153 題、66.5%）交給模型排序、取前 10%（315 題）→ 兩條路匯入人工複核佇列。用三個步驟分段點選，讓讀者理解為什麼「難題組」才是正確的評估範圍。"} caption="逐步點選：為什麼模型只需要處理「看起來一致」的那批">
+  <ReviewRoutingFlow client:idle />
+</GeneratedFrame>
 
 | 項目 | 整體測試集 | **難題組** |
 | --- | ---: | ---: |
@@ -286,6 +364,21 @@ GoEmotions 除了授權乾淨，目標分布也最平衡，所以這個改動不
 1. **entropy 規則完全無效**（9.9 對隨機的 9.5）。第 1 段的預測成立了——「看前兩人吵不吵」在這批題目上毫無用處。
 2. **機器學習有效**：19.4% 對 9.5%，**翻倍**。只複核 10% 就能抓到兩成的爭議題。
 3. **但那張四列查表拿到 18.5%**，是模型的 **95%**。
+
+{/* @ai-visualize
+id: baseline-results
+type: chart
+prompt: |
+  兩個分頁。分頁一「排序成績」：五個方法的 Recall@10% 長條圖（隨機 9.5、可見 entropy 9.9、同意標籤查表 18.5、Logistic Regression 19.4、Gradient Boosting 19.4），畫上隨機地板線與理論上限 40.5% 的參考線，規則用暖色、模型用主色。分頁二「配對比較」：5 個 reveal seed 的斜線圖，每條線從「同意標籤查表」連到「Logistic Regression」，呈現五條全部向上但幅度都很小，對應配對差 +0.85 ± 0.26、5/5 全勝。
+caption: 切到「配對比較」看逐 seed 的真實差距：又小又穩
+status: generated
+*/}
+
+import BaselineResults from '@notes/components/baseline-results'
+
+<GeneratedFrame id="baseline-results" type="chart" prompt={"兩個分頁。分頁一「排序成績」：五個方法的 Recall@10% 長條圖（隨機 9.5、可見 entropy 9.9、同意標籤查表 18.5、Logistic Regression 19.4、Gradient Boosting 19.4），畫上隨機地板線與理論上限 40.5% 的參考線，規則用暖色、模型用主色。分頁二「配對比較」：5 個 reveal seed 的斜線圖，每條線從「同意標籤查表」連到「Logistic Regression」，呈現五條全部向上但幅度都很小，對應配對差 +0.85 ± 0.26、5/5 全勝。"} caption="切到「配對比較」看逐 seed 的真實差距：又小又穩">
+  <BaselineResults client:idle />
+</GeneratedFrame>
 
 ### 模型真的贏查表嗎？用配對比較
 
@@ -340,6 +433,21 @@ GoEmotions 除了授權乾淨，目標分布也最平衡，所以這個改動不
 **模型送複核的題目，100% 來自「兩人同意 neutral」這一組**，其他三組一題都沒送。而在 neutral 組裡面，送出的精確率 48.1% 只比該組本來的分歧率 46.5% 高 **1.6 個百分點**。
 
 → 這就解釋了為什麼查表能拿到 95%：**模型在這個預算下，行為幾乎等於「挑出同意中立的題目」，文字只是在組內微調。**
+
+{/* @ai-visualize
+id: neutral-only-flagging
+type: chart
+prompt: |
+  分組長條圖，依「前兩人同意的標籤」分成 neutral／ambiguous／negative／positive 四組，每組並列兩根長條：該組真實分歧率（46.5／29.3／20.8／12.3）與模型送複核的比例（36.5／0／0／0）。凸顯模型送複核的題目全部來自 neutral 組，其他三組掛零。
+caption: 模型在 10% 預算下只送 neutral 組；該組內精確率 48.1% 僅比基礎分歧率 46.5% 高 1.6 個百分點
+status: generated
+*/}
+
+import NeutralOnlyFlagging from '@notes/components/neutral-only-flagging'
+
+<GeneratedFrame id="neutral-only-flagging" type="chart" prompt={"分組長條圖，依「前兩人同意的標籤」分成 neutral／ambiguous／negative／positive 四組，每組並列兩根長條：該組真實分歧率（46.5／29.3／20.8／12.3）與模型送複核的比例（36.5／0／0／0）。凸顯模型送複核的題目全部來自 neutral 組，其他三組掛零。"} caption="模型在 10% 預算下只送 neutral 組；該組內精確率 48.1% 僅比基礎分歧率 46.5% 高 1.6 個百分點">
+  <NeutralOnlyFlagging client:idle />
+</GeneratedFrame>
 
 ## 6. 結論（1.5 分鐘）
 
