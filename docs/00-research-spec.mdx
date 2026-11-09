@@ -6,7 +6,7 @@ createdAt: "2026-10-13"
 updatedAt: "2026-11-09"
 Project Name: SplitSense
 文件類型: Research Specification
-文件版本: v0.13.0
+文件版本: v0.14.0
 文件狀態: 草稿
 文件作者: 陳欣怡
 建立日期: 2026-10-13
@@ -15,7 +15,7 @@ Project Name: SplitSense
 
 # SplitSense（歧見預判）
 
-在一筆資料只取得部分標註時，預測完整標註結果是否會出現分歧，讓固定的人工複核預算優先落在較可能分歧的項目上。
+在一筆資料只取得部分標註時，預測完整標註結果是否會出現:ref[標註分歧]{id="term.annotation-disagreement"}，讓固定的人工:ref[複核預算]{id="term.review-budget"}優先落在較可能分歧的項目上。
 
 ## 1. 文件資訊
 
@@ -25,7 +25,7 @@ Project Name: SplitSense
 | --- | --- |
 | 專案名稱 | SplitSense |
 | 文件類型 | Research Specification |
-| 文件版本 | v0.13.0 |
+| 文件版本 | v0.14.0 |
 | 文件狀態 | 草稿 |
 | 文件作者 | 陳欣怡 |
 | 建立日期 | 2026-10-13 |
@@ -98,7 +98,7 @@ Project Name: SplitSense
 
 ### 2.3 與 Label Suite 的關係
 
-本專題是 Label Suite 的技術調研與離線原型。Label Suite 之後要處理「標註進來後哪些該送複核」，需要先知道這件事用機器學習值不值得、以及平台要先記下哪些欄位（見第 8.7 節與第 10.3 節）。
+本專題是 :ref[Label Suite]{id="term.label-suite"} 的技術調研與離線原型。Label Suite 之後要處理「標註進來後哪些該送複核」，需要先知道這件事用機器學習值不值得、以及平台要先記下哪些欄位（見第 8.7 節與第 10.3 節）。
 
 本專題**不**取代標註者、**不**裁定哪一個標籤正確，也**不**把分歧直接等同於標註錯誤，更不開發正式的複核佇列功能。
 
@@ -159,7 +159,7 @@ Project Name: SplitSense
 
 ### 3.4 與既有研究的差異
 
-「不要聚合成單一真值、直接從分歧中學習」已經是成熟方向：SemEval-2023 Task 11（Le-Wi-Di，Learning With Disagreements）以四個保留逐人標註的資料集辦過 shared task，有數十支隊伍的系統論文。GoEmotions 雖不在那四個之中，同樣是 TID-8 與 soft label 文獻反覆使用的資料集。因此「機器學習能不能預測標註分歧」**不能當成本專題的新發現**，必須明確引用並指出差異：
+「不要聚合成單一真值、直接從分歧中學習」已經是成熟方向：SemEval-2023 Task 11（:ref[Le-Wi-Di]{id="term.le-wi-di"}，Learning With Disagreements）以四個保留逐人標註的資料集辦過 shared task，有數十支隊伍的系統論文。GoEmotions 雖不在那四個之中，同樣是 :ref[TID-8]{id="term.tid-8"} 與 :ref[soft label]{id="term.soft-label"} 文獻反覆使用的資料集。因此「機器學習能不能預測標註分歧」**不能當成本專題的新發現**，必須明確引用並指出差異：
 
 | 面向 | Le-Wi-Di 與多數既有文獻 | 本專題 |
 | --- | --- | --- |
@@ -257,7 +257,7 @@ z_i^{(\tau)} = \mathbf{1}(H_i \ge \tau)
 
 > **本專題固定使用 `z_i`，不使用 `z_i^{(\tau)}`。** 定案資料每題恰好 3 份標註、4 個類別，`H_i` 只有少數幾個離散值，門檻版本沒有意義；且「任何分歧」的陽性率 49.7% 落在合理區間，沒有切換的理由。
 
-部分觀測實驗中，只向模型揭露 `r` 份標註，記為 `O_i`；其餘標註 `U_i=A_i\setminus O_i` 全部隱藏。主要設定為 `r=2`。模型輸出風險分數：
+:ref[部分觀測]{id="term.partial-observation"}實驗中，只向模型揭露 `r` 份標註，記為 `O_i`；其餘標註 `U_i=A_i\setminus O_i` 全部隱藏。主要設定為 `r=2`。模型輸出風險分數：
 
 ```math
 s_i
@@ -315,7 +315,7 @@ source_dataset
 
 ### 6.2 Item-level split
 
-以 `item_id` 分組切分：
+以 `item_id` 分組切分（:ref[Item-level split]{id="term.item-level-split"}）：
 
 ```math
 \mathcal{D}
@@ -341,17 +341,17 @@ source_dataset
 
 ### 6.3 部分標註 reveal protocol
 
-對每個 item：
+本專題的 :ref[reveal protocol]{id="term.reveal-protocol"} 對每個 item：
 
 1. 從完整標註中抽出 `r=2` 份成為可見集合 `O_i`。
 2. 其餘標註成為隱藏集合 `U_i`。
 3. **只用 `O_i` 與 training history 建立特徵。**
 4. 用完整 `A_i` 計算 target `z_i`。
-5. 因公開資料沒有可靠時間順序，重複多個 random reveal seeds（課堂版 5 個，論文延伸建議 10 個）。
+5. 因公開資料沒有可靠時間順序，重複多個隨機的 :ref[reveal seed]{id="term.reveal-seed"}（課堂版 5 個，論文延伸建議 10 個）。
 
 ### 6.4 洩漏檢查
 
-以下一律禁止，並需有自動化測試逐條驗證：
+以下的 :ref[target leakage]{id="term.target-leakage"} 一律禁止，並需有自動化測試逐條驗證：
 
 | # | 禁止事項 | 為什麼 |
 | --- | --- | --- |
@@ -376,7 +376,7 @@ GNN 另有兩條（論文延伸）：test item 的 hidden edges 不得進圖；�
 
 ### 6.6 冷啟動測試（論文延伸）
 
-建立兩種測試情境：
+為:ref[冷啟動]{id="term.cold-start"}建立兩種測試情境：
 
 1. **已知 annotator**：測試 annotator 曾在 training items 出現。
 2. **未知 annotator**：測試 annotator 完全不在 training graph。
@@ -431,7 +431,7 @@ BGE-M3 畫在階梯 2 的同一列，不是新的一層：它只把那一層的*
 | 3 | **Gradient Boosting**（`HistGradientBoostingClassifier`，Q3 定案） | 檢查非線性模型有無額外增益 | `learning_rate`、`max_depth` |
 | 4 | ~~零樣本大語言模型~~ | **課堂版不做（Q9）**，論文階段必做。資料污染使分數不可檢驗，改以 Q&A 說明 | — |
 
-階梯 1.5 是 2026-10-31 實測後補上的。原本的階梯只有 entropy 一條規則，但 entropy 在 hard 子集恆為常數、等於隨機（8.4），拿它當「不用機器學習」的對照會高估 ML 的貢獻。真正該比的透明規則是「前兩人**同意了哪個標籤**」——那是一張四列查表，不需訓練、不需文字處理：
+階梯 1.5 是 2026-10-31 實測後補上的。原本的階梯只有 entropy 一條規則，但 entropy 在:ref[難題子集]{id="term.hard-subset"}（hard）恆為常數、等於隨機（8.4），拿它當「不用機器學習」的對照會高估 ML 的貢獻。真正該比的透明規則是「前兩人**同意了哪個標籤**」——那是一張四列查表，不需訓練、不需文字處理：
 
 | 前兩人同意 | Training 分歧率 |
 | --- | ---: |
@@ -649,7 +649,7 @@ b\in\{0.05,0.10,0.20\}
 | 次要 | `Precision@5%`、`Precision@10%`、`Recall@5%`、`Recall@20%`、PR-AUC、`Lift@10%` |
 | 課堂版另報 | 混淆矩陣 |
 
-主要指標固定為 `Recall@10%`，因為它直接回答實務上的問句：「今天只有時間複核 10% 的題目，可以涵蓋多少真正分歧？」
+主要指標固定為 :ref[`Recall@10%`]{id="term.recall-at-k"}，因為它直接回答實務上的問句：「今天只有時間複核 10% 的題目，可以涵蓋多少真正分歧？」
 
 **所有主要指標與門檻必須在看測試結果前固定。**
 
@@ -724,7 +724,7 @@ full 範圍的模型與查表採**部署式排序**（Q12）：可見已不一�
 
 判讀：
 
-- **H1（entropy 勝過隨機）在 full 範圍成立且幅度極大**：`R@10%` 20.1% 對 10.0%，`Lift@10%` 2.01 對 1.00。但這個勝幅全部來自「可見已不一致者必然分歧」這個定義，不是學到的訊號。
+- **H1（entropy 勝過隨機）在 full 範圍成立且幅度極大**：`R@10%` 20.1% 對 10.0%，:ref[`Lift@10%`]{id="term.lift-at-k"} 2.01 對 1.00。但這個勝幅全部來自「可見已不一致者必然分歧」這個定義，不是學到的訊號。
 - **entropy 在 hard 範圍等於隨機**：PR-AUC 24.7 對 24.9，兩者都約等於盛行率 24.67%，`Lift@10%` 約 1.0。entropy 在這個子集恆為常數，所以 5 個 reveal seed 的那一列實際上就是 5 次隨機抽樣，26.9 ± 2.6 與 25.0 ± 3.2 的差距落在雜訊內，不是優勢。
 - 因此 **hard 範圍的地板線是隨機（約 10%）**，H2 要在這條線上比。
 - **H2 成立，但勝的對象要挑對**：對 entropy 規則（9.9%），Logistic Regression 的 19.3% 接近兩倍。然而那個比較高估了 ML 的貢獻，因為 entropy 在 hard 子集等於隨機。對**同意標籤先驗**這張四列查表（18.5%），TF-IDF 的差距只有 0.8 個百分點。
@@ -1142,6 +1142,12 @@ visible_annotation_count
 完整清單在 [90-open-questions.mdx](./90-open-questions.mdx)，全文的 `Qn` 一律指該文件的編號；已決議者留在原位改狀態，編號不重排、不回收。
 
 ## 14. Change Log
+
+### [0.14.0] - 2026-11-09
+
+- **Changed**: 本文件與 Dataset Card 的術語改用 `:ref[名詞]{id="term.xxx"}` 連到 `80-glossary.mdx`，**每個術語只標第一次出現**（本文件 15 處、Dataset Card 2 處）。**理由**：v0.11.0 建了術語表並宣告「各文件用 `:ref` 引用」，但實際上只有 `index.mdx` 用了，15 個定義有 14 個沒有任何文件引用——定義建好卻沒人連過去，術語表等於孤島。只標第一次出現是為了不讓同一個詞在長章節裡反覆變成連結。
+- **Note**: `Recall@10%`、`Lift@10%` 這類本來就用反引號的術語，可以把行內程式碼直接放進 `:ref` 的方括號裡，渲染出來是帶 `<code>` 的連結，不必為了加連結而拿掉程式碼樣式。
+- **Note**: 兩個術語標在「解釋它的那句」而不是字面上的第一次出現——`Recall@10%` 標在 8.2「主要指標固定為…」，不標在 7.5 GraphSAGE 停損條件裡的那次。讀者第一次需要定義的地方才是有用的連結點。
 
 ### [0.13.0] - 2026-11-09
 
