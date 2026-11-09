@@ -1,0 +1,37 @@
+---
+title: "SplitSense 總覽"
+description: "歧見預判：在部分標註下預測標註分歧，協助安排人工複核的優先順序。核心結果與閱讀順序"
+tags: ["總覽", "研究規格"]
+createdAt: "2026-11-09"
+updatedAt: "2026-11-09"
+---
+
+# SplitSense（歧見預判）
+
+機器學習實作課程期末專題。只看到每筆資料的前 2 份標註時，預測哪些 item 的完整標註會出現:ref[標註分歧]{id="term.annotation-disagreement"}，把它們排在前面，讓有限的:ref[複核預算]{id="term.review-budget"}花在最可能出問題的地方。
+
+目標是**排序**，不是判斷哪個標籤正確。課堂版只做英文（GoEmotions，取自 :ref[TID-8]{id="term.tid-8"}）。
+
+## 三個發現
+
+主要指標是 :ref[Recall@10%]{id="term.recall-at-k"}，在:ref[難題子集]{id="term.hard-subset"}（可見 2 份一致）上計算；整個 test split 上這個指標已經飽和，理由見[研究規格 8.2.1](./00-research-spec.mdx)。
+
+1. **可見 entropy 在 hard 子集等於隨機。** 兩份可見標註一致時 entropy 恆為 0，排序全靠同分打散。拿它當「不用 ML」的對照，會高估模型的貢獻。
+2. **一張四列查表拿到模型 95% 的效果。** 只看「前兩人同意了哪個標籤」的先驗是 18.5%，Logistic Regression 是 19.4%。
+3. **文字模型的優勢是真的，但很小。** 配對比較 +0.85 ± 0.26 個百分點，5 個 :ref[reveal seed]{id="term.reveal-seed"} 全勝；Gradient Boosting 沒有比 Logistic Regression 更好。
+
+::include{id="result.hard-ladder"}
+
+## 閱讀順序
+
+| 想知道 | 讀這篇 |
+| --- | --- |
+| 研究問題、假設、資料協議、評估方法與完整結果 | [研究規格](./00-research-spec.mdx) |
+| 資料從哪來、授權、實測統計與限制 | [Dataset Card](./10-dataset-card-goemotions.mdx) |
+| 做到哪裡、還缺什麼 | [進度追蹤](./20-progress.mdx) |
+| 期末要講什麼、Q&A 準備 | [期末簡報](./30-presentation.mdx) |
+| 用了哪些套件、怎麼重現 | [技術棧](./40-tech-stack.mdx) |
+| 名詞定義 | [術語表](./80-glossary.mdx) |
+| 還沒決定的事與決議紀錄 | [待釐清事項](./90-open-questions.mdx) |
+
+本頁不放新內容：結果表從研究規格嵌入，數字改了這裡會跟著變。

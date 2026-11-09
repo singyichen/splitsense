@@ -1,0 +1,83 @@
+---
+title: "術語表"
+description: "SplitSense 研究規格、Dataset Card 與簡報共用的名詞定義"
+tags: ["術語", "研究規格"]
+createdAt: "2026-11-09"
+updatedAt: "2026-11-09"
+---
+
+# 術語表
+
+各文件中的專有名詞都定義在這裡，行文中用 `:ref[名詞]{id="term.xxx"}` 引用。
+
+- `id` 用 `term.<英文 kebab-case>`，全站唯一；改名時只改 label，不改 `id`，引用才不會斷
+- 只寫定義與跟相近名詞的差別，不寫決策理由（在[研究規格](./00-research-spec.mdx)）也不寫實作（在[技術棧](./40-tech-stack.mdx)）
+- 依下列四組分類，新增時接在同組最後
+
+## 問題設定
+
+:::define{id="term.annotation-disagreement" label="標註分歧"}
+<strong>Annotation disagreement（標註分歧）</strong>：同一 item 的多位標註者給出不同標籤。可能源於主觀差異、規範不清或標註錯誤，三者不等同。
+:::
+
+:::define{id="term.partial-observation" label="部分觀測"}
+<strong>部分觀測（partial observation）</strong>：只向模型揭露 `r` 份標註、隱藏其餘的實驗設定。本專題 `r=2`。
+:::
+
+:::define{id="term.hard-subset" label="難題子集"}
+<strong>難題子集</strong>：可見 2 份標註一致、但完整標註出現分歧的 item。定案資料佔全體 66.6% 中的 24.4%。
+:::
+
+:::define{id="term.soft-label" label="Soft label"}
+<strong>Soft label</strong>：保留完整標籤分布而非壓成單一標籤的表示方式。
+:::
+
+## 資料協議
+
+:::define{id="term.reveal-protocol" label="Reveal protocol"}
+<strong>Reveal protocol</strong>：決定哪 `r` 份標註可見的程序。本專題為隨機抽取，重複多個 seeds。
+:::
+
+:::define{id="term.reveal-seed" label="Reveal seed"}
+<strong>Reveal seed</strong>：一次隨機揭露的亂數種子。不同 seed 產生不同的 `O_i`，但 `z_i` 不變。
+:::
+
+:::define{id="term.item-level-split" label="Item-level split"}
+<strong>Item-level split</strong>：以 `item_id` 分組切分資料，同一 item 的所有 annotation 留在同一 split。
+:::
+
+:::define{id="term.target-leakage" label="Target leakage"}
+<strong>Target leakage</strong>：特徵中混入由完整標註推得的資訊，導致測試分數虛高而無法上線。禁止清單見研究規格 6.4。
+:::
+
+:::define{id="term.cold-start" label="冷啟動"}
+<strong>冷啟動（cold start）</strong>：測試 annotator 完全不在 training graph 中的情境。
+:::
+
+## 評估
+
+:::define{id="term.review-budget" label="複核預算"}
+<strong>複核預算（review budget）</strong>：可人工複核的資料比例 `b`，對應排序後的前 `K=⌊bN⌋` 筆。
+:::
+
+:::define{id="term.recall-at-k" label="Recall@K"}
+<strong>`Recall@K`</strong>：排序前 `K` 筆涵蓋了多少真正分歧的 item。本專題主要指標為 `Recall@10%`。
+:::
+
+:::define{id="term.lift-at-k" label="Lift@K"}
+<strong>`Lift@K`</strong>：`Precision@K` 相對於隨機抽查盛行率 `π` 的倍數。
+:::
+
+## 外部名詞
+
+:::define{id="term.le-wi-di" label="Le-Wi-Di"}
+<strong>Le-Wi-Di</strong>：SemEval-2023 Task 11（Learning With Disagreements），本專題最接近的既有研究。
+:::
+
+:::define{id="term.tid-8" label="TID-8"}
+<strong>TID-8</strong>：整合八個具有真實分歧的英文語言理解資料集的集合，保留 annotator 與個別 annotation 的關係。
+:::
+
+:::define{id="term.label-suite" label="Label Suite"}
+<strong>Label Suite</strong>：本專題的下游標註平台，期末專題是它的技術調研與離線原型。
+:::

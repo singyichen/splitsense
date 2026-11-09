@@ -8,11 +8,13 @@
       "accent": "navy",
       "icon": "bookOpen",
       "slugs": [
+        "index",
         "00-research-spec",
         "10-dataset-card-goemotions",
         "20-progress",
         "30-presentation",
         "40-tech-stack",
+        "80-glossary",
         "90-open-questions"
       ]
     }
