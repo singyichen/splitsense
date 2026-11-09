@@ -70,4 +70,4 @@ EMBED_NORMALIZE = True
 # PCA 維度列進 grid，由 CV 選（研究規格 7.3）
 PCA_COMPONENTS = (64, 128, 256)
 # CV 選出的定案值（研究規格 7.2.1）。只當 Pipeline 的預設，grid 會覆寫它
-PCA_COMPONENTS_DEFAULT = 128
+PCA_COMPONENTS_DEFAULT = 64
