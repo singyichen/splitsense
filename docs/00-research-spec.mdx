@@ -6,11 +6,11 @@ createdAt: "2026-10-13"
 updatedAt: "2026-11-09"
 Project Name: SplitSense
 文件類型: Research Specification
-文件版本: v0.10.0
+文件版本: v0.12.0
 文件狀態: 草稿
 文件作者: 陳欣怡
 建立日期: 2026-10-13
-更新日期: 2026-10-31
+更新日期: 2026-11-09
 ---
 
 # SplitSense（歧見預判）
@@ -25,7 +25,7 @@ Project Name: SplitSense
 | --- | --- |
 | 專案名稱 | SplitSense |
 | 文件類型 | Research Specification |
-| 文件版本 | v0.11.0 |
+| 文件版本 | v0.12.0 |
 | 文件狀態 | 草稿 |
 | 文件作者 | 陳欣怡 |
 | 建立日期 | 2026-10-13 |
@@ -415,9 +415,11 @@ Split 的實際結果（`SPLIT_SEED = 20261031`）：
 
 由笨到聰明逐層比較，所有層級使用相同 split、相同可見資訊與相同 `K`：
 
-![模型階梯：五層由笨到聰明，隨機排序 9.5、可見標籤 entropy 9.9、同意標籤查表 18.5、Logistic Regression 19.4、Gradient Boosting 19.4；層與層之間標明前一層答不了的問題](./assets/model-ladder.svg)
+![模型階梯：五層由笨到聰明，隨機排序 9.5、可見標籤 entropy 9.9、同意標籤查表 18.5、Logistic Regression 以 TF-IDF 為 19.4、換成 BGE-M3 為 21.3、Gradient Boosting 19.4；層與層之間標明前一層答不了的問題](./assets/model-ladder.svg)
 
 圖上箭頭寫的是**前一層答不了的問題**，那才是下一層存在的理由。實測數字見 8.4。
+
+BGE-M3 畫在階梯 2 的同一列，不是新的一層：它只把那一層的**文字表示**換掉（TF-IDF → `bge-m3` dense 向量），分類器與可見標註特徵都不變。那一列的兩個數字 19.4 與 21.3 就是這個對照，見 7.2.1 與 8.4。
 
 
 | 階梯 | 方法 | 用途 | 超參數 |
@@ -450,7 +452,27 @@ TF-IDF 不移除 stopwords 的理由：文字中位數只有 60 字元，否定�
 | 可見標註特徵 | 前 2 份標註是否一致、可見標籤 entropy、標了什麼 | 課堂版 |
 | 文字表面與 metadata | 字元數與 token 數、問號、否定詞、模糊詞與程度詞數量、是否多句或含引號條件句、`subreddit` | 論文延伸 Baseline 2 |
 | Annotator 歷史 | 歷史標註數、各類別標註比例、與同組其他 annotator 的歷史分歧率、與 training majority label 的一致率、覆蓋 domain 數、歷史不足指示值 | 論文延伸 Baseline 3，**只從 training items 計算** |
-| Embedding | `BAAI/bge-m3`，1024 維；先以 PCA 降維再接分類器 | 課堂版選做、論文延伸必做 |
+| Embedding | `BAAI/bge-m3`（revision `5617a9f6`），1024 維；PCA 降至 **128** 維後與可見標註特徵串接，再接 Logistic Regression | 課堂版選做**已完成**、論文延伸必做 |
+
+### 7.2.1 Embedding 的定案設定
+
+2026-11-09 跑完後定案。PCA 維度與「PCA 前要不要逐維標準化」都列進 `GridSearchCV` 的格線由 CV 選，不先猜：
+
+| 項目 | 定案 | 怎麼決定的 |
+| --- | --- | --- |
+| 維度 | 1024 → PCA **128** | 格線 64／128／256，CV 選 128 |
+| PCA 前的標準化 | **不做**（`passthrough`） | 格線含 `StandardScaler`，CV 選不做 |
+| L2 normalize | 不是可選項 | 見下段 |
+| `max_length` | 512 | 文字中位數只有 60 字元（Dataset Card 3），8192 付不起也用不到 |
+| 裝置 | Apple MPS | 31,603 個 item 編碼 248 秒 |
+
+**「要不要先做 L2 normalize」在這一層不是可選項。** `bge-m3` 的 SentenceTransformer 組態由三個模組組成——`Transformer`、`Pooling`、**`Normalize`**——輸出恆為單位長度（實測 norm 平均 1.000、標準差 0.000），所以 `normalize_embeddings` 設不設都一樣，再 normalize 一次是 no-op。真正可選的是 PCA 前的逐維標準化：PCA 吃的是共變異數，標準化會改變它看到的結構。格線試了，CV 選「不做」。
+
+**PCA 必須放在 Pipeline 裡。** 主成分是由資料的共變異數結構算出來的統計量，先對全部資料做一次 PCA 再切折，test 的結構就進到特徵裡了——分數會變好，而且不會報錯。這是 6.4 第 6 條（特徵只能由 training 決定）在 Embedding 階梯上的具體形式，`tests/test_leakage.py` 有測試守著。可見標註特徵不經過 PCA，才能直接讀係數（8.4.2）。
+
+Embedding 只跟文字有關、跟 reveal 無關，所以 31,603 個 item 編一次就給 5 個 reveal seed 共用。快取附一份 metadata，讀取時比對模型名稱、commit sha、`normalize_embeddings`、`max_length`、維度與 item_id 順序，任一項不同就重算——沿用錯誤的向量不會報錯，只會讓分數「跟上次差不多」。
+
+**污染程度與 Q9 不同。** `bge-m3` 的預訓練語料可能包含 Reddit 文字，但它是無監督的 Embedding 模型，沒有看過本專題的分歧標籤，也沒有看過 GoEmotions 的標註。這與 Q9 的零樣本 LLM（可能直接看過標籤）不是同一件事，分數仍然可檢驗。
 
 ### 7.3 超參數調整
 
@@ -650,6 +672,8 @@ b\in\{0.05,0.10,0.20\}
 
 **定案的報告方式**：先用 full 範圍說明指標為什麼飽和——那本身是結論，對應 8.7 決策規則第一列「可見 entropy 已經最好 → 先採透明規則排序」——再切到 hard 範圍呈現真正的差異。只報 full 會得出「ML 勝不過規則」這個**指標假象**而非真實結果。
 
+**full 範圍的模型分數怎麼排，本身是一個決定（Q12，2026-11-09 決議）。** 採部署式排序：可見已不一致者排最前，其餘依模型分數細排。理由是任何會上線的排序都會先把確定陽性送去複核；而且只在 hard 上訓練的模型其 `visible_disagree` 係數恆為 0，直接拿它的原始分數排 full 會低估它。2026-11-09 補完六個方法的 full 範圍結果後，這個範圍的飽和已經是定量事實：`P@10%` 全部 100.0 ± 0.0、`R@10%` 全部 20.1 ± 0.0，連 `bge-m3` 也一樣（8.4）。
+
 hard 範圍才是 2.2 真正要解的問題。關鍵事實：**可見 entropy 在 hard 子集上恆為 0**（兩份可見標籤相同，比例分布必為 `(1,0,0,0)`），所以那條規則在這個子集上完全沒有排序資訊，退化成隨機。這正是文字特徵有機會贏的地方，也讓「ML 是否勝過規則」變成可檢驗的問題。
 
 ### 8.3 報告方式
@@ -666,16 +690,22 @@ hard 範圍才是 2.2 真正要解的問題。關鍵事實：**可見 entropy �
 
 ### 8.4 結果表格式
 
-以 `uv run python scripts/run_baselines.py` 產生。單位 %，平均 ± 標準差。
+兩個範圍的表都以 `uv run python scripts/run_models.py` 產生，連階梯 0 與 1 也由它算——同一張表的每一列要用同一批 reveal seed 與同一批排序 seed，否則各列不在同一份資料上。`run_baselines.py` 仍可單獨跑階梯 0 與 1。單位 %，平均 ± 標準差。
 
 **範圍 full**（test item 4,741、盛行率 49.82%、`K=474`、`R@10%` 上限 20.1%）：
 
 | 模型 | runs | PR-AUC | P@5% | R@5% | P@10% | R@10% | Lift@10% |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| Random | 150 | 50.0 ± 0.7 | 49.7 ± 3.0 | 5.0 ± 0.3 | 50.0 ± 2.3 | 10.0 ± 0.5 | 100.3 ± 4.6 |
-| Visible entropy | 5 | 83.4 ± 0.3 | **100.0 ± 0.0** | 10.0 ± 0.0 | **100.0 ± 0.0** | **20.1 ± 0.0** | 200.7 ± 0.0 |
-| Logistic Regression | | | | | | | |
-| Random Forest / Gradient Boosting | | | | | | | |
+| Random | 150 | 50.5 ± 0.8 | 52.0 ± 3.2 | 5.2 ± 0.3 | 51.0 ± 2.6 | 10.2 ± 0.5 | 102.3 ± 5.3 |
+| Visible entropy | 150 | 83.4 ± 0.2 | **100.0 ± 0.0** | 10.0 ± 0.0 | **100.0 ± 0.0** | **20.1 ± 0.0** | 200.7 ± 0.0 |
+| Agreed-label prior | 5 | 90.4 ± 0.2 | 100.0 ± 0.0 | 10.0 ± 0.0 | 100.0 ± 0.0 | 20.1 ± 0.0 | 200.7 ± 0.0 |
+| Logistic Regression | 5 | 93.2 ± 0.1 | 100.0 ± 0.0 | 10.0 ± 0.0 | 100.0 ± 0.0 | 20.1 ± 0.0 | 200.7 ± 0.0 |
+| Gradient Boosting | 5 | **93.6 ± 0.1** | 100.0 ± 0.0 | 10.0 ± 0.0 | 100.0 ± 0.0 | 20.1 ± 0.0 | 200.7 ± 0.0 |
+| BGE-M3 + LR | 5 | 93.4 ± 0.2 | 100.0 ± 0.0 | 10.0 ± 0.0 | 100.0 ± 0.0 | 20.1 ± 0.0 | 200.7 ± 0.0 |
+
+full 範圍的模型與查表採**部署式排序**（Q12）：可見已不一致者必然分歧，排在最前，其餘才依分數細排。直接拿只在 hard 上訓練的模型分數去排 full 會低估它——那個模型的 `visible_disagree` 係數恆為 0（8.4.2），它從來沒機會學到「可見不一致」這件事。`Random` 與 `Visible entropy` 是原始分數。
+
+這張表的作用是**證明指標在這裡已經壞掉**：五個方法的 `P@10%` 全是 100.0 ± 0.0、`R@10%` 全是 20.1 ± 0.0，一個都分不開。唯一還有區分力的是 PR-AUC（83.4 → 90.4 → 93.2／93.4／93.6），因為它看整條排序曲線而不是 10% 那一個操作點。
 
 :::define{id="result.hard-ladder" label="hard 範圍結果表"}
 **範圍 hard**（test item 3,153、盛行率 24.67%、`K=315`、`R@10%` 上限 40.5%）：
@@ -686,7 +716,8 @@ hard 範圍才是 2.2 真正要解的問題。關鍵事實：**可見 entropy �
 | Visible entropy | 150 | 24.7 ± 0.3 | 24.5 ± 3.6 | 5.0 ± 0.7 | 24.4 ± 2.3 | 9.9 ± 0.9 | 98.8 ± 9.2 |
 | Agreed-label prior | 5 | 39.5 ± 0.8 | 46.9 ± 2.3 | 9.5 ± 0.5 | 45.8 ± 2.0 | **18.5 ± 0.8** | 185.6 ± 8.2 |
 | Logistic Regression | 5 | 42.8 ± 1.4 | 47.8 ± 2.8 | 9.6 ± 0.5 | 48.0 ± 2.3 | **19.4 ± 0.8** | 194.5 ± 7.6 |
-| Gradient Boosting | 5 | **44.6 ± 1.3** | 47.3 ± 4.3 | 9.5 ± 0.8 | 47.9 ± 1.6 | **19.4 ± 0.6** | 194.3 ± 5.8 |
+| Gradient Boosting | 5 | 44.6 ± 1.3 | 47.3 ± 4.3 | 9.5 ± 0.8 | 47.9 ± 1.6 | **19.4 ± 0.6** | 194.3 ± 5.8 |
+| BGE-M3 + LR | 5 | **44.8 ± 0.8** | **52.2 ± 3.3** | **10.5 ± 0.6** | **52.6 ± 0.7** | **21.3 ± 0.4** | **213.4 ± 3.6** |
 :::
 
 `Random` 與 `Visible entropy` 的 runs 是 5 個 reveal seed × 30 個排序 seed。這兩條線的排序**完全由同分打散決定**（entropy 在 hard 子集恆為常數），只跑一次等於報一次抽樣——實測不同 rng 會在 9.6 與 10.6 之間跳。其餘方法的分數在給定 reveal seed 下是確定的，5 runs 即可。
@@ -696,27 +727,36 @@ hard 範圍才是 2.2 真正要解的問題。關鍵事實：**可見 entropy �
 - **H1（entropy 勝過隨機）在 full 範圍成立且幅度極大**：`R@10%` 20.1% 對 10.0%，`Lift@10%` 2.01 對 1.00。但這個勝幅全部來自「可見已不一致者必然分歧」這個定義，不是學到的訊號。
 - **entropy 在 hard 範圍等於隨機**：PR-AUC 24.7 對 24.9，兩者都約等於盛行率 24.67%，`Lift@10%` 約 1.0。entropy 在這個子集恆為常數，所以 5 個 reveal seed 的那一列實際上就是 5 次隨機抽樣，26.9 ± 2.6 與 25.0 ± 3.2 的差距落在雜訊內，不是優勢。
 - 因此 **hard 範圍的地板線是隨機（約 10%）**，H2 要在這條線上比。
-- **H2 成立，但勝的對象要挑對**：對 entropy 規則（9.9%），Logistic Regression 的 19.4% 接近兩倍。然而那個比較高估了 ML 的貢獻，因為 entropy 在 hard 子集等於隨機。對**同意標籤先驗**這張四列查表（18.5%），差距只有 0.9 個百分點。
-- **一張四列查表已經拿到模型 95% 的效果**：18.5 / 19.4 = 95.4%。那張表不需訓練、不需文字處理、不需維護詞彙表，而且完全可解釋。這直接回答 3.2 的子問題 5（模型增益是否足以抵銷資料需求、維護成本與可解釋性損失）。
-- **非線性模型沒有實質增益**：Gradient Boosting 的 PR-AUC 比 Logistic Regression 高 1.8 個百分點，但主要指標 `R@10%` 完全相同（都是 19.4，標準差也重疊），而調參耗時 102 秒對 10 秒。依 8.7 的決策規則，結論採 Logistic Regression——透明、快、係數可讀。
-- **文字特徵在整體排序品質上的貢獻比在操作點上大**：PR-AUC 39.5 → 42.8 → 44.6，但 `R@10%` 幾乎不動。換句話說，文字幫助的是整條排序曲線，而 10% 預算這個操作點剛好落在查表已經做得很好的區段。
+- **H2 成立，但勝的對象要挑對**：對 entropy 規則（9.9%），Logistic Regression 的 19.4% 接近兩倍。然而那個比較高估了 ML 的貢獻，因為 entropy 在 hard 子集等於隨機。對**同意標籤先驗**這張四列查表（18.5%），TF-IDF 的差距只有 0.9 個百分點。
+- **非線性模型沒有實質增益**：Gradient Boosting 的 PR-AUC 比 Logistic Regression 高 1.8 個百分點，但主要指標 `R@10%` 完全相同（都是 19.4，標準差也重疊），而調參耗時 78 秒對 6 秒。在 TF-IDF 這一組裡，結論採 Logistic Regression——透明、快、係數可讀。
+- **換掉文字表示有增益，換掉模型族沒有**：同一個 Logistic Regression、同一批可見標註特徵，只把 TF-IDF 換成 `bge-m3` 的 dense 向量，`R@10%` 從 19.4 升到 **21.3**（配對差 +1.88 ± 0.88、5/5 全勝，見 8.4.3）；而把 LR 換成 Gradient Boosting 是 −0.02 ± 0.40。**在這個任務上，文字表示是比模型族更有效的槓桿**，而且 BGE 是唯一把 P@5%、R@5%、P@10%、`R@10%` 四個操作點一起拉起來的方法，不只是 PR-AUC 好看。
+- **「查表已經夠好」這個結論取決於文字表示的品質。** 查表佔 TF-IDF LR 的 **95.4%**（18.5 / 19.4），但只佔 BGE-M3 + LR 的 **86.9%**（18.5 / 21.3）。換句話說 2026-10-31 得到的「一張四列查表已經拿到模型 95% 的效果」沒有錯，但它量的是 TF-IDF 的天花板，不是這個任務的天花板。這是 3.2 子問題 5（模型增益是否足以抵銷資料需求、維護成本與可解釋性損失）的直接答案：增益從 0.85 個百分點變成 2.73 個百分點，成長約 3.2 倍，但代價也從「維護一張詞彙表」變成「2.3 GB 模型權重 ＋ 約 2 GB 的 torch 環境 ＋ 248 秒編碼 ＋ 260 秒調參，而且失去逐詞可讀的係數」。
+- **文字特徵在整體排序品質上的貢獻比在操作點上大，但 BGE 是例外**：PR-AUC 39.5 → 42.8 → 44.6 → 44.8，而 `R@10%` 在 TF-IDF 這幾列幾乎不動（18.5 → 19.4 → 19.4）。換掉文字表示之後兩者才一起動（44.8、21.3）。10% 預算這個操作點落在查表已經做得不錯的區段，要超過它需要的不是更複雜的分類器，是更好的文字表示。
+- **BGE 在 full 範圍的 PR-AUC（93.4）略低於 Gradient Boosting（93.6），在 hard 範圍卻反過來（44.8 對 44.6）。** 兩個差距都在 0.2 個百分點以內、落在標準差內，不足以排序；真正要看的是 hard 範圍的主要指標，那裡的差距是 21.3 對 19.4。
 
 ### 8.4.1 調參結果
 
 只在訓練集內以 `GroupKFold` 交叉驗證，測試集最後才評估一次。
 
-| 模型 | 最佳參數 | CV `Recall@10%` | 調參耗時 |
-| --- | --- | ---: | ---: |
-| Logistic Regression | `C=0.01`、`class_weight=None` | 19.42% | 10s |
-| Gradient Boosting | `learning_rate=0.05`、`max_depth=3` | 20.36% | 111s |
+三列都來自同一次執行（2026-11-09，M1 Pro、8 核）。耗時只在同一台機器上互相比較才有意義。
 
-CV 分數與 test 分數相當接近（19.42 對 19.4、20.36 對 19.4），沒有明顯過擬合。`C=0.01` 落在格線邊界，表示這個任務偏好強正則化；若要再調，格線該往更小的 `C` 延伸。
+| 模型 | 最佳參數 | 格線大小 | CV `Recall@10%` | 調參耗時 |
+| --- | --- | ---: | ---: | ---: |
+| Logistic Regression | `C=0.01`、`class_weight=None` | 8 | 19.42% | 6s |
+| Gradient Boosting | `learning_rate=0.05`、`max_depth=3` | 4 | 20.36% | 78s |
+| BGE-M3 + LR | `n_components=128`、`scale=passthrough`、`C=0.01`、`class_weight=None` | 48 | 19.85% | 260s |
+
+CV 分數與 test 分數相當接近（19.42 對 19.4、20.36 對 19.4），沒有明顯過擬合。BGE 的 CV 19.85% 反而**低於** test 的 21.3——CV 的每一折只用 4/5 的訓練資料 fit PCA 與 LR，而最終模型用全部訓練資料 refit，所以 test 高一點是合理的，不是洩漏。
+
+`C=0.01` 在兩個 LR 上都落在格線邊界，表示這個任務偏好強正則化；若要再調，格線該往更小的 `C` 延伸。PCA 選到 128 維（格線 64／128／256），所以 1024 維不直接輸入是對的，但也不必壓到 64。
+
+BGE 的 260 秒不含編碼。編碼是一次性成本：31,603 個 item 在 MPS 上 **248 秒**，之後 5 個 reveal seed 共用同一份快取。
 
 ### 8.4.3 配對比較
 
 比較平均 ± 標準差會同時低估與高估差異的可信度。所有方法跑在同一批 reveal seed、同一份資料上，所以可以逐 seed 相減——配對差的標準差遠小於各自分數的標準差（研究規格 8.5 要求 paired bootstrap，這是其單機版）。
 
-以**同意標籤先驗**為參考：
+以**同意標籤先驗**為參考（hard 範圍）：
 
 | 模型 | `R@10%` | 配對差 | 勝的 seed 數 |
 | --- | ---: | ---: | ---: |
@@ -725,12 +765,26 @@ CV 分數與 test 分數相當接近（19.42 對 19.4、20.36 對 19.4），沒�
 | Agreed-label prior | 18.6 ± 0.7 | ±0.00 | — |
 | Logistic Regression | 19.4 ± 0.8 | **+0.85 ± 0.26** | **5/5** |
 | Gradient Boosting | 19.4 ± 0.6 | +0.83 ± 0.55 | 5/5 |
+| BGE-M3 + LR | 21.3 ± 0.4 | **+2.73 ± 0.89** | **5/5** |
+
+以 **TF-IDF Logistic Regression** 為參考（hard 範圍）——這組才回答「換文字表示值不值得」，因為兩者只差在文字表示：
+
+| 模型 | `R@10%` | 配對差 | 勝的 seed 數 |
+| --- | ---: | ---: | ---: |
+| Agreed-label prior | 18.6 ± 0.7 | −0.85 ± 0.26 | 0/5 |
+| Logistic Regression | 19.4 ± 0.8 | ±0.00 | — |
+| Gradient Boosting | 19.4 ± 0.6 | −0.02 ± 0.40 | 2/5 |
+| BGE-M3 + LR | 21.3 ± 0.4 | **+1.88 ± 0.88** | **5/5** |
+
+full 範圍的配對比較全部是 `±0.00`（除了 Random 的 −9.84 ± 0.59）：指標已飽和，配對比較在那裡什麼也量不到。這再次印證 8.2.1 以 hard 為主要範圍的決定。
 
 判讀：
 
-- **文字模型的優勢是真的，但很小。** 配對標準差 0.26 遠小於各自的 ±0.8，而且 5 個 seed 全勝——這是一致的優勢，不是雜訊。但幅度只有 0.85 個百分點。
+- **TF-IDF 文字模型的優勢是真的，但很小。** 配對標準差 0.26 遠小於各自的 ±0.8，而且 5 個 seed 全勝——這是一致的優勢，不是雜訊。但幅度只有 0.85 個百分點。
 - 若只看「19.4 ± 0.8 對 18.5 ± 0.8」會誤判成無差異；若只看「19.4 對 9.9」會誤判成巨大差異。**配對比較是這一章唯一能支撐結論的呈現方式。**
-- Gradient Boosting 的配對差（±0.55）比 Logistic Regression（±0.26）不穩定，再次支持結論採線性模型。
+- **換文字表示有增益，換模型族沒有。** BGE 對 TF-IDF LR 是 +1.88 ± 0.88、5/5 全勝——配對差是標準差的兩倍以上。Gradient Boosting 對同一個參考是 −0.02 ± 0.40、2/5——配對差比標準差小一個量級，與 0 無法區分。
+- BGE 的配對標準差（±0.88）比 TF-IDF LR 的 ±0.26 大，所以它的增益比較不穩定；但平均差 +2.73 是標準差的三倍，而且 5 個 seed 全勝，結論仍然成立。
+- Gradient Boosting 對查表的配對差（±0.55）比 Logistic Regression（±0.26）不穩定，在 TF-IDF 這一組裡支持採線性模型。
 
 ### 8.4.4 混淆矩陣
 
@@ -749,23 +803,25 @@ flag rate 0.103 確認由 val 取得的門檻轉移到 test 之後仍然落在 1
 
 ### 8.4.2 可見標註特徵的係數
 
-Logistic Regression 在 hard 範圍的係數，由小到大：
+兩個 Logistic Regression 在 hard 範圍的係數，依 TF-IDF 那一欄由小到大：
 
-| 特徵 | 係數 |
-| --- | ---: |
-| `visible_count_positive` | −0.577 |
-| `visible_distinct` | −0.264 |
-| `visible_vote_margin` | −0.264 |
-| `visible_count_negative` | −0.253 |
-| `visible_disagree` | 0.000 |
-| `visible_entropy` | 0.000 |
-| `visible_count_ambiguous` | +0.054 |
-| `visible_count_neutral` | +0.248 |
+| 特徵 | TF-IDF | BGE-M3 |
+| --- | ---: | ---: |
+| `visible_count_positive` | −0.577 | −0.489 |
+| `visible_distinct` | −0.264 | −0.280 |
+| `visible_vote_margin` | −0.264 | −0.280 |
+| `visible_count_negative` | −0.253 | −0.324 |
+| `visible_disagree` | 0.000 | 0.000 |
+| `visible_entropy` | 0.000 | 0.000 |
+| `visible_count_ambiguous` | +0.054 | +0.026 |
+| `visible_count_neutral` | +0.248 | +0.228 |
+
+兩欄的方向與大致量級一致，連排序都幾乎相同——換掉文字表示沒有改變模型對可見標註的讀法，改變的是它額外從文字裡抓到多少。
 
 三件事值得寫進結論：
 
 1. **係數方向與 EDA 一致。** 前兩人同意 neutral（+0.248）或 ambiguous（+0.054）時分歧風險較高，同意 positive（−0.577）時較低。這對應 Dataset Card 3.1：分歧集中在 neutral↔positive、negative↔neutral、ambiguous↔neutral，而 positive 全一致是最大的單一群（27.4%）。模型學到的是「模糊地帶的一致比較脆弱」。
-2. **`visible_disagree` 與 `visible_entropy` 的係數恰為 0**，這是一個正確性檢查而非巧合：在 hard 子集上這兩欄全為零，L2 會把係數壓到 0。換句話說，規則特徵在這個子集真的沒有資訊。
+2. **`visible_disagree` 與 `visible_entropy` 的係數恰為 0**，這是一個正確性檢查而非巧合：在 hard 子集上這兩欄全為零，L2 會把係數壓到 0。換句話說，規則特徵在這個子集真的沒有資訊。**兩個模型都是 0**，而它們的文字特徵完全不同——這讓這條檢查更站得住。
 3. **`visible_distinct` 與 `visible_vote_margin` 的係數相同（−0.264）**，因為它們在 hard 子集是非零常數（1 與 1.0），只是吸收 intercept，不帶訊號。hard 範圍只有四個 `visible_count_*` 會變動，有測試守著這個事實。
 
 `Random` 的 runs 是 5 個 reveal seed × 30 個排序 seed。雖然隨機分數與 reveal 無關，但 hard 子集的成員由 reveal 決定，所以兩個基準必須跑在同一批 reveal seed 上，否則不在同一份資料上。
@@ -822,7 +878,7 @@ Logistic Regression 在 hard 範圍的係數，由小到大：
 
 **這張表是整章最重要的發現。** 在 10% 預算的操作點上，模型送複核的項目**全部**來自「兩人同意 neutral」這一組；其他三組一個都沒送。而在 neutral 組內，送複核的精確率 48.1% 只比該組的基礎分歧率 46.5% 高 1.6 個百分點。
 
-也就是說，模型在這個操作點的行為幾乎等於「挑出同意 neutral 的題目」，文字只用來在組內做微調。這正是同意標籤先驗那張查表能拿到 95% 效果的機制。
+也就是說，模型在這個操作點的行為幾乎等於「挑出同意 neutral 的題目」，文字只用來在組內做微調。這正是同意標籤先驗那張查表能追平 TF-IDF Logistic Regression（95.4%）的機制。本節的錯誤分析對象是 TF-IDF Logistic Regression；BGE-M3 + LR 的 `R@10%` 高出 1.9 個百分點，它在這張表上的行為是否仍然「只送 neutral 組」沒有量測，不能沿用這一節的結論。
 
 **漏掉的分歧（FN）是哪一組「同意的標籤 → 第三人的標籤」**，與同一群體的全部分歧相比：
 
@@ -858,6 +914,15 @@ Logistic Regression 在 hard 範圍的係數，由小到大：
 
 兩種走向都算完整結果，這是刻意設計的：ML 勝不過規則時，「就用那條透明的規則，不要為了用模型而用模型」同樣有價值，而且省下維護成本。
 
+**實測落點（2026-11-09）**：
+
+| 範圍 | 命中的那一列 | 依據 |
+| --- | --- | --- |
+| full | 第 1 列「可見 entropy 已經最好」 | 六個方法的 `R@10%` 全是 20.1 ± 0.0，規則就已達理論上限（8.4） |
+| hard | 第 2 列「Embedding 穩定提升」 | BGE-M3 + LR 對 TF-IDF LR 配對差 +1.88 ± 0.88、5/5 全勝；對查表 +2.73 ± 0.89、5/5（8.4.3） |
+
+第 2 列的建議是「採 Embedding ＋ 簡單分類器作候選」——實測的最佳組合正是這個形狀（`bge-m3` → PCA 128 → Logistic Regression），沒有用到更複雜的分類器。但「候選」不等於「導入」：10% 預算下的絕對增益是 2.7 個百分點（18.5 → 21.3），而代價是 2.3 GB 模型權重、約 2 GB 的 torch 環境與每次重算 248 秒的編碼。要不要付這個代價是產品決策，本文件只負責把兩邊的數字擺出來。
+
 ### 8.8 公平與倫理
 
 - 不把 disagreement 直接稱為 error。
@@ -886,7 +951,7 @@ TID-8 的 Dataset Card 授權欄標示 `unknown`，其論文也沒有授權聲�
 
 | 模型 | 定位 | 專題角色 | 注意事項 |
 | --- | --- | --- | --- |
-| [`BAAI/bge-m3`](https://huggingface.co/BAAI/bge-m3) | 開源多語 Embedding，1024 維，MIT License | **主模型**，本機一次處理英文與中文 | 官方資料以 `zh` 為單位，仍要用臺灣繁中 pilot 驗證（[論文](https://arxiv.org/abs/2402.03216)） |
+| [`BAAI/bge-m3`](https://huggingface.co/BAAI/bge-m3) | 開源多語 Embedding，1024 維，MIT License | **主模型**，本機一次處理英文與中文。課堂版已實測英文（revision `5617a9f6`，見 7.2.1） | 官方資料以 `zh` 為單位，仍要用臺灣繁中 pilot 驗證（[論文](https://arxiv.org/abs/2402.03216)）。dense 輸出恆為單位長度（自帶 `Normalize` 模組） |
 | [`voyage-4-lite`](https://docs.voyageai.com/docs/embeddings) | 多語 Embedding API | 有額度時作 API 對照 | 公開資料可送；論文真實資料需先確認資料治理 |
 | [`mistral-embed`](https://docs.mistral.ai/studio/knowledge-rag/embeddings) | 通用文字 Embedding API | Voyage 的替代方案 | 不需兩者都做；不使用 Mistral 對話模型產生判斷 |
 
@@ -997,7 +1062,7 @@ visible_annotation_count
 | 文字特徵 | TF-IDF（scikit-learn） | 課堂版主線，不依賴 GPU 與外部模型 |
 | 分類器 | scikit-learn `LogisticRegression` 與 `HistGradientBoostingClassifier`（Q3） | 對應規範的「模型比較」；樹模型吃不下 31,451 維稀疏矩陣，先以 `TruncatedSVD(200)` 降維 |
 | 調參 | `GridSearchCV` + `GroupKFold`（group 為 `item_id`） | 避免同 item 跨折洩漏 |
-| Embedding | `BAAI/bge-m3` 本機推論 | 開源、多語、可本機跑，英文與繁中共用同一管線 |
+| Embedding | `BAAI/bge-m3` 本機推論（`sentence-transformers`，optional extra `embed`） | 開源、多語、可本機跑，英文與繁中共用同一管線；列為 optional extra，讓不做這一項的人不必裝 torch |
 | 圖模型框架 | PyTorch Geometric [`HeteroData`](https://pytorch-geometric.readthedocs.io/en/latest/notes/heterogeneous.html) | 可分別保存不同 node 與 edge type，支援異質 GraphSAGE |
 
 ### 11.2 工具鏈
@@ -1029,6 +1094,18 @@ visible_annotation_count
 完整清單在 [90-open-questions.mdx](./90-open-questions.mdx)，全文的 `Qn` 一律指該文件的編號；已決議者留在原位改狀態，編號不重排、不回收。
 
 ## 14. Change Log
+
+### [0.12.0] - 2026-11-09
+- **Added**: 第 7.2.1 節記錄 Embedding 的定案設定（PCA 128、PCA 前不標準化、`max_length=512`、MPS、快取 metadata 比對、污染程度與 Q9 的差別）。
+- **Added**: 第 8.4 的 hard 與 full 表各加一列 **BGE-M3 + LR**；full 表同時補上 Agreed-label prior、Logistic Regression 與 Gradient Boosting 三列（原本留空）。8.4.1 加調參結果與格線大小，8.4.2 加 BGE 的係數欄，8.4.3 加一張以 TF-IDF Logistic Regression 為參考的配對比較表。
+- **Added**: 第 8.7 節加「實測落點」表——full 命中第 1 列、hard 命中第 2 列「Embedding 穩定提升」。
+- **Changed**: 第 8.4 的判讀改寫。**理由**：原本寫「一張四列查表已經拿到模型 95% 的效果」，那句話量的是 TF-IDF 的天花板而不是這個任務的天花板。換成 `bge-m3` 之後查表只佔 86.9%，文字模型的增益從 0.85 個百分點變成 2.73 個百分點。結論改為「文字表示是比模型族更有效的槓桿」：同一個 LR 換掉文字表示是 +1.88 ± 0.88、5/5 全勝，而把 LR 換成 Gradient Boosting 是 −0.02 ± 0.40、2/5。
+- **Changed**: 第 8.4 兩個範圍的表改為同一支腳本（`run_models.py`）產生，階梯 0 與 1 也由它算。**理由**：原本 full 表來自 `run_baselines.py`、hard 表來自 `run_models.py`，兩者的排序 seed 不同，同一張表的各列不在同一批抽樣上。full 表的 `Random` 與 `Visible entropy` 數字因此有小幅變動（50.0 → 50.5、entropy 的 runs 5 → 150）。
+- **Changed**: 第 8.2.1 節補上 full 範圍的排序方式（Q12，部署式排序）與六個方法全部飽和的定量證據。
+- **Changed**: 第 7.1 節補一句說明 BGE-M3 不是新的一層，而是換掉階梯 2 的文字表示；階梯圖不含它。第 7.2 特徵表的 Embedding 列補上定案設定與「課堂版已完成」。
+- **Changed**: 第 8.4.1 的調參耗時改為同一次執行的實測值（LR 10s → 6s、GB 111s → 78s），並註明耗時只在同一台機器上可比。
+- **Changed**: 第 9.2、11.1 補上 `bge-m3` 的 revision、optional extra 與「輸出恆為單位長度」。
+- **Changed**: 四張圖跟著改——第 7.1 的模型階梯把 BGE-M3 畫在階梯 2 的同一列（19.4 對 21.3，不另開一層）、8.4 的長條圖加第六根並改成四階語意色、配對斜線圖改成三欄兩段、技術棧的管線圖補上 `embeddings.py` 與 `embed_texts.py`。斜線圖的逐 seed 數值改由 `artifacts/models/per_seed_r10_hard.csv` 提供（`metrics.per_seed_metric`），不再寫死。
 
 ### [0.11.0] - 2026-11-09
 

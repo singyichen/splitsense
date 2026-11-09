@@ -52,3 +52,22 @@ REVEAL_SEEDS = tuple(range(N_REVEAL_SEEDS))
 BUDGETS = (0.05, 0.10, 0.20)
 PRIMARY_BUDGET = 0.10
 N_RANDOM_SEEDS = 30  # Baseline 0 至少 30 個 seed
+
+# --- Embedding（研究規格 7.2，課堂版選做）---
+EMBEDDINGS_DIR = ARTIFACTS_DIR / "embeddings"
+EMBED_MODEL_NAME = "BAAI/bge-m3"
+# 釘住 commit sha（2026-11-09 解析自 HF main）。不釘的話模型在 HF 上被改了，
+# 快取仍然會被當成有效，分數就跟不上實際用的權重。
+EMBED_MODEL_REVISION: str | None = "5617a9f61b028005a4858fdac845db406aefb181"
+EMBED_DIM = 1024
+EMBED_BATCH_SIZE = 32
+# 文字中位數只有 60 字元（Dataset Card 3），512 已遠超需求，不必付 8192 的代價
+EMBED_MAX_LENGTH = 512
+# bge-m3 的 SentenceTransformer 組態第三個模組就是 Normalize，輸出恆為單位長度
+# ——「要不要 L2 normalize」在這一層不是可選項。這裡設 True 只是讓 metadata
+# 誠實記錄實際拿到的向量；PCA 前真正可選的是逐維標準化，那個列進 grid。
+EMBED_NORMALIZE = True
+# PCA 維度列進 grid，由 CV 選（研究規格 7.3）
+PCA_COMPONENTS = (64, 128, 256)
+# CV 選出的定案值（研究規格 7.2.1）。只當 Pipeline 的預設，grid 會覆寫它
+PCA_COMPONENTS_DEFAULT = 128

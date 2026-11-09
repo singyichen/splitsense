@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg viewBox="0 0 1000 640" width="2000" height="1280" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="module-pipeline-title module-pipeline-desc" id="module-pipeline-root">
         <title id="module-pipeline-title">從上游資料到產物</title>
-        <desc id="module-pipeline-desc">四層管線：取得資料、資料協議、特徵、模型與分析。每層標明負責的模組、要跑的腳本與產出目錄。層與層之間的箭頭寫的是不得違反的不變量。底部是被多處共用的 config 與 metrics。</desc>
+        <desc id="module-pipeline-desc">四層管線：取得資料、資料協議、特徵、模型與分析。特徵層有兩種文字表示，TF-IDF 與 bge-m3 embedding。每層標明負責的模組、要跑的腳本與產出目錄。層與層之間的箭頭寫的是不得違反的不變量。底部是被多處共用的 config 與 metrics。</desc>
         <style>
           text { font-family: 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', sans-serif; }
           .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
@@ -87,11 +87,14 @@
         <!-- 3 特徵 -->
         <rect x="76" y="304" width="664" height="64" rx="10" fill="#ffffff" stroke="#2c6ebb"/>
         <rect x="76" y="314" width="4" height="44" rx="2" fill="#2c6ebb"/>
-        <text x="96" y="328" class="h ink">3　特徵</text>
-        <text x="96" y="350" class="q muted">TF-IDF（31,451 維）＋ 可見標註統計；只在 training 文字上 fit</text>
-        <text x="620" y="350" text-anchor="end" class="mono sub muted">features.py</text>
-        <text x="860" y="340" text-anchor="middle" class="lg soft">無獨立腳本</text>
-        <text x="860" y="356" text-anchor="middle" class="lg soft">被下一層直接呼叫</text>
+        <text x="96" y="326" class="h ink">3　特徵</text>
+        <text x="96" y="346" class="q muted">兩種文字表示：TF-IDF（31,451 維）與 bge-m3（1024 維 → PCA 128）</text>
+        <text x="96" y="363" class="lg muted">＋ 可見標註統計。兩者都只由 training 決定，PCA 在 Pipeline 裡逐折 fit</text>
+        <text x="722" y="363" text-anchor="end" class="mono sub muted">features.py · embeddings.py</text>
+        <rect x="756" y="312" width="208" height="20" rx="10" fill="#2c6ebb"/>
+        <text x="860" y="326" text-anchor="middle" class="chip mono inv">embed_texts.py</text>
+        <text x="860" y="344" text-anchor="middle" class="mono sub muted">artifacts/embeddings/</text>
+        <text x="860" y="360" text-anchor="middle" class="lg soft">TF-IDF 無獨立腳本</text>
 
         <line x1="408" y1="368" x2="408" y2="400" stroke="#6c798e" stroke-width="1.5" marker-end="url(#module-pipeline-mp)"/>
         <text x="420" y="389" class="lg muted">訓練集疊 5 個 reveal seed；GroupKFold 的 group 必須是 item_id</text>
@@ -100,7 +103,7 @@
         <rect x="76" y="404" width="664" height="96" rx="10" fill="#ffffff" stroke="#2c6ebb"/>
         <rect x="76" y="416" width="4" height="72" rx="2" fill="#2c6ebb"/>
         <text x="96" y="430" class="h ink">4　模型與分析</text>
-        <text x="96" y="452" class="q muted">階梯 0–3 與配對比較、混淆矩陣、錯誤分析</text>
+        <text x="96" y="452" class="q muted">階梯 0–3 與 BGE-M3；full／hard 兩個範圍、配對比較、混淆矩陣、錯誤分析</text>
         <text x="96" y="472" class="mono sub muted">baselines.py · models.py · error_analysis.py</text>
         <text x="96" y="490" class="lg soft">測試集只在最後評估一次</text>
         <rect x="756" y="414" width="208" height="20" rx="10" fill="#2c6ebb"/>
@@ -117,7 +120,7 @@
         <text x="96" y="562" class="h ink">共用層</text>
         <text x="176" y="562" class="q muted">四層全部依賴，不畫連線是因為連線會比方塊多</text>
         <text x="96" y="584" class="mono sub muted">config.py</text>
-        <text x="176" y="584" class="lg muted">路徑、split 比例與 seed、reveal 設定、預算與指標常數 — 被 19 處 import</text>
+        <text x="176" y="584" class="lg muted">路徑、split 比例與 seed、reveal 與 embedding 設定、預算與指標常數 — 被 24 處 import</text>
         <text x="612" y="584" class="mono sub muted">metrics.py</text>
         <text x="684" y="584" class="lg muted">排序指標、門檻、混淆矩陣、配對比較 — 被 6 處 import</text>
 

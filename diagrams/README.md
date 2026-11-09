@@ -88,17 +88,17 @@ text { font-family: 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', sans-se
 | --- | --- |
 | `annotation-count-leakage` | `artifacts/eda/標註數洩漏證據.csv` |
 | `metric-saturation`、`review-routing-flow` | `scripts/run_baselines.py` 的範圍統計 |
-| `baseline-results`、`baseline-paired` | `artifacts/models/summary_hard.csv`、`paired_vs_agreed_label_prior.csv` |
+| `baseline-results`、`baseline-paired` | `artifacts/models/summary_hard.csv`、`paired_hard_vs_*.csv`、`per_seed_r10_hard.csv` |
 | `neutral-only-flagging` | `artifacts/error_analysis/agreed_label_profile.csv` |
 | `module-pipeline` | 由 `import` 反查，見下方指令 |
 | `model-ladder` | 研究規格 7.1 與 8.4 |
 | `dataset-funnel` | Dataset Card 第 3、5 節 |
 
-`baseline-paired` 用的是**逐 seed 實測值**（17.83／18.96／19.41／17.79／18.88 對 18.60／19.72／20.56／18.84／19.39），不是從平均反推。
+`baseline-paired` 用的是**逐 seed 實測值**，直接取自 `artifacts/models/per_seed_r10_hard.csv`（由 `metrics.per_seed_metric` 產生，排序 seed 與配對比較同為 `40_000 + reveal_seed`），不是從平均反推。
 
 ## 製圖時踩到的三個規則
 
-- **長條圖焦點色只能一根。** 多根會讓「什麼是重點」失效。`baseline-results` 的焦點給查表，因為那是最反直覺的發現。
+- **長條圖焦點色只能一根。** 多根會讓「什麼是重點」失效。`baseline-results` 原本只給查表一根金色，因為那是最反直覺的發現；2026-11-09 加入 BGE-M3 後改成四階語意色（灰＝地板線、金＝透明規則、淺藍＝TF-IDF 模型、深藍＝bge-m3 模型）。這不是「多個焦點」，而是把方法分成四類——金色仍然只有一根。
 - **斜線圖沒有「列序」。** 線的位置由資料決定，不要寫列序說明——那是 dumbbell 的規則。
 - **零值就是沒有長條。** `annotation-count-leakage` 的「1 份」與 `neutral-only-flagging` 的三組送複核率都是 0，只標數字、不畫假高度。
 

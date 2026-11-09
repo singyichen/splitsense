@@ -3,12 +3,12 @@ title: "進度追蹤"
 description: "課程規範必做項目、課堂版時程、最低成功線與交付物的單一進度真相"
 tags: ["進度", "交付物", "課程規範"]
 createdAt: "2026-10-31"
-updatedAt: "2026-10-31"
+updatedAt: "2026-11-09"
 ---
 
 # 進度追蹤
 
-> 進度以 **2026-10-31** 為準。（當日第二次更新：錯誤分析與混淆矩陣完成）
+> 進度以 **2026-11-09** 為準。（本次更新：BGE-M3 + PCA 比較完成，研究規格 v0.12.0）
 
 本文件是**進度的單一真相**。其他文件不再帶狀態欄，需要知道「做了沒」一律看這裡。
 
@@ -41,17 +41,19 @@ updatedAt: "2026-10-31"
 
 ## 1. 總覽
 
-**課堂版的最低成功線六項全部完成**，分析工作超前約四週（原訂 11/29 的錯誤分析在 10/31 完成）。剩餘缺口是**簡報投影片**（內容草稿已完成），加上一張**還沒送的登記表單**。
+**課堂版的最低成功線六項全部完成**，而且**唯一的選做項目（BGE-M3 + PCA 比較）也在 11/09 完成**，比原訂的 11/22 提前 13 天。剩餘缺口是**簡報投影片**（內容草稿與全部圖表都已完成），加上一張**還沒送的登記表單**。
 
 | 面向 | 進度 |
 | --- | --- |
 | 課程規範必做（9 項） | 完成 7、部分 1、逾期風險 1 |
-| 課堂版時程（8 格） | 完成 4、部分 1、未開始 2、逾期風險 1 |
+| 課堂版時程（8 格） | 完成 5、部分 1、未開始 1、逾期風險 1 |
 | 最低成功線（課堂版，6 項） | **完成 6／6** |
 | 最終交付物（課堂版，6 項） | 完成 5、部分 1 |
-| 待釐清事項（11 題） | 已決議 9、待處理 2 |
+| 待釐清事項（12 題） | 已決議 10、待處理 2 |
 
-關鍵日期：**11/30** 登記截止（剩 30 天）、**12/13** 簡報須完成（剩 43 天，假設排在 12/14 發表）。
+關鍵日期：**11/30** 登記截止（剩 21 天）、**12/13** 簡報須完成（剩 34 天，假設排在 12/14 發表）。
+
+**BGE-M3 的結果改變了簡報的主張**，不只是多一列數字：hard 範圍 `R@10%` 21.3 ± 0.4，對 TF-IDF Logistic Regression 的配對差 +1.88 ± 0.88、5/5 全勝。原本「一張四列查表拿到模型 95% 的效果」要改成 86.9%，結論從「不要上模型」調整為「文字表示是比模型族更有效的槓桿」。詳見研究規格 8.4 與 8.4.3。
 
 ## 2. 課程規範必做項目
 
@@ -60,12 +62,12 @@ updatedAt: "2026-10-31"
 | 1 | 問題描述 | :badge[完成]{variant="success"} | 研究規格 3.1、5：二元分類 `z_i`，機率用於排序 |
 | 2 | 資料收集 | :badge[完成]{variant="success"} | [Dataset Card](./10-dataset-card-goemotions.mdx)：來源、Apache-2.0、授權追溯 |
 | 3 | 資料分析與前處理 | :badge[完成]{variant="success"} | `scripts/run_eda.py` 重現全部統計；文字去重、item-level split 70/15/15、reveal 2 份、TF-IDF 都已實作 |
-| 4 | 模型訓練 | :badge[完成]{variant="success"} | `scripts/run_models.py`：四層階梯 ＋ `GridSearchCV` + `GroupKFold` 調參 |
-| 5 | 模型評估 | :badge[完成]{variant="success"} | PR-AUC、`Recall@10%`、5 reveal seeds、配對比較（研究規格 8.4.3）、混淆矩陣（8.4.4，門檻由 val 取得）都有 |
+| 4 | 模型訓練 | :badge[完成]{variant="success"} | `scripts/run_models.py`：四層階梯 ＋ BGE-M3 + PCA + LR ＋ `GridSearchCV` + `GroupKFold` 調參 |
+| 5 | 模型評估 | :badge[完成]{variant="success"} | PR-AUC、`Recall@10%`、5 reveal seeds、full 與 hard 兩個範圍、兩組配對比較（研究規格 8.4.3）、混淆矩陣（8.4.4，門檻由 val 取得）都有 |
 | 6 | 結論 | :badge[完成]{variant="success"} | H1、H2 有實測結論；錯誤分析見研究規格 8.6.1。`scripts/run_error_analysis.py` |
 | 7 | 主題與組員登記 | :badge[逾期風險]{variant="danger"} | **表單尚未送出**，截止 11/30。三個欄位的內容 2026-10-19 就定了，見研究規格 2.4 末段 |
-| 8 | 發表簡報 | :badge[部分]{variant="warning"} | 內容草稿完成（[`30-presentation.mdx`](./30-presentation.mdx)），六段齊備含 Q&A 準備，內嵌六個互動元件與七張靜態圖。**投影片本身未製作** |
-| 9 | 專題程式 | :badge[完成]{variant="success"} | 規範未要求交付。`uv run pytest` 53 passed、2 skipped；從零（無 `data/`、無 `artifacts/`）可完整重跑 |
+| 8 | 發表簡報 | :badge[部分]{variant="warning"} | 內容草稿完成（[`30-presentation.mdx`](./30-presentation.mdx)），六段齊備含 Q&A 準備，內嵌六個互動元件與七張靜態圖，全部含 BGE-M3 的結果。**投影片本身未製作** |
+| 9 | 專題程式 | :badge[完成]{variant="success"} | 規範未要求交付。`uv run pytest` **91 passed、2 skipped**；從零（無 `data/`、無 `artifacts/`）可完整重跑 |
 
 ## 3. 課堂版時程
 
@@ -76,7 +78,7 @@ updatedAt: "2026-10-31"
 | 10/19–10/25 | 資料、EDA、子資料集、授權 | :badge[完成]{variant="success"} | EDA 於 10/31 補成可重跑腳本（Q10） |
 | 10/26–11/01 | Split、reveal、TF-IDF、隨機與 entropy 基準 | :badge[完成]{variant="success"} | 提前 1 天 |
 | 11/02–11/15 | Logistic Regression、Gradient Boosting、調參 | :badge[完成]{variant="success"} | **提前 15 天**，於 10/31 完成 |
-| 11/16–11/22 | BGE-M3 + PCA 比較 | :badge[未開始]{variant="neutral"} | 選做。刪減順序第 1 條 |
+| 11/16–11/22 | BGE-M3 + PCA 比較 | :badge[完成]{variant="success"} | **提前 13 天**，於 11/09 完成。`uv run python scripts/embed_texts.py`（248s）＋ `run_models.py`（調參 260s）；hard `R@10%` 21.3 ± 0.4，配對差 +1.88 ± 0.88、5/5 |
 | 11/23–11/29 | 5 個 seeds 評估、錯誤分析 | :badge[完成]{variant="success"} | **提前 29 天**，於 10/31 完成 |
 | 11/30 前 | 填表單登記主題 | :badge[逾期風險]{variant="danger"} | 見第 2 節第 7 項 |
 | 11/30–12/06 | 製作簡報 | :badge[部分]{variant="warning"} | 內容、互動元件與七張靜態圖於 10/31 完成；投影片本身未製作 |
@@ -106,7 +108,7 @@ updatedAt: "2026-10-31"
 | 可重現的資料處理與實驗程式 | :badge[完成]{variant="success"} | `src/splitsense/`、`scripts/`、`tests/` |
 | 固定 split 與 reveal manifests | :badge[完成]{variant="success"} | `artifacts/manifests/`（不進版控） |
 | Dataset Card（英文） | :badge[完成]{variant="success"} | [`10-dataset-card-goemotions.mdx`](./10-dataset-card-goemotions.mdx) |
-| Baseline 比較表 | :badge[完成]{variant="success"} | 研究規格 8.4；`artifacts/models/summary_hard.csv` |
+| Baseline 比較表 | :badge[完成]{variant="success"} | 研究規格 8.4；`artifacts/models/summary_hard.csv`、`summary_full.csv`、`paired_hard_vs_*.csv` |
 | 錯誤案例分析 | :badge[完成]{variant="success"} | 研究規格 8.6.1；抽樣在 `artifacts/error_analysis/samples_for_reading.csv`（含原始文字，不進版控） |
 | 簡報（12 分鐘 ＋ Q&A 3 分鐘） | :badge[部分]{variant="warning"} | 內容、六個互動元件與**七張投影片用靜態圖**都在 [`30-presentation.mdx`](./30-presentation.mdx)，原始檔在 `diagrams/`。**投影片本身未製作** |
 
@@ -121,8 +123,12 @@ updatedAt: "2026-10-31"
 | 3 | val split 閒置 | 切了 4,740 筆但從未使用 | :badge[完成]{variant="success"} 用來取得分類門檻（研究規格 8.4.4），符合 6.4 第 6 條 |
 | 4 | 同意標籤先驗基準 | 實測發現 entropy 在 hard 子集等於隨機，拿它當對照會高估 ML 貢獻 | :badge[完成]{variant="success"} 階梯 1.5，研究規格 7.1 |
 | 5 | 配對比較 | 平均 ± 標準差會同時低估與高估差異的可信度 | :badge[完成]{variant="success"} `metrics.paired_comparison`，研究規格 8.4.3 |
+| 6 | BGE-M3 + PCA 比較（選做） | 研究規格 7.2；回答「文字表示換掉有沒有用」 | :badge[完成]{variant="success"} `embeddings.py`、`scripts/embed_texts.py`、`models.embed_logreg_pipeline`、`tests/test_embeddings.py` |
+| 7 | 視覺化補上 BGE 那一列 | 研究規格 8.4 的表已有 BGE，圖不能停在五個方法 | :badge[完成]{variant="success"} 四張靜態圖（`baseline-results`、`baseline-paired`、`model-ladder`、`module-pipeline`）與互動元件 `baseline-results.tsx` 都已更新並重新匯出 SVG |
 
-接下來只剩簡報，沒有待寫的程式。選做項目（BGE-M3 比較、Q9 的 LLM 對照線）時間夠才做。
+七項全部完成，沒有待寫的程式。Q9 的 LLM 對照線已決議不做。
+
+斜線圖的逐 seed 數值不再寫死在圖裡：`run_models.py` 會輸出 `artifacts/models/per_seed_r10_hard.csv`，靜態圖與互動元件都從那裡抄。
 
 ## 7. 擋路關係
 
@@ -133,7 +139,7 @@ updatedAt: "2026-10-31"
 | Q8 | 發表排 12/14 還是 12/21 | 排練與緩衝安排 | 待教師公布 |
 | Q7 | 繁中 pilot 的題目來源 | 繁中 pilot 設計（論文階段） | — |
 
-Q11（評估範圍）與 Q9（LLM 對照線）已於 2026-10-31 決議，簡報講法不再有未定事項。
+Q11（評估範圍）與 Q9（LLM 對照線）已於 2026-10-31 決議，Q12（full 範圍的排序方式）於 2026-11-09 決議，簡報講法不再有未定事項。
 
 ## 8. 論文延伸
 

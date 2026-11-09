@@ -134,6 +134,29 @@ def aggregate(runs: list[dict[str, float]]) -> pd.DataFrame:
     return summary
 
 
+def per_seed_metric(
+    y_by_seed: dict[int, np.ndarray],
+    scores_by_model: dict[str, dict[int, np.ndarray]],
+    key: str = "R@10%",
+) -> pd.DataFrame:
+    """每個模型在每個 reveal seed 上的指標值，一列一個模型。
+
+    配對比較與斜線圖都要用同一份逐 seed 數字——從平均反推畫出來的線不是實測
+    結果。排序 seed 固定為 `40_000 + reveal_seed`，所以兩邊必定一致。
+    """
+    per_seed: dict[str, dict[int, float]] = {}
+    for name, by_seed in scores_by_model.items():
+        per_seed[name] = {}
+        for seed, scores in by_seed.items():
+            rng = np.random.default_rng(40_000 + seed)
+            per_seed[name][seed] = ranking_metrics(y_by_seed[seed], scores, rng)[key]
+
+    table = pd.DataFrame({name: pd.Series(vals) for name, vals in per_seed.items()}).T
+    table.index.name = "model"
+    table.columns.name = "reveal_seed"
+    return table
+
+
 def paired_comparison(
     y_by_seed: dict[int, np.ndarray],
     scores_by_model: dict[str, dict[int, np.ndarray]],
@@ -146,18 +169,13 @@ def paired_comparison(
     標準差通常遠小於各自分數的標準差——用後者比較會低估差異的可信度，也會
     高估（研究規格 8.5 要求 paired bootstrap，這是其單機版）。
     """
-    per_seed: dict[str, dict[int, float]] = {}
-    for name, by_seed in scores_by_model.items():
-        per_seed[name] = {}
-        for seed, scores in by_seed.items():
-            rng = np.random.default_rng(40_000 + seed)
-            per_seed[name][seed] = ranking_metrics(y_by_seed[seed], scores, rng)[key]
+    per_seed = per_seed_metric(y_by_seed, scores_by_model, key)
 
     seeds = sorted(y_by_seed)
-    ref = np.array([per_seed[reference][s] for s in seeds])
+    ref = np.array([per_seed.loc[reference, s] for s in seeds])
     rows = []
     for name in scores_by_model:
-        values = np.array([per_seed[name][s] for s in seeds])
+        values = np.array([per_seed.loc[name, s] for s in seeds])
         diff = values - ref
         diff_text = f"{diff.mean() * 100:+.2f} ± {diff.std(ddof=1) * 100:.2f}"
         rows.append(

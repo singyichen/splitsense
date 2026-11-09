@@ -9,12 +9,14 @@ from sklearn.model_selection import GroupKFold
 from splitsense import config as cfg
 from splitsense.features import VISIBLE_FEATURE_NAMES, visible_features
 from splitsense.models import (
+    EMBED_LOGREG_GRID,
     GB_GRID,
     LOGREG_GRID,
     N_CV_SPLITS,
     build_vectorizer,
     recall_at_budget,
     stack_reveal_seeds,
+    stack_reveal_seeds_embed,
 )
 from splitsense.reveal import build_reveal_manifest
 from splitsense.split import build_split_manifest
@@ -42,6 +44,16 @@ def test_調參格線涵蓋規格要求的超參數():
     assert "clf__C" in LOGREG_GRID
     assert "clf__learning_rate" in GB_GRID
     assert "clf__max_depth" in GB_GRID
+
+
+def test_embedding_格線涵蓋_PCA_維度與前處理():
+    """研究規格 7.2 把「1024 維是否需要 PCA」與 normalization 列為待調研項目，
+    所以兩者都要由 CV 選，不能先猜一個寫死。"""
+    assert "pre__text__pca__n_components" in EMBED_LOGREG_GRID
+    assert len(EMBED_LOGREG_GRID["pre__text__pca__n_components"]) >= 3
+    assert "pre__text__scale" in EMBED_LOGREG_GRID
+    assert "clf__C" in EMBED_LOGREG_GRID
+    assert "clf__class_weight" in EMBED_LOGREG_GRID
 
 
 # --- 疊加 reveal seeds 與 GroupKFold ---
@@ -103,3 +115,30 @@ def test_hard_子集上四個可見特徵是常數(table):
                  "visible_vote_margin"):
         assert features[name].nunique() == 1, name
     assert features["visible_count_neutral"].nunique() > 1
+
+
+# --- 兩個階梯必須跑在同一批 row 上 ---
+
+
+def test_embedding_與_tfidf_選到同一批_row(table):
+    """少了這點，BGE 與 TF-IDF LR 的配對比較就不在同一份資料上。"""
+    from splitsense.embeddings import EmbeddingStore
+
+    split = build_split_manifest(table)
+    train_ids = set(split.loc[split["split"] == "train", "item_id"])
+    manifests = {s: build_reveal_manifest(table, seed=s) for s in cfg.REVEAL_SEEDS}
+    vectorizer = build_vectorizer(table.items, train_ids)
+
+    item_ids = [str(i) for i in table.items["item_id"]]
+    store = EmbeddingStore(
+        matrix=np.arange(len(item_ids) * 4, dtype=np.float32).reshape(len(item_ids), 4),
+        item_ids=item_ids,
+        metadata={},
+    )
+
+    tfidf = stack_reveal_seeds(table.items, manifests, train_ids, vectorizer, hard_only=True)
+    embed = stack_reveal_seeds_embed(manifests, train_ids, store, hard_only=True)
+
+    assert np.array_equal(tfidf.y, embed.y)
+    assert np.array_equal(tfidf.groups, embed.groups)
+    assert len(embed.feature_names) == embed.X.shape[1]

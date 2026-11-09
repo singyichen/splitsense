@@ -38,7 +38,7 @@
     <div class="diagram-container">
       <svg viewBox="0 0 1000 540" width="2000" height="1080" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="baseline-results-title baseline-results-desc">
         <title id="baseline-results-title">只複核 10% 時能抓到多少爭議題</title>
-        <desc id="baseline-results-desc">長條圖：難題組上五個方法的 Recall@10%。隨機 9.5、可見 entropy 9.9、同意標籤查表 18.5、Logistic Regression 19.4、Gradient Boosting 19.4，理論上限 40.5%。</desc>
+        <desc id="baseline-results-desc">長條圖：難題組上六個方法的 Recall@10%。隨機 9.5、可見 entropy 9.9、同意標籤查表 18.5、TF-IDF Logistic Regression 19.4、Gradient Boosting 19.4、BGE-M3 Logistic Regression 21.3，理論上限 40.5%。</desc>
         <style>
           text { font-family: 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', sans-serif; }
           .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
@@ -72,35 +72,44 @@
         <line x1="80" y1="112" x2="960" y2="112" stroke="#6c798e" stroke-width="1" stroke-dasharray="5,4"/>
         <rect x="760" y="92" width="196" height="14" rx="2" fill="#ffffff"/>
         <text x="956" y="103" text-anchor="end" class="val mono muted">理論上限 40.5%</text>
-        <rect x="112" y="348" width="112" height="72" fill="#ffffff"/>
-        <rect x="112" y="348" width="112" height="72" fill="rgba(79,91,110,0.15)" stroke="#6c798e" stroke-width="1"/>
-        <text x="168" y="340" text-anchor="middle" class="val mono muted">9.5</text>
-        <text x="168" y="444" text-anchor="middle" class="h2 ink">隨機排序</text>
-        <text x="168" y="460" text-anchor="middle" class="val mono muted">1.0×</text>
-        <rect x="288" y="345" width="112" height="75" fill="#ffffff"/>
-        <rect x="288" y="345" width="112" height="75" fill="rgba(79,91,110,0.15)" stroke="#6c798e" stroke-width="1"/>
-        <text x="344" y="337" text-anchor="middle" class="val mono muted">9.9</text>
-        <text x="344" y="444" text-anchor="middle" class="h2 ink">可見 entropy</text>
-        <text x="344" y="460" text-anchor="middle" class="val mono muted">1.0×</text>
-        <rect x="464" y="279" width="112" height="141" fill="#ffffff"/>
-        <rect x="464" y="279" width="112" height="141" fill="rgba(237,155,38,0.12)" stroke="#c7641a" stroke-width="1"/>
-        <text x="520" y="271" text-anchor="middle" class="val mono acc">18.5</text>
-        <text x="520" y="444" text-anchor="middle" class="h2 ink">同意標籤查表</text>
-        <text x="520" y="460" text-anchor="middle" class="val mono muted">1.9×</text>
-        <rect x="640" y="273" width="112" height="147" fill="#ffffff"/>
-        <rect x="640" y="273" width="112" height="147" fill="rgba(79,91,110,0.15)" stroke="#6c798e" stroke-width="1"/>
-        <text x="696" y="265" text-anchor="middle" class="val mono muted">19.4</text>
-        <text x="696" y="444" text-anchor="middle" class="h2 ink">Logistic Reg.</text>
-        <text x="696" y="460" text-anchor="middle" class="val mono muted">1.9×</text>
-        <rect x="816" y="273" width="112" height="147" fill="#ffffff"/>
-        <rect x="816" y="273" width="112" height="147" fill="rgba(79,91,110,0.15)" stroke="#6c798e" stroke-width="1"/>
-        <text x="872" y="265" text-anchor="middle" class="val mono muted">19.4</text>
-        <text x="872" y="444" text-anchor="middle" class="h2 ink">Gradient Boost.</text>
-        <text x="872" y="460" text-anchor="middle" class="val mono muted">1.9×</text>
+        <rect x="101" y="348" width="104" height="72" fill="#ffffff"/>
+        <rect x="101" y="348" width="104" height="72" fill="rgba(79,91,110,0.15)" stroke="#6c798e" stroke-width="1"/>
+        <text x="153" y="340" text-anchor="middle" class="val mono muted">9.5</text>
+        <text x="153" y="444" text-anchor="middle" class="h2 ink">隨機排序</text>
+        <text x="153" y="460" text-anchor="middle" class="val mono muted">1.0×</text>
+        <rect x="248" y="345" width="104" height="75" fill="#ffffff"/>
+        <rect x="248" y="345" width="104" height="75" fill="rgba(79,91,110,0.15)" stroke="#6c798e" stroke-width="1"/>
+        <text x="300" y="337" text-anchor="middle" class="val mono muted">9.9</text>
+        <text x="300" y="444" text-anchor="middle" class="h2 ink">可見 entropy</text>
+        <text x="300" y="460" text-anchor="middle" class="val mono muted">1.0×</text>
+        <rect x="395" y="279" width="104" height="141" fill="#ffffff"/>
+        <rect x="395" y="279" width="104" height="141" fill="rgba(237,155,38,0.12)" stroke="#c7641a" stroke-width="1"/>
+        <text x="447" y="271" text-anchor="middle" class="val mono acc">18.5</text>
+        <text x="447" y="444" text-anchor="middle" class="h2 ink">同意標籤查表</text>
+        <text x="447" y="460" text-anchor="middle" class="val mono muted">1.9×</text>
+        <rect x="541" y="273" width="104" height="147" fill="#ffffff"/>
+        <rect x="541" y="273" width="104" height="147" fill="rgba(44,110,187,0.10)" stroke="#2c6ebb" stroke-width="1"/>
+        <text x="593" y="265" text-anchor="middle" class="val mono muted">19.4</text>
+        <text x="593" y="444" text-anchor="middle" class="h2 ink">LR（TF-IDF）</text>
+        <text x="593" y="460" text-anchor="middle" class="val mono muted">1.9×</text>
+        <rect x="688" y="273" width="104" height="147" fill="#ffffff"/>
+        <rect x="688" y="273" width="104" height="147" fill="rgba(44,110,187,0.10)" stroke="#2c6ebb" stroke-width="1"/>
+        <text x="740" y="265" text-anchor="middle" class="val mono muted">19.4</text>
+        <text x="740" y="444" text-anchor="middle" class="h2 ink">GB（TF-IDF）</text>
+        <text x="740" y="460" text-anchor="middle" class="val mono muted">1.9×</text>
+        <rect x="835" y="258" width="104" height="162" fill="#ffffff"/>
+        <rect x="835" y="258" width="104" height="162" fill="rgba(27,79,156,0.18)" stroke="#1b4f9c" stroke-width="1"/>
+        <text x="887" y="250" text-anchor="middle" class="val mono navy">21.3</text>
+        <text x="887" y="444" text-anchor="middle" class="h2 ink">LR（BGE-M3）</text>
+        <text x="887" y="460" text-anchor="middle" class="val mono muted">2.1×</text>
         <line x1="32" y1="488" x2="968" y2="488" stroke="rgba(38,46,61,0.12)" stroke-width="0.8"/>
         <text x="32" y="512" letter-spacing="0.14em" class="val mono muted">LEGEND</text>
         <rect x="128" y="502" width="16" height="10" rx="2" fill="rgba(237,155,38,0.12)" stroke="#c7641a" stroke-width="1"/>
         <text x="152" y="512" class="lg muted">不用訓練的透明規則</text>
+        <rect x="256" y="502" width="16" height="10" rx="2" fill="rgba(44,110,187,0.10)" stroke="#2c6ebb" stroke-width="1"/>
+        <text x="280" y="512" class="lg muted">TF-IDF 文字模型</text>
+        <rect x="376" y="502" width="16" height="10" rx="2" fill="rgba(27,79,156,0.18)" stroke="#1b4f9c" stroke-width="1"/>
+        <text x="400" y="512" class="lg muted">只換掉文字表示：bge-m3</text>
         <text x="968" y="512" text-anchor="end" class="val mono muted">y 軸：Recall@10%，難題組 3,153 題</text>
       </svg>
     </div>

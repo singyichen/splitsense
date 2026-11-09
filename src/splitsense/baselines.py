@@ -59,6 +59,20 @@ def agreed_label_scores(manifest: pd.DataFrame, prior: dict) -> np.ndarray:
     return agreed.map(prior).fillna(default).to_numpy(dtype=float)
 
 
+def disagree_first_scores(manifest: pd.DataFrame, refine: np.ndarray) -> np.ndarray:
+    """full 範圍的部署式排序：可見已不一致者排最前，其餘用 `refine` 細排。
+
+    可見 2 份已不一致時該 item 必然分歧（研究規格 8.2.1），所以任何實際會上線
+    的排序都會先把它們送去複核，再用模型安排剩下的。直接拿 hard 範圍訓練出來
+    的模型分數去排 full 範圍會低估它：那個模型的 `visible_disagree` 係數恆為 0
+    （8.4.2），它從來沒機會學到「可見不一致」這件事。
+
+    `refine` 會先壓到 [0, 1] 再乘 0.5，確保不可能翻過 disagree 那一群。
+    """
+    disagree = (~manifest["visible_agree"].to_numpy(dtype=bool)).astype(float)
+    return disagree + 0.5 * np.clip(np.asarray(refine, dtype=float), 0.0, 1.0)
+
+
 def evaluate_agreed_label_prior(
     y_true_by_seed: dict[int, np.ndarray], manifests: dict[int, pd.DataFrame], prior: dict
 ) -> pd.DataFrame:

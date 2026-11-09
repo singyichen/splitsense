@@ -19,6 +19,11 @@ dev = [
     "pytest>=8.0",
     "ruff>=0.6",
 ]
+# 研究規格 7.2 的 Embedding 階梯（選做）。torch 會被 sentence-transformers 帶進來，
+# 體積約 2 GB，所以不放進主要 dependencies——沒有這個 extra 也要能跑完課堂版主線。
+embed = [
+    "sentence-transformers>=3.0",
+]
 
 [build-system]
 requires = ["hatchling"]

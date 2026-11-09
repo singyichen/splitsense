@@ -1,6 +1,6 @@
-"""階梯 2（Logistic Regression）與階梯 3（Gradient Boosting）。
+"""階梯 2（Logistic Regression）、階梯 3（Gradient Boosting）與 Embedding 階梯。
 
-對應研究規格 7.1、7.3。調參一律 `GridSearchCV` + `GroupKFold`，group 為
+對應研究規格 7.1、7.2、7.3。調參一律 `GridSearchCV` + `GroupKFold`，group 為
 `item_id`，評分用主要指標 `Recall@10%`。
 """
 
@@ -11,14 +11,17 @@ from dataclasses import dataclass
 import numpy as np
 import pandas as pd
 from scipy import sparse
-from sklearn.decomposition import TruncatedSVD
+from sklearn.compose import ColumnTransformer
+from sklearn.decomposition import PCA, TruncatedSVD
 from sklearn.ensemble import HistGradientBoostingClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import make_scorer
 from sklearn.model_selection import GridSearchCV, GroupKFold
 from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler
 
 from splitsense import config as cfg
+from splitsense.embeddings import EmbeddingStore, build_embed_matrix, embed_feature_names
 from splitsense.features import VISIBLE_FEATURE_NAMES, build_matrix, fit_tfidf, visible_features
 from splitsense.metrics import precision_recall_at_k, rank_with_random_tiebreak
 
@@ -56,6 +59,20 @@ GB_GRID = {
 
 SVD_COMPONENTS = 200
 
+# Embedding 階梯的格線。PCA 維度與「PCA 前要不要逐維標準化」都交給 CV 選，
+# 不先猜（研究規格 7.2 列為待調研項目：「pooling 與 normalization 是否固定、
+# 1024 維是否直接輸入或需 PCA」）。
+#
+# L2 normalize 沒有列進格線：bge-m3 的 SentenceTransformer 組態自帶 Normalize
+# 模組，向量恆為單位長度，再 normalize 一次是 no-op。可選的是 StandardScaler
+# ——PCA 吃的是共變異數，逐維標準化會改變它看到的結構。
+EMBED_LOGREG_GRID = {
+    "pre__text__scale": ["passthrough", StandardScaler()],
+    "pre__text__pca__n_components": list(cfg.PCA_COMPONENTS),
+    "clf__C": [0.01, 0.1, 1.0, 10.0],
+    "clf__class_weight": [None, "balanced"],
+}
+
 
 def logreg_pipeline() -> Pipeline:
     return Pipeline(
@@ -90,6 +107,50 @@ def gb_pipeline() -> Pipeline:
     )
 
 
+def embed_logreg_pipeline(dimension: int = cfg.EMBED_DIM) -> Pipeline:
+    """Embedding → PCA → 與可見標註特徵串接 → Logistic Regression。
+
+    結構刻意對齊 `logreg_pipeline`，讓兩者只差在文字表示（TF-IDF 對 bge-m3）。
+
+    **PCA 必須放在 Pipeline 裡**，這樣 `GridSearchCV` 的每一折都只用訓練折
+    fit 它。先把全部資料做一次 PCA 再切折，會讓 test 的共變異數結構進到特徵
+    裡——那是研究規格 6.4 第 6 條禁止的，而且不會報錯。
+
+    可見標註特徵不經過 PCA：只有 8 欄，而且每一欄都要能直接讀係數（8.4.2）。
+    """
+    text_branch = Pipeline(
+        [
+            ("scale", "passthrough"),
+            (
+                "pca",
+                PCA(
+                    n_components=cfg.PCA_COMPONENTS_DEFAULT,
+                    svd_solver="randomized",
+                    random_state=cfg.SPLIT_SEED,
+                ),
+            ),
+        ]
+    )
+    n_visible = len(VISIBLE_FEATURE_NAMES)
+    pre = ColumnTransformer(
+        [
+            ("text", text_branch, list(range(dimension))),
+            ("visible", "passthrough", list(range(dimension, dimension + n_visible))),
+        ]
+    )
+    return Pipeline(
+        [
+            ("pre", pre),
+            (
+                "clf",
+                LogisticRegression(
+                    solver="liblinear", max_iter=2000, random_state=cfg.SPLIT_SEED
+                ),
+            ),
+        ]
+    )
+
+
 @dataclass
 class TrainingData:
     """疊加多個 reveal seed 的訓練資料。
@@ -99,10 +160,25 @@ class TrainingData:
     次，`GroupKFold` 會退化成一般 `KFold`。
     """
 
-    X: sparse.csr_matrix
+    X: sparse.csr_matrix | np.ndarray
     y: np.ndarray
     groups: np.ndarray
     feature_names: list[str]
+
+
+def iter_reveal_rows(
+    manifests: dict[int, pd.DataFrame], item_ids: set[str], hard_only: bool
+):
+    """逐 reveal seed 取出要用的 manifest row。
+
+    `hard_only=True` 只留可見 2 份一致的 row——那是模型真正被使用的時機。
+    可見已不一致時該 item 必然分歧，不需要模型。
+    """
+    for manifest in manifests.values():
+        rows = manifest[manifest["item_id"].isin(item_ids)]
+        if hard_only:
+            rows = rows[rows["visible_agree"]]
+        yield rows.reset_index(drop=True)
 
 
 def stack_reveal_seeds(
@@ -112,18 +188,10 @@ def stack_reveal_seeds(
     vectorizer,
     hard_only: bool,
 ) -> TrainingData:
-    """把各 reveal seed 的資料疊成一張表。
-
-    `hard_only=True` 只留可見 2 份一致的 row——那是模型真正被使用的時機。
-    可見已不一致時該 item 必然分歧，不需要模型。
-    """
+    """TF-IDF 版：把各 reveal seed 的資料疊成一張表。"""
     text_by_id = items.set_index("item_id")["text"]
     blocks, ys, groups = [], [], []
-    for manifest in manifests.values():
-        rows = manifest[manifest["item_id"].isin(item_ids)]
-        if hard_only:
-            rows = rows[rows["visible_agree"]]
-        rows = rows.reset_index(drop=True)
+    for rows in iter_reveal_rows(manifests, item_ids, hard_only):
         texts = text_by_id.loc[rows["item_id"]].reset_index(drop=True)
         blocks.append(build_matrix(texts, rows, vectorizer))
         ys.append(rows["z"].to_numpy())
@@ -135,6 +203,30 @@ def stack_reveal_seeds(
         y=np.concatenate(ys),
         groups=np.concatenate(groups),
         feature_names=names,
+    )
+
+
+def stack_reveal_seeds_embed(
+    manifests: dict[int, pd.DataFrame],
+    item_ids: set[str],
+    store: EmbeddingStore,
+    hard_only: bool,
+) -> TrainingData:
+    """Embedding 版：同樣的 row 選法，只換文字表示。
+
+    不需要 `items`：文字已經在編碼階段用掉了，這裡只依 item_id 取向量。
+    """
+    blocks, ys, groups = [], [], []
+    for rows in iter_reveal_rows(manifests, item_ids, hard_only):
+        blocks.append(build_embed_matrix(rows, store))
+        ys.append(rows["z"].to_numpy())
+        groups.append(rows["item_id"].to_numpy())
+
+    return TrainingData(
+        X=np.vstack(blocks),
+        y=np.concatenate(ys),
+        groups=np.concatenate(groups),
+        feature_names=embed_feature_names(store.dimension),
     )
 
 
@@ -170,15 +262,19 @@ def visible_feature_coefficients(search: GridSearchCV, data: TrainingData) -> pd
 
 
 __all__ = [
+    "EMBED_LOGREG_GRID",
     "GB_GRID",
     "LOGREG_GRID",
     "RECALL_SCORER",
     "TrainingData",
     "build_vectorizer",
+    "embed_logreg_pipeline",
     "gb_pipeline",
+    "iter_reveal_rows",
     "logreg_pipeline",
     "recall_at_budget",
     "stack_reveal_seeds",
+    "stack_reveal_seeds_embed",
     "tune",
     "visible_feature_coefficients",
     "visible_features",

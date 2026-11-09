@@ -6,6 +6,7 @@
 
 from __future__ import annotations
 
+import numpy as np
 import pytest
 
 from splitsense import config as cfg
@@ -149,3 +150,63 @@ def test_不使用門檻版_target():
     assert not hasattr(data, "tau")
     source = (cfg.PROJECT_ROOT / "src" / "splitsense" / "data.py").read_text(encoding="utf-8")
     assert "tau" not in source
+
+
+def _embed_toy_data(dimension: int = 16, n: int = 200):
+    from splitsense.features import VISIBLE_FEATURE_NAMES
+
+    rng = np.random.default_rng(0)
+    X = rng.normal(size=(n, dimension + len(VISIBLE_FEATURE_NAMES)))
+    y = (rng.random(n) > 0.5).astype(int)
+    return X, y, dimension
+
+
+def _text_pca(pipeline):
+    return pipeline.named_steps["pre"].named_transformers_["text"].named_steps["pca"]
+
+
+def test_PCA_放在_Pipeline_裡而不是先算好():
+    """第 6 條：特徵只能由 training 決定。
+
+    PCA 的主成分是由資料的共變異數結構算出來的統計量。先對全部資料做一次 PCA
+    再切折，test 的結構就進到特徵裡了——分數會變好，而且不會報錯。放進
+    Pipeline 是唯一能讓 `GridSearchCV` 每一折只用訓練折 fit 它的方式。
+    """
+    from sklearn.base import clone
+
+    from splitsense.models import EMBED_LOGREG_GRID, embed_logreg_pipeline
+
+    X, y, dimension = _embed_toy_data()
+    assert "pre__text__pca__n_components" in EMBED_LOGREG_GRID
+
+    pipeline = embed_logreg_pipeline(dimension).set_params(pre__text__pca__n_components=4)
+    assert "pre__text__pca" in pipeline.get_params()
+
+    half = len(X) // 2
+    pipeline.fit(X[:half], y[:half])
+    components = _text_pca(pipeline).components_.copy()
+
+    # 對 test 做預測不得改動已 fit 的 PCA
+    pipeline.predict_proba(X[half:])
+    assert np.array_equal(_text_pca(pipeline).components_, components)
+
+    # 而且這個統計量真的會隨資料變——所以先算好就是洩漏，不是無害的加速
+    on_all = clone(pipeline).fit(X, y)
+    assert not np.allclose(_text_pca(on_all).components_, components)
+
+
+def test_可見標註特徵不經過_PCA():
+    """只有 8 欄，而且每一欄都要能直接讀係數（研究規格 8.4.2）。"""
+    from splitsense.features import VISIBLE_FEATURE_NAMES
+    from splitsense.models import embed_logreg_pipeline
+
+    X, y, dimension = _embed_toy_data()
+    n_components = 4
+    pipeline = embed_logreg_pipeline(dimension).set_params(
+        pre__text__pca__n_components=n_components
+    )
+    pipeline.fit(X, y)
+    transformed = pipeline.named_steps["pre"].transform(X)
+    assert transformed.shape == (len(X), n_components + len(VISIBLE_FEATURE_NAMES))
+    # 可見標註那幾欄原封不動地穿過去
+    assert np.allclose(transformed[:, n_components:], X[:, dimension:])

@@ -3,12 +3,12 @@ title: "技術棧"
 description: "實際安裝的工具與版本、目錄佈局、常用指令、程式與測試盤點、視覺化工具鏈"
 tags: ["技術棧", "工具鏈", "版本"]
 createdAt: "2026-10-31"
-updatedAt: "2026-10-31"
+updatedAt: "2026-11-09"
 ---
 
 # 技術棧
 
-> 以 repo 實況為準，**2026-10-31** 盤點。
+> 以 repo 實況為準，**2026-11-09** 盤點。
 
 本文件管**實際裝了什麼**；為什麼選它管在別處。
 
@@ -35,54 +35,64 @@ Python **3.13.0**（`pyproject.toml` 要求 `>=3.12`），套件管理 **uv 0.12
 | `certifi` | 2026.10.23 | 下載憑證 |
 | `pytest` | 9.2.0 | 測試（dev） |
 | `ruff` | 0.17.3 | lint（dev） |
-| `playwright` | 1.64.1 | 圖表匯出 PNG（選配） |
+| `sentence-transformers` | 6.2.0 | `BAAI/bge-m3` 編碼（embed） |
+| `torch` | 2.15.0 | 由 sentence-transformers 帶入，MPS 推論（embed） |
+| `transformers` | 5.22.2 | 同上（embed） |
+| `tokenizers` | 0.23.3 | 同上（embed） |
+| `huggingface-hub` | 2.4.0 | 模型下載與 commit sha 解析（embed） |
+| `safetensors` | 0.8.0 | 模型權重載入（embed） |
 
-兩個相依值得說明：
+三個相依值得說明：
 
 - **`certifi` 是被迫加的。** macOS 的 python.org 版 Python 不讀系統鑰匙串，`urllib` 預設下載會 `CERTIFICATE_VERIFY_FAILED`。`data.download_raw()` 明確指定 `ssl.create_default_context(cafile=certifi.where())`。
-- **`playwright` 只有 PNG 匯出用得到**（會啟動 chromium）。沒裝不影響任何實驗，也不影響 HTML 與 SVG 出圖。
+- **`embed` extra 刻意獨立。** `sentence-transformers` 會把 torch 一起帶進來（環境多約 2 GB，模型權重再約 2.3 GB），而它只服務研究規格 7.2 這個選做項目。放進主要 dependencies 會讓「只想重現課堂版主線」的人也得付這個代價，所以列為 optional extra；沒裝也能跑完 `run_models.py`，只會少掉 BGE 那一列。
+- **`playwright` 沒有寫進 `pyproject.toml`**，所以 `uv sync` 會把它移除。只有 `diagrams/scripts/export_png.py` 用得到（會啟動 chromium）；要出 PNG 時再 `uv pip install playwright` 即可，不影響任何實驗，也不影響 HTML 與 SVG 出圖。
 
 ## 2. 管線總覽
 
-![四層管線：取得資料、資料協議、特徵、模型與分析。每層標明負責的模組、要跑的腳本與產出目錄；層與層之間的箭頭寫的是不得違反的不變量；底部是被多處共用的 config 與 metrics](./assets/module-pipeline.svg)
+![四層管線：取得資料、資料協議、特徵、模型與分析。特徵層有 TF-IDF 與 bge-m3 兩種文字表示。每層標明負責的模組、要跑的腳本與產出目錄；層與層之間的箭頭寫的是不得違反的不變量；底部是被多處共用的 config 與 metrics](./assets/module-pipeline.svg)
 
 要知道「跑哪支腳本會產出什麼」看這張就夠。箭頭上寫的四條不變量每條都有對應的測試（見第 6 節），相依關係由 `import` 反查而來，不是手寫的。
 
-`config.py` 被 19 處 import、`metrics.py` 被 6 處——扇入太密，畫成連線會比方塊還多，所以用數字陳述而不是畫線。
+`config.py` 被 24 處 import、`metrics.py` 被 6 處——扇入太密，畫成連線會比方塊還多，所以用數字陳述而不是畫線。
 
 ## 3. 目錄佈局
 
 | 目錄 | 內容 | 進版控 |
 | --- | --- | --- |
-| `src/splitsense/` | 套件本體，11 個模組 | 是 |
-| `scripts/` | 5 支可執行腳本 | 是 |
-| `tests/` | 7 個測試檔 ＋ `conftest.py` | 是 |
+| `src/splitsense/` | 套件本體，12 個模組 | 是 |
+| `scripts/` | 6 支可執行腳本 | 是 |
+| `tests/` | 8 個測試檔 ＋ `conftest.py` | 是 |
 | `diagrams/` | 圖表原始檔（`.html`／`.svg`） | 是 |
 | `docs/assets/` | 筆記引用的 SVG | 是 |
 | `.notecraft/components/` | 互動元件 `.tsx` | 是 |
 | `data/` | 上游 parquet | **否** |
-| `artifacts/` | `eda/`、`manifests/`、`baselines/`、`models/`、`error_analysis/` | **否** |
+| `artifacts/` | `eda/`、`manifests/`、`baselines/`、`models/`、`error_analysis/`、`embeddings/` | **否** |
 
 所有實驗參數集中在 `src/splitsense/config.py`，不散落在各腳本——split 與 reveal 要能重現就靠這一點。
 
 ## 4. 常用指令
 
 ```text
-uv sync --extra dev                             # 建環境
+uv sync --extra dev                             # 建環境（課堂版主線）
+uv sync --extra dev --extra embed               # 另加 BGE-M3（torch 約 2 GB）
 uv run python scripts/run_eda.py                # 重現 Dataset Card 第 3 節
 uv run python scripts/build_dataset.py          # split 與 reveal manifest
 uv run python scripts/run_baselines.py          # 階梯 0、1
-uv run python scripts/run_models.py             # 階梯 2、3，含調參
+uv run python scripts/embed_texts.py            # bge-m3 向量，寫快取（需 embed）
+uv run python scripts/run_models.py             # 階梯 2、3 與 BGE，含調參
 uv run python scripts/run_error_analysis.py     # 混淆矩陣與錯誤分析
-uv run pytest                                   # 70 passed、2 skipped
+uv run pytest                                   # 91 passed、2 skipped（裝 embed）
 uv run ruff check src/ scripts/ tests/
 ```
 
 從零（刪掉 `data/` 與 `artifacts/`）可完整跑通，所有 seed 固定。
 
+`embed_texts.py` 可以單獨先跑，也可以不跑——`run_models.py` 找不到快取時會自己編碼，兩者都沒有（沒裝 `embed` extra）就跳過 BGE 那一列，主線照樣跑完。向量快取約 124 MB，存在 `artifacts/embeddings/` 並附一份 metadata JSON；讀取時比對模型名稱、commit sha、`normalize_embeddings`、`max_length`、維度與 item_id 順序，任一項不同就重算。
+
 ## 5. 程式盤點
 
-2,531 行。
+3,381 行。
 
 | 模組 | 負責 |
 | --- | --- |
@@ -93,15 +103,17 @@ uv run ruff check src/ scripts/ tests/
 | `reveal.py` | `r=2` 的 reveal manifest |
 | `features.py` | TF-IDF ＋ 可見標註特徵 |
 | `metrics.py` | 排序指標、門檻、混淆矩陣、配對比較 |
-| `baselines.py` | 階梯 0、1、1.5 |
-| `models.py` | 階梯 2、3，疊加 reveal seed 與調參 |
+| `baselines.py` | 階梯 0、1、1.5，以及 full 範圍的部署式排序 |
+| `models.py` | 階梯 2、3 與 BGE 階梯的 Pipeline、疊加 reveal seed 與調參 |
+| `embeddings.py` | `bge-m3` 編碼、快取與 metadata 比對、向量與可見特徵串接 |
 | `error_analysis.py` | 文字訊號、同意標籤剖面、邊界組合、抽樣 |
 
 ### scikit-learn 實際用到的 API
 
 ```text
 TfidfVectorizer · LogisticRegression · HistGradientBoostingClassifier
-TruncatedSVD · Pipeline · GridSearchCV · GroupKFold
+TruncatedSVD · PCA · StandardScaler · ColumnTransformer
+Pipeline · GridSearchCV · GroupKFold
 train_test_split · average_precision_score · make_scorer
 ```
 
@@ -109,17 +121,18 @@ train_test_split · average_precision_score · make_scorer
 
 ## 6. 測試盤點
 
-70 passed、2 skipped。兩個 skip 是刻意的（annotator 歷史與 GraphSAGE 的洩漏檢查，標了原因，論文延伸實作時才啟用）。
+裝了 `embed` extra 時 **91 passed、2 skipped**；沒裝時 90 passed、3 skipped。三個 skip 都是刻意的並標了原因：annotator 歷史與 GraphSAGE 的洩漏檢查（論文延伸實作時才啟用），以及唯一需要真實模型的那支（`pytest.importorskip`）。其餘 embedding 測試注入假的 encoder，不碰模型。
 
 | 檔案 | 守什麼 |
 | --- | --- |
-| `test_leakage.py` | 研究規格 6.4 的洩漏七條、split 不變量、`author` 已丟棄 |
+| `test_leakage.py` | 研究規格 6.4 的洩漏七條、split 不變量、`author` 已丟棄、**PCA 只在訓練折上 fit** |
 | `test_reproducibility.py` | 同 seed 重跑一致、比例與盛行率符合設定 |
 | `test_metrics.py` | 指標手算對照、同分隨機打散、Recall 理論上限 |
 | `test_features.py` | **改隱藏標註後特徵必須完全不變**、TF-IDF 只在 training 上 fit |
-| `test_models.py` | `GroupKFold` 不讓同一 item 跨折、疊加 seed 後同 item 出現多次 |
+| `test_models.py` | `GroupKFold` 不讓同一 item 跨折、疊加 seed 後同 item 出現多次、兩個階梯選到同一批 row |
 | `test_baselines.py` | entropy 在難題組恆為常數、低預算指標已飽和 |
 | `test_error_analysis.py` | 混淆矩陣、比率在相加後才算、邊界組合用同一群體當基準 |
+| `test_embeddings.py` | 快取 metadata 不一致就重算、向量列序與 `item_id` 對齊、串接欄序 |
 
 ## 7. 文件與視覺化
 
@@ -170,7 +183,6 @@ diagrams/<name>.html          原始檔，改圖改這個
 | 技術 | 為什麼不用 |
 | --- | --- |
 | BERT、大語言模型 | GoEmotions 公開且被大量使用，LLM 預訓練幾乎確定看過這些留言甚至標籤，分數不可檢驗（Q9）。論文階段仍為必做 |
-| `BAAI/bge-m3` Embedding | 課堂版選做，時間投入打磨簡報；論文階段必做 |
-| PyTorch、PyTorch Geometric | GraphSAGE 屬論文延伸選做 |
-| GPU | 整條管線都在 CPU 上跑完，最慢的 Gradient Boosting 調參 102 秒 |
+| PyTorch Geometric | GraphSAGE 屬論文延伸選做。torch 本身已隨 `embed` extra 進來，但只用於 `bge-m3` 推論，沒有自己訓練任何神經網路 |
+| CUDA GPU | 本機沒有。`bge-m3` 的編碼走 Apple MPS（31,603 筆 248 秒），其餘全在 CPU 上跑完 |
 | Random Forest | Q3 定案改用 `HistGradientBoostingClassifier`——TF-IDF 是 31,451 維稀疏矩陣，RF 的 `max_depth` 格線難調 |
