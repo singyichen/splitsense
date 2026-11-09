@@ -82,9 +82,11 @@ import TechStackArchitecture from '@notes/components/tech-stack-architecture'
 
 ## 3. 管線總覽
 
-![四層管線：取得資料、資料協議、特徵、模型與分析。特徵層有 TF-IDF 與 bge-m3 兩種文字表示。每層標明負責的模組、要跑的腳本與產出目錄；層與層之間的箭頭寫的是不得違反的不變量；底部是被多處共用的 config 與 metrics](./assets/module-pipeline.svg)
+![分層架構圖：左側由外部來源 HuggingFace TID-8 往下接四層——取得資料、資料協議、特徵、模型與分析，每層標出模組、腳本與不得違反的不變量；右側是貫穿全圖的儲存層，每層以虛線對應它寫出的目錄；底部兩列是六支腳本的執行順序與共用的 config、metrics](./assets/module-pipeline.svg)
 
-要知道「跑哪支腳本會產出什麼」看這張就夠。箭頭上寫的四條不變量每條都有對應的測試（見第 7 節），相依關係由 `import` 反查而來，不是手寫的。
+要知道「跑哪支腳本會產出什麼」看這張就夠。箭頭上寫的四條不變量每條都有對應的測試（見第 7 節），相依關係與「哪支腳本寫哪個目錄」都是從程式碼反查的，不是手寫的——**六支腳本剛好一支寫一個產物目錄**。
+
+它與上一節的技術架構圖共用同一套視覺語言（深色膠囊標層級、圓角容器框住每層、虛線＝選配或非主線），但回答不同問題：那張是**相依層級**，這張是**執行順序**。
 
 `config.py` 被 24 處 import、`metrics.py` 被 6 處——扇入太密，畫成連線會比方塊還多，所以用數字陳述而不是畫線。
 
@@ -187,6 +189,8 @@ train_test_split · average_precision_score · make_scorer
 | `annotation-count-leakage`、`baseline-results`、`neutral-only-flagging` | recharts | 有（分頁／hover） |
 | `annotation-reveal-setup`、`metric-saturation`、`review-routing-flow` | 手寫 SVG | 有（拖動／逐步揭露） |
 | `tech-stack-architecture` | HTML ＋ lucide 圖示 | **無**，純靜態 |
+
+它與 `module-pipeline.svg` 共用視覺語言：深色膠囊壓在容器上緣標層級、圓角容器框住每一層、虛線代表選配或非主線。結構取自常見的 solution architecture 圖，但**不採它的黑白格線配色**——本專案的視覺基準是 navy ＋ 金，`CLAUDE.md` 要求兩套擇一不混用，所以層級標籤用 navy 底白字而不是黑底。
 
 純靜態的那個不掛 `client:*` directive——不需要 hydrate，SSR 出來就是最終畫面。
 

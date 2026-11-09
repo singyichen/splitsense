@@ -35,17 +35,18 @@
     <h1>從上游資料到產物</h1>
 
     <div class="diagram-container">
-      <svg viewBox="0 0 1000 640" width="2000" height="1280" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="module-pipeline-title module-pipeline-desc">
+      <svg viewBox="0 0 1000 900" width="2000" height="1800" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="module-pipeline-title module-pipeline-desc">
         <title id="module-pipeline-title">從上游資料到產物</title>
-        <desc id="module-pipeline-desc">四層管線：取得資料、資料協議、特徵、模型與分析。特徵層有兩種文字表示，TF-IDF 與 bge-m3 embedding。每層標明負責的模組、要跑的腳本與產出目錄。層與層之間的箭頭寫的是不得違反的不變量。底部是被多處共用的 config 與 metrics。</desc>
+        <desc id="module-pipeline-desc">分層架構圖。左側由上而下：外部來源 HuggingFace TID-8，接著四層——取得資料、資料協議、特徵、模型與分析，每層標出負責的模組、要跑的腳本與不得違反的不變量。右側是貫穿全圖的儲存層，每一層以虛線對應它寫出的目錄：data/raw、artifacts 的 eda、manifests、embeddings，以及 baselines、models、error_analysis。底部兩列：六支腳本的執行順序，以及被四層共用的 config.py 與 metrics.py。</desc>
         <style>
           text { font-family: 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', sans-serif; }
           .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
           .h    { font-size: 13px; font-weight: 700; }
+          .h2   { font-size: 11px; font-weight: 700; }
           .q    { font-size: 11px; }
           .sub  { font-size: 9px; }
           .lg   { font-size: 8px; }
-          .chip { font-size: 10px; font-weight: 700; }
+          .val  { font-size: 8px; }
           .ink   { fill: #262e3d; }
           .muted { fill: #4f5b6e; }
           .soft  { fill: #9aa6b8; }
@@ -57,91 +58,146 @@
           <marker id="mp" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto">
             <path d="M 0 0.5 L 7.5 4 L 0 7.5 z" fill="#6c798e"/>
           </marker>
+          <marker id="mp-soft" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto">
+            <path d="M 0 0.5 L 7.5 4 L 0 7.5 z" fill="#9aa6b8"/>
+          </marker>
         </defs>
-
-        <rect x="0.5" y="0.5" width="999" height="639" rx="10" fill="#ffffff" stroke="#e1e6ee"/>
-
-        <!-- 左側方向軸 -->
-        <text x="44" y="62" text-anchor="middle" class="lg soft">上游</text>
-        <line x1="44" y1="72" x2="44" y2="488" stroke="#cbd3df" stroke-width="1.5"/>
-        <path d="M 38 476 L 44 489 L 50 476" fill="none" stroke="#cbd3df" stroke-width="1.5"/>
-        <text x="44" y="506" text-anchor="middle" class="lg soft">產物</text>
-
-        <!-- 1 取得資料 -->
-        <rect x="76" y="72" width="664" height="80" rx="10" fill="#eef4fb" stroke="#1b4f9c"/>
-        <rect x="76" y="84" width="4" height="56" rx="2" fill="#1b4f9c"/>
-        <text x="96" y="98" class="h ink">1　取得資料</text>
-        <text x="96" y="120" class="q muted">下載上游 parquet、丟棄 author、篩出恰好 3 份標註、文字去重</text>
-        <text x="96" y="140" class="mono sub muted">data.py · eda.py</text>
-        <rect x="756" y="86" width="208" height="24" rx="12" fill="#1b4f9c"/>
-        <text x="860" y="102" text-anchor="middle" class="chip mono inv">run_eda.py</text>
-        <text x="860" y="130" text-anchor="middle" class="mono sub muted">artifacts/eda/</text>
-        <text x="860" y="146" text-anchor="middle" class="lg soft">31,603 題 · 79 位標註者</text>
-
-        <line x1="408" y1="152" x2="408" y2="184" stroke="#6c798e" stroke-width="1.5" marker-end="url(#mp)"/>
-        <text x="420" y="173" class="lg muted">切 split 前先文字去重，同一段文字不得同時落在 train 與 test</text>
-
-        <!-- 2 資料協議（焦點） -->
-        <rect x="76" y="188" width="664" height="80" rx="10" fill="rgba(237,155,38,0.10)" stroke="#c7641a"/>
-        <rect x="76" y="200" width="4" height="56" rx="2" fill="#c7641a"/>
-        <text x="96" y="214" class="h ink">2　資料協議</text>
-        <text x="96" y="236" class="q muted">item-level 切 70／15／15、每題隨機揭露 2 份標註、其餘隱藏</text>
-        <text x="96" y="256" class="mono sub muted">split.py · reveal.py</text>
-        <rect x="756" y="202" width="208" height="24" rx="12" fill="#c7641a"/>
-        <text x="860" y="218" text-anchor="middle" class="chip mono inv">build_dataset.py</text>
-        <text x="860" y="246" text-anchor="middle" class="mono sub muted">artifacts/manifests/</text>
-        <text x="860" y="262" text-anchor="middle" class="lg soft">split ＋ 5 個 reveal seed</text>
-
-        <line x1="408" y1="268" x2="408" y2="300" stroke="#6c798e" stroke-width="1.5" marker-end="url(#mp)"/>
-        <text x="420" y="289" class="lg muted">只用可見的 2 份建特徵；隱藏標註不得進入特徵、統計或圖 adjacency</text>
-
-        <!-- 3 特徵 -->
-        <rect x="76" y="304" width="664" height="64" rx="10" fill="#ffffff" stroke="#2c6ebb"/>
-        <rect x="76" y="314" width="4" height="44" rx="2" fill="#2c6ebb"/>
-        <text x="96" y="326" class="h ink">3　特徵</text>
-        <text x="96" y="346" class="q muted">兩種文字表示：TF-IDF（31,451 維）與 bge-m3（1024 維 → PCA 64）</text>
-        <text x="96" y="363" class="lg muted">＋ 可見標註統計。兩者都只由 training 決定，PCA 在 Pipeline 裡逐折 fit</text>
-        <text x="722" y="363" text-anchor="end" class="mono sub muted">features.py · embeddings.py</text>
-        <rect x="756" y="312" width="208" height="20" rx="10" fill="#2c6ebb"/>
-        <text x="860" y="326" text-anchor="middle" class="chip mono inv">embed_texts.py</text>
-        <text x="860" y="344" text-anchor="middle" class="mono sub muted">artifacts/embeddings/</text>
-        <text x="860" y="360" text-anchor="middle" class="lg soft">TF-IDF 無獨立腳本</text>
-
-        <line x1="408" y1="368" x2="408" y2="400" stroke="#6c798e" stroke-width="1.5" marker-end="url(#mp)"/>
-        <text x="420" y="389" class="lg muted">訓練集疊 5 個 reveal seed；GroupKFold 的 group 必須是 item_id</text>
-
-        <!-- 4 模型與分析 -->
-        <rect x="76" y="404" width="664" height="96" rx="10" fill="#ffffff" stroke="#2c6ebb"/>
-        <rect x="76" y="416" width="4" height="72" rx="2" fill="#2c6ebb"/>
-        <text x="96" y="430" class="h ink">4　模型與分析</text>
-        <text x="96" y="452" class="q muted">階梯 0–3 與 BGE-M3；full／hard 兩個範圍、配對比較、混淆矩陣、錯誤分析</text>
-        <text x="96" y="472" class="mono sub muted">baselines.py · models.py · error_analysis.py</text>
-        <text x="96" y="490" class="lg soft">測試集只在最後評估一次</text>
-        <rect x="756" y="414" width="208" height="20" rx="10" fill="#2c6ebb"/>
-        <text x="860" y="428" text-anchor="middle" class="chip mono inv">run_baselines.py</text>
-        <rect x="756" y="440" width="208" height="20" rx="10" fill="#2c6ebb"/>
-        <text x="860" y="454" text-anchor="middle" class="chip mono inv">run_models.py</text>
-        <rect x="756" y="466" width="208" height="20" rx="10" fill="#2c6ebb"/>
-        <text x="860" y="480" text-anchor="middle" class="chip mono inv">run_error_analysis.py</text>
-        <text x="860" y="496" text-anchor="middle" class="mono sub muted">artifacts/ 下三個目錄</text>
-
-        <!-- 共用層 -->
-        <rect x="76" y="536" width="888" height="60" rx="10" fill="#f6f8fb" stroke="#cbd3df"/>
-        <rect x="76" y="548" width="4" height="36" rx="2" fill="#9aa6b8"/>
-        <text x="96" y="562" class="h ink">共用層</text>
-        <text x="176" y="562" class="q muted">四層全部依賴，不畫連線是因為連線會比方塊多</text>
-        <text x="96" y="584" class="mono sub muted">config.py</text>
-        <text x="176" y="584" class="lg muted">路徑、split 比例與 seed、reveal 與 embedding 設定、預算與指標常數 — 被 24 處 import</text>
-        <text x="612" y="584" class="mono sub muted">metrics.py</text>
-        <text x="684" y="584" class="lg muted">排序指標、門檻、混淆矩陣、配對比較 — 被 6 處 import</text>
-
-        <!-- LEGEND -->
-        <line x1="32" y1="612" x2="968" y2="612" stroke="rgba(38,46,61,0.12)" stroke-width="0.8"/>
-        <text x="32" y="630" class="lg muted mono" letter-spacing="0.14em">LEGEND</text>
-        <rect x="128" y="620" width="16" height="10" rx="2" fill="rgba(237,155,38,0.10)" stroke="#c7641a"/>
-        <text x="152" y="630" class="lg muted">品質比選哪個模型更重要的一層</text>
-        <text x="420" y="630" class="lg muted">箭頭上寫的是不得違反的不變量，每條都有對應的測試</text>
-        <text x="968" y="630" text-anchor="end" class="lg muted mono">相依關係由 import 反查，見 diagrams/README.md</text>
+        <rect x="0.5" y="0.5" width="999" height="899" rx="10" fill="#ffffff" stroke="#e1e6ee"/>
+        <rect x="640" y="40" width="320" height="654" rx="12" fill="#ffffff" stroke="#cbd3df"/>
+        <rect x="779" y="31" width="42" height="18" rx="5" fill="#1b4f9c"/>
+        <text x="800" y="44" text-anchor="middle" class="h2 inv">儲存</text>
+        <rect x="660" y="60" width="280" height="72" rx="9" fill="#f6f8fb" stroke="#cbd3df"/>
+        <text x="672" y="79" class="h2 ink mono">data/raw/</text>
+        <rect x="672" y="87" width="120" height="15" rx="4" fill="#ffffff" stroke="#e1e6ee"/>
+        <text x="732" y="98" text-anchor="middle" class="val mono muted">goemotions-atr  parquet</text>
+        <text x="672" y="123" class="lg soft">由程式自動下載</text>
+        <rect x="660" y="172" width="280" height="58" rx="9" fill="#f6f8fb" stroke="#cbd3df"/>
+        <text x="672" y="191" class="h2 ink mono">artifacts/eda/</text>
+        <rect x="672" y="199" width="42" height="15" rx="4" fill="#ffffff" stroke="#e1e6ee"/>
+        <text x="693" y="210" text-anchor="middle" class="val mono muted">統計與圖</text>
+        <rect x="660" y="314" width="280" height="58" rx="9" fill="#f6f8fb" stroke="#cbd3df"/>
+        <text x="672" y="333" class="h2 ink mono">artifacts/manifests/</text>
+        <rect x="672" y="341" width="34" height="15" rx="4" fill="#ffffff" stroke="#e1e6ee"/>
+        <text x="689" y="352" text-anchor="middle" class="val mono muted">split</text>
+        <rect x="711" y="341" width="53" height="15" rx="4" fill="#ffffff" stroke="#e1e6ee"/>
+        <text x="738" y="352" text-anchor="middle" class="val mono muted">reveal ×5</text>
+        <rect x="660" y="456" width="280" height="58" rx="9" fill="#f6f8fb" stroke="#cbd3df"/>
+        <text x="672" y="475" class="h2 ink mono">artifacts/embeddings/</text>
+        <rect x="672" y="483" width="29" height="15" rx="4" fill="#ffffff" stroke="#e1e6ee"/>
+        <text x="687" y="494" text-anchor="middle" class="val mono muted">.npy</text>
+        <rect x="706" y="483" width="48" height="15" rx="4" fill="#ffffff" stroke="#e1e6ee"/>
+        <text x="730" y="494" text-anchor="middle" class="val mono muted">metadata</text>
+        <rect x="660" y="598" width="280" height="58" rx="9" fill="#f6f8fb" stroke="#cbd3df"/>
+        <text x="672" y="617" class="h2 ink mono">artifacts/</text>
+        <rect x="672" y="625" width="53" height="15" rx="4" fill="#ffffff" stroke="#e1e6ee"/>
+        <text x="699" y="636" text-anchor="middle" class="val mono muted">baselines</text>
+        <rect x="730" y="625" width="39" height="15" rx="4" fill="#ffffff" stroke="#e1e6ee"/>
+        <text x="750" y="636" text-anchor="middle" class="val mono muted">models</text>
+        <rect x="774" y="625" width="77" height="15" rx="4" fill="#ffffff" stroke="#e1e6ee"/>
+        <text x="813" y="636" text-anchor="middle" class="val mono muted">error_analysis</text>
+        <rect x="40" y="40" width="560" height="74" rx="12" fill="#ffffff" stroke="#cbd3df"/>
+        <rect x="288" y="31" width="64" height="18" rx="5" fill="#1b4f9c"/>
+        <text x="320" y="44" text-anchor="middle" class="h2 inv">外部來源</text>
+        <rect x="60" y="56" width="520" height="46" rx="9" fill="#ffffff" stroke="#e1e6ee"/>
+        <text x="72" y="75" class="h2 ink mono">HuggingFace　MichiganNLP/TID-8</text>
+        <rect x="72" y="83" width="77" height="15" rx="4" fill="#f6f8fb" stroke="#e1e6ee"/>
+        <text x="111" y="94" text-anchor="middle" class="val mono muted">goemotions-atr</text>
+        <rect x="154" y="83" width="64" height="15" rx="4" fill="#f6f8fb" stroke="#e1e6ee"/>
+        <text x="186" y="94" text-anchor="middle" class="val mono muted">恰好 3 份標註</text>
+        <rect x="40" y="152" width="560" height="104" rx="12" fill="#ffffff" stroke="#cbd3df"/>
+        <rect x="279" y="143" width="81" height="18" rx="5" fill="#1b4f9c"/>
+        <text x="320" y="156" text-anchor="middle" class="h2 inv">1　取得資料</text>
+        <rect x="60" y="168" width="520" height="60" rx="9" fill="#eef4fb" stroke="#1b4f9c"/>
+        <text x="72" y="187" class="h2 ink mono">data.py · eda.py</text>
+        <rect x="72" y="195" width="26" height="15" rx="4" fill="#ffffff" stroke="#adc8e8"/>
+        <text x="85" y="206" text-anchor="middle" class="val mono navy">下載</text>
+        <rect x="103" y="195" width="60" height="15" rx="4" fill="#ffffff" stroke="#adc8e8"/>
+        <text x="133" y="206" text-anchor="middle" class="val mono navy">丟棄 author</text>
+        <rect x="168" y="195" width="42" height="15" rx="4" fill="#ffffff" stroke="#adc8e8"/>
+        <text x="189" y="206" text-anchor="middle" class="val mono navy">文字去重</text>
+        <rect x="518" y="230" width="62" height="16" rx="8" fill="#1b4f9c"/>
+        <text x="549" y="241" text-anchor="middle" class="val mono inv">run_eda.py</text>
+        <line x1="600" y1="204" x2="656" y2="204" stroke="#9aa6b8" stroke-width="1.2" stroke-dasharray="4,3" marker-end="url(#mp-soft)"/>
+        <line x1="320.0" y1="256" x2="320.0" y2="286" stroke="#6c798e" stroke-width="1.5" marker-end="url(#mp)"/>
+        <text x="334" y="278" class="lg muted">切 split 前先文字去重，同一段文字不得同時落在 train 與 test</text>
+        <rect x="40" y="294" width="560" height="104" rx="12" fill="#ffffff" stroke="#cbd3df"/>
+        <rect x="279" y="285" width="81" height="18" rx="5" fill="#1b4f9c"/>
+        <text x="320" y="298" text-anchor="middle" class="h2 inv">2　資料協議</text>
+        <rect x="60" y="310" width="520" height="60" rx="9" fill="#eef4fb" stroke="#1b4f9c"/>
+        <text x="72" y="329" class="h2 ink mono">split.py · reveal.py</text>
+        <rect x="72" y="337" width="101" height="15" rx="4" fill="#ffffff" stroke="#adc8e8"/>
+        <text x="123" y="348" text-anchor="middle" class="val mono navy">item-level 70/15/15</text>
+        <rect x="178" y="337" width="48" height="15" rx="4" fill="#ffffff" stroke="#adc8e8"/>
+        <text x="202" y="348" text-anchor="middle" class="val mono navy">揭露 2 份</text>
+        <rect x="489" y="372" width="91" height="16" rx="8" fill="#1b4f9c"/>
+        <text x="535" y="383" text-anchor="middle" class="val mono inv">build_dataset.py</text>
+        <line x1="600" y1="346" x2="656" y2="346" stroke="#9aa6b8" stroke-width="1.2" stroke-dasharray="4,3" marker-end="url(#mp-soft)"/>
+        <line x1="320.0" y1="398" x2="320.0" y2="428" stroke="#6c798e" stroke-width="1.5" marker-end="url(#mp)"/>
+        <text x="334" y="420" class="lg muted">只用可見的 2 份建特徵；隱藏標註不得進入特徵或統計</text>
+        <rect x="40" y="436" width="560" height="104" rx="12" fill="#ffffff" stroke="#cbd3df"/>
+        <rect x="290" y="427" width="59" height="18" rx="5" fill="#1b4f9c"/>
+        <text x="320" y="440" text-anchor="middle" class="h2 inv">3　特徵</text>
+        <rect x="60" y="452" width="520" height="60" rx="9" fill="#eef4fb" stroke="#1b4f9c"/>
+        <text x="72" y="471" class="h2 ink mono">features.py · embeddings.py</text>
+        <rect x="72" y="479" width="85" height="15" rx="4" fill="#ffffff" stroke="#adc8e8"/>
+        <text x="115" y="490" text-anchor="middle" class="val mono navy">TF-IDF 31,451 維</text>
+        <rect x="162" y="479" width="82" height="15" rx="4" fill="#ffffff" stroke="#adc8e8"/>
+        <text x="203" y="490" text-anchor="middle" class="val mono navy">bge-m3 → PCA 64</text>
+        <rect x="499" y="514" width="81" height="16" rx="8" fill="#1b4f9c"/>
+        <text x="539" y="525" text-anchor="middle" class="val mono inv">embed_texts.py</text>
+        <line x1="600" y1="488" x2="656" y2="488" stroke="#9aa6b8" stroke-width="1.2" stroke-dasharray="4,3" marker-end="url(#mp-soft)"/>
+        <line x1="320.0" y1="540" x2="320.0" y2="570" stroke="#6c798e" stroke-width="1.5" marker-end="url(#mp)"/>
+        <text x="334" y="562" class="lg muted">兩者都只由 training 決定；PCA 在 Pipeline 裡逐折 fit</text>
+        <rect x="40" y="578" width="560" height="116" rx="12" fill="#ffffff" stroke="#cbd3df"/>
+        <rect x="274" y="569" width="92" height="18" rx="5" fill="#1b4f9c"/>
+        <text x="320" y="582" text-anchor="middle" class="h2 inv">4　模型與分析</text>
+        <rect x="60" y="594" width="520" height="72" rx="9" fill="#eef4fb" stroke="#1b4f9c"/>
+        <text x="72" y="613" class="h2 ink mono">baselines.py · models.py · error_analysis.py</text>
+        <rect x="72" y="621" width="77" height="15" rx="4" fill="#ffffff" stroke="#adc8e8"/>
+        <text x="111" y="632" text-anchor="middle" class="val mono navy">階梯 0–3 ＋ BGE</text>
+        <rect x="154" y="621" width="56" height="15" rx="4" fill="#ffffff" stroke="#adc8e8"/>
+        <text x="182" y="632" text-anchor="middle" class="val mono navy">full／hard</text>
+        <rect x="216" y="621" width="42" height="15" rx="4" fill="#ffffff" stroke="#adc8e8"/>
+        <text x="237" y="632" text-anchor="middle" class="val mono navy">配對比較</text>
+        <rect x="446" y="668" width="134" height="16" rx="8" fill="#1b4f9c"/>
+        <text x="513" y="679" text-anchor="middle" class="val mono inv">run_models.py 等 3 支</text>
+        <line x1="600" y1="636" x2="656" y2="636" stroke="#9aa6b8" stroke-width="1.2" stroke-dasharray="4,3" marker-end="url(#mp-soft)"/>
+        <line x1="320.0" y1="114" x2="320.0" y2="144" stroke="#6c798e" stroke-width="1.5" marker-end="url(#mp)"/>
+        <text x="334" y="136" class="lg muted">只取恰好 3 份標註的 item，分母固定</text>
+        <line x1="600" y1="77" x2="656" y2="77" stroke="#9aa6b8" stroke-width="1.2" stroke-dasharray="4,3" marker-end="url(#mp-soft)"/>
+        <rect x="40" y="724" width="920" height="64" rx="12" fill="#ffffff" stroke="#cbd3df"/>
+        <rect x="468" y="715" width="64" height="18" rx="5" fill="#1b4f9c"/>
+        <text x="500" y="728" text-anchor="middle" class="h2 inv">執行順序</text>
+        <circle cx="71" cy="762" r="8" fill="#1b4f9c"/>
+        <text x="71" y="765" text-anchor="middle" class="val inv mono">1</text>
+        <text x="84" y="765" class="val mono muted">run_eda</text>
+        <text x="124" y="765" class="val soft">→</text>
+        <circle cx="143" cy="762" r="8" fill="#1b4f9c"/>
+        <text x="143" y="765" text-anchor="middle" class="val inv mono">2</text>
+        <text x="156" y="765" class="val mono muted">build_dataset</text>
+        <text x="224" y="765" class="val soft">→</text>
+        <circle cx="243" cy="762" r="8" fill="#1b4f9c"/>
+        <text x="243" y="765" text-anchor="middle" class="val inv mono">3</text>
+        <text x="256" y="765" class="val mono muted">embed_texts</text>
+        <text x="315" y="765" class="val soft">→</text>
+        <circle cx="334" cy="762" r="8" fill="#1b4f9c"/>
+        <text x="334" y="765" text-anchor="middle" class="val inv mono">4</text>
+        <text x="347" y="765" class="val mono muted">run_baselines</text>
+        <text x="415" y="765" class="val soft">→</text>
+        <circle cx="434" cy="762" r="8" fill="#1b4f9c"/>
+        <text x="434" y="765" text-anchor="middle" class="val inv mono">5</text>
+        <text x="447" y="765" class="val mono muted">run_models</text>
+        <text x="501" y="765" class="val soft">→</text>
+        <circle cx="520" cy="762" r="8" fill="#1b4f9c"/>
+        <text x="520" y="765" text-anchor="middle" class="val inv mono">6</text>
+        <text x="533" y="765" class="val mono muted">run_error_analysis</text>
+        <rect x="40" y="812" width="920" height="64" rx="12" fill="#ffffff" stroke="#cbd3df"/>
+        <rect x="474" y="803" width="53" height="18" rx="5" fill="#1b4f9c"/>
+        <text x="500" y="816" text-anchor="middle" class="h2 inv">共用層</text>
+        <text x="64" y="846" class="h2 ink mono">config.py</text>
+        <text x="160" y="846" class="lg muted">路徑、split 比例與 seed、reveal 與 embedding 設定、預算與指標常數　—　被 24 處 import</text>
+        <text x="680" y="846" class="h2 ink mono">metrics.py</text>
+        <text x="770" y="846" class="lg muted">排序指標、門檻、配對比較　—　被 6 處</text>
       </svg>
     </div>
   </div>
