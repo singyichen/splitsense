@@ -3,7 +3,7 @@ title: "期末簡報內容"
 description: "依課程規範六段撰寫的 12 分鐘發表內容，含講稿要點、數字、時間分配與 Q&A 準備"
 tags: ["簡報", "期末發表", "課程規範"]
 createdAt: "2026-10-31"
-updatedAt: "2026-10-31"
+updatedAt: "2026-11-09"
 ---
 
 # 期末簡報內容
@@ -548,3 +548,48 @@ Gradient Boosting 的 PR-AUC 比 Logistic Regression 高 1.8 個百分點，但�
 | 中文資料可以用嗎？ | 這次只做英文。中文需要自己建小規模標註資料（找 3–5 位標註者），前置時間太長，排在這學期之後。 |
 | 49.8% 的分歧率是不是太高？ | 這是情緒標註的特性——正面／中立／模糊的界線本來就主觀。而且分歧集中在語意相鄰的類別，真正極性相反（正面對負面）只佔 8.2%。 |
 | 為什麼對照組是做完實驗才補的？ | entropy 在難題組恆為 0 是數學事實（兩人標一樣，entropy 必為 0），不是看了結果才挑的。補一條更強的對照是讓比較更保守，不是更寬鬆。 |
+| 用到哪些課堂教的東西？ | 主幹都是課內的：邏輯迴歸（第 5 週）、正則化與 Pipeline（第 6 週）、交叉驗證、`GridSearchCV`、`class_weight` 與混淆矩陣（第 7 週）、TF-IDF 與 Gradient Boosting（第 12 週）、降維（第 13 週）。課外補的三項都是問題設定逼出來的，見 7.1。 |
+| 課堂教的是 k-fold，為什麼改用 `GroupKFold`？ | 訓練集疊了 5 個 reveal seed，同一題會出現 5 次。一般 k-fold 會把同一題同時分到訓練折與驗證折，調參分數因此虛高——這正是第 7 週講的資料洩漏。`GroupKFold` 以題目為 group，保證同一題只在一邊。 |
+| 課堂教的是 ROC-AUC，為什麼報 PR-AUC？ | 難題組的分歧盛行率只有 24.7%，ROC 的偽陽率分母是大量的負例，排序再差 FPR 也動得很慢，曲線看起來偏好。PR 曲線只看「抓出來的有多少是對的」，正例少時比較誠實。主要指標 `Recall@10%` 則直接對應「固定複核預算能抓多少」。 |
+| 為什麼用 `TruncatedSVD` 不用課堂的 PCA？ | 兩者做的是同一件事（找變異最大的方向），差別在 PCA 要先置中。TF-IDF 是 3 萬多維的稀疏矩陣，一置中就變成密集矩陣、記憶體裝不下；`TruncatedSVD` 不置中，可以直接吃稀疏矩陣。 |
+
+### 7.1 技術與課程對照
+
+被問「這跟課程有什麼關係」時用。對照的是 notecraft 課程筆記第 1–15 週。
+
+**課內直接用上**
+
+| 技術 | 專題位置 | 課程週次 |
+| --- | --- | --- |
+| NumPy、Pandas | `data.py`、`reveal.py` | 第 3 週 |
+| Logistic Regression（sigmoid、交叉熵） | 階梯 2 | 第 5 週 |
+| L1／L2 正則化（調 `C`） | LR 調參 | 第 6 週 |
+| `Pipeline` | TF-IDF → 分類器 | 第 6 週 |
+| 先切分再處理（防資料洩漏） | TF-IDF 只在 train 上 fit；`tests/test_leakage.py` | 第 5、6、7 週 |
+| k 折交叉驗證、`GridSearchCV` | `models.tune()` | 第 7 週 |
+| `class_weight='balanced'` | 調參 grid | 第 7 週 |
+| 自訂評分（`make_scorer`） | 以 `Recall@10%` 調參 | 第 7 週 |
+| 混淆矩陣、precision／recall、門檻 | `metrics.confusion_at_threshold` | 第 7 週 |
+| TF-IDF | `features.fit_tfidf` | 第 12 週 |
+| Gradient Boosting | 階梯 3 | 第 12 週 |
+
+**課內概念的延伸**
+
+| 專題做法 | 課內對應 | 差異 |
+| --- | --- | --- |
+| `TruncatedSVD(200)` | PCA（第 13 週） | 不置中，能直接處理稀疏矩陣 |
+| `HistGradientBoostingClassifier` | gradient boosting 原理（第 12 週） | sklearn 的直方圖加速實作 |
+| item-level split | `train_test_split`（第 6 週） | 以題目為單位切，不是以列 |
+| 可見標籤 entropy 當基準 | 熵（第 1、6 週） | 拿來當「不用 ML」的規則分數 |
+
+**課外，問題設定逼出來的**
+
+| 技術 | 為什麼需要 |
+| --- | --- |
+| `GroupKFold`（group = `item_id`） | 疊加 reveal seed 後，一般 k-fold 會洩漏 |
+| PR-AUC | 正例少時比 ROC-AUC 敏感 |
+| `Recall@K%`、`Precision@K%` | 任務是固定預算下的排序，不是分類 |
+| 部分標註 reveal protocol | 本專題的問題設定 |
+| 同分隨機打散、多 seed、配對比較 | 讓比較可重現、可檢驗 |
+
+課內教了但沒用到的：神經網路與 CNN（第 10–11 週）、樸素貝氏（第 12 週）、LDA 與 t-SNE（第 13 週）、迴歸（第 14 週）、分群（第 15 週）。
