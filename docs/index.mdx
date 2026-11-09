@@ -17,8 +17,8 @@ updatedAt: "2026-11-09"
 主要指標是 :ref[Recall@10%]{id="term.recall-at-k"}，在:ref[難題子集]{id="term.hard-subset"}（可見 2 份一致）上計算；整個 test split 上這個指標已經飽和，理由見[研究規格 8.2.1](./00-research-spec.mdx)。
 
 1. **可見 entropy 在 hard 子集等於隨機。** 兩份可見標註一致時 entropy 恆為 0，排序全靠同分打散。拿它當「不用 ML」的對照，會高估模型的貢獻。
-2. **一張四列查表拿到模型 95% 的效果。** 只看「前兩人同意了哪個標籤」的先驗是 18.5%，Logistic Regression 是 19.4%。
-3. **文字模型的優勢是真的，但很小。** 配對比較 +0.85 ± 0.26 個百分點，5 個 :ref[reveal seed]{id="term.reveal-seed"} 全勝；Gradient Boosting 沒有比 Logistic Regression 更好。
+2. **「一張四列查表拿到模型 95% 的效果」要看跟哪個模型比。** 只看「前兩人同意了哪個標籤」的先驗是 18.5%，TF-IDF Logistic Regression 是 19.3%（查表佔 95.9%）——但換成 `bge-m3` 的文字表示之後是 21.8%，查表只佔 84.9%。
+3. **文字表示是比模型族更有效的槓桿。** 同一個 Logistic Regression 只換文字表示：配對比較 +2.45 ± 0.72 個百分點，5 個 :ref[reveal seed]{id="term.reveal-seed"} 全勝；把 LR 換成 Gradient Boosting 是 +0.05 ± 0.27、2/5，與 0 分不出來。
 
 ::include{id="result.hard-ladder"}
 

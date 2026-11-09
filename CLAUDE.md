@@ -59,8 +59,7 @@ uv run ruff check src/ scripts/ tests/
 - 英文與繁中分開報告指標，不只報 pooled score，讓英文樣本量不會遮住繁中的弱點。
 - 機器翻譯資料只能當跨語壓力測試，不得當作繁中主證據。
 - **課堂版只做英文**（2026-10-19 定案）。繁中 pilot、annotator 歷史特徵與 GraphSAGE 都在論文延伸；繁中 pilot 於 2026-10-31 決議不與課堂版並行。
-- **BGE-M3 的 dense 輸出恆為單位長度**（SentenceTransformer 組態自帶 `Normalize` 模組），所以「要不要先 L2 normalize」不是可選項；可選的是 PCA 前要不要逐維標準化（CV 選「不做」）。PCA 維度由 CV 從 64／128／256 選出 **64**，**而且一定要放在 Pipeline 裡**——主成分是由資料算出的統計量，先對全部資料算一次就是洩漏（6.4 第 6 條）。
-- Embedding 快取附 metadata（模型名稱、commit sha、`normalize_embeddings`、`max_length`、維度、item_id 順序），讀取時比對，任一項不同就重算。沿用錯誤的向量不會報錯，只會讓分數「跟上次差不多」。
+- Embedding 定案為 `BAAI/bge-m3`（revision `5617a9f6`）＋ PCA **64** 維，接 Logistic Regression，列為 optional extra `embed`。理由與實測見研究規格 7.2.1；程式慣例在 `.claude/rules/experiments.md`。
 - 最低成功線（課堂版）：GoEmotions ＋ item-level split ＋ reveal protocol ＋ 隨機／entropy／Logistic Regression（含調參）＋ 5 seeds 評估 ＋ 錯誤分析。
 - 最低成功線（論文延伸）：英文真實資料 ＋ 繁中 pilot ＋ 完整 baseline ＋ 一個多語 Embedding 模型 ＋ 雙語獨立評估。GraphSAGE 沒做完或沒改善都不影響結論成立。
 - 只取恰好 3 份標註的 item，分母固定。**標註數本身洩漏答案**（4 份 88.1%、5 份 85.5% 分歧率），不得混入其他標註數的 item，也不得把標註數當特徵。
