@@ -48,15 +48,44 @@ Python **3.13.0**（`pyproject.toml` 要求 `>=3.12`），套件管理 **uv 0.12
 - **`embed` extra 刻意獨立。** `sentence-transformers` 會把 torch 一起帶進來（環境多約 2 GB，模型權重再約 2.3 GB），而它只服務研究規格 7.2 這個選做項目。放進主要 dependencies 會讓「只想重現課堂版主線」的人也得付這個代價，所以列為 optional extra；沒裝也能跑完 `run_models.py`，只會少掉 BGE 那一列。
 - **`playwright` 沒有寫進 `pyproject.toml`**，所以 `uv sync` 會把它移除。只有 `diagrams/scripts/export_png.py` 用得到（會啟動 chromium）；要出 PNG 時再 `uv pip install playwright` 即可，不影響任何實驗，也不影響 HTML 與 SVG 出圖。
 
-## 2. 管線總覽
+## 2. 技術架構
+
+{/* @ai-visualize
+id: tech-stack-architecture
+type: diagram
+prompt: |
+  靜態技術架構圖（不互動）。主幹由上而下六層，每層一張卡片、層間用箭頭相連：
+  1 執行環境（Python 3.13、uv 0.12.18，版本鎖在 uv.lock）；
+  2 資料與運算（numpy、pandas、scipy、pyarrow）；
+  3 建模（scikit-learn 1.9.1，列出實際用到的 Pipeline／GridSearchCV／GroupKFold／PCA／TruncatedSVD／ColumnTransformer）；
+  4 專案套件 src/splitsense/（12 個模組，config 被 24 處 import、metrics 被 6 處）；
+  5 可執行腳本 scripts/（6 支，標明執行順序）；
+  6 產物 artifacts/（六個目錄，全部不進版控）。
+  右側三塊旁支：選配的 extra 「embed」用虛線接回建模層（sentence-transformers → torch、Apple MPS、BAAI/bge-m3 1024 維，沒裝也能跑完主線）、
+  品質閘（pytest 91 passed 2 skipped、ruff）、文件與視覺化鏈（Node 22、notecraftapp、recharts 做互動元件、diagram-design 做靜態 SVG）。
+  四階語意色：本專案自己寫的用深藍、第三方套件用天藍、選配用金色虛線、其餘中性灰。
+caption: 技術棧怎麼疊起來、誰依賴誰；資料怎麼流見下一節的管線圖
+status: generated
+*/}
+
+import GeneratedFrame from '@/components/GeneratedFrame.astro'
+import TechStackArchitecture from '@notes/components/tech-stack-architecture'
+
+<GeneratedFrame id="tech-stack-architecture" type="diagram" prompt={"靜態技術架構圖（不互動）。主幹由上而下六層：執行環境、資料與運算、建模、專案套件 src/splitsense、可執行腳本 scripts、產物 artifacts。右側三塊旁支：選配的 extra 「embed」用虛線接回建模層、品質閘（pytest／ruff）、文件與視覺化鏈。四階語意色：本專案自己寫的用深藍、第三方套件用天藍、選配用金色虛線、其餘中性灰。"} caption="技術棧怎麼疊起來、誰依賴誰；資料怎麼流見下一節的管線圖">
+  <TechStackArchitecture />
+</GeneratedFrame>
+
+這張回答「裝了什麼、誰依賴誰」，下一節的管線圖回答「跑哪支腳本會產出什麼」。兩張都存在是因為它們切的面不同：這張是**相依層級**，那張是**資料流**。
+
+## 3. 管線總覽
 
 ![四層管線：取得資料、資料協議、特徵、模型與分析。特徵層有 TF-IDF 與 bge-m3 兩種文字表示。每層標明負責的模組、要跑的腳本與產出目錄；層與層之間的箭頭寫的是不得違反的不變量；底部是被多處共用的 config 與 metrics](./assets/module-pipeline.svg)
 
-要知道「跑哪支腳本會產出什麼」看這張就夠。箭頭上寫的四條不變量每條都有對應的測試（見第 6 節），相依關係由 `import` 反查而來，不是手寫的。
+要知道「跑哪支腳本會產出什麼」看這張就夠。箭頭上寫的四條不變量每條都有對應的測試（見第 7 節），相依關係由 `import` 反查而來，不是手寫的。
 
 `config.py` 被 24 處 import、`metrics.py` 被 6 處——扇入太密，畫成連線會比方塊還多，所以用數字陳述而不是畫線。
 
-## 3. 目錄佈局
+## 4. 目錄佈局
 
 | 目錄 | 內容 | 進版控 |
 | --- | --- | --- |
@@ -71,7 +100,7 @@ Python **3.13.0**（`pyproject.toml` 要求 `>=3.12`），套件管理 **uv 0.12
 
 所有實驗參數集中在 `src/splitsense/config.py`，不散落在各腳本——split 與 reveal 要能重現就靠這一點。
 
-## 4. 常用指令
+## 5. 常用指令
 
 ```text
 uv sync --extra dev                             # 建環境（課堂版主線）
@@ -91,7 +120,7 @@ uv run ruff check src/ scripts/ tests/
 
 `embed_texts.py` 可以單獨先跑，也可以不跑——`run_models.py` 找不到快取時會自己編碼，兩者都沒有（沒裝 `embed` extra）就跳過 BGE 那一列，主線照樣跑完。向量快取約 124 MB，存在 `artifacts/embeddings/` 並附一份 metadata JSON；讀取時比對模型名稱、commit sha、`normalize_embeddings`、`max_length`、維度與 item_id 順序，任一項不同就重算。
 
-## 5. 程式盤點
+## 6. 程式盤點
 
 3,463 行。
 
@@ -120,7 +149,7 @@ train_test_split · average_precision_score · make_scorer
 
 `Recall@10%` 不是內建指標，是自寫函式包成 `make_scorer(response_method="predict_proba")`，讓 `GridSearchCV` 直接拿主要指標調參，而不是用 accuracy 之類的代理。
 
-## 6. 測試盤點
+## 7. 測試盤點
 
 裝了 `embed` extra 時 **91 passed、2 skipped**；沒裝時 90 passed、3 skipped。三個 skip 都是刻意的並標了原因：annotator 歷史與 GraphSAGE 的洩漏檢查（論文延伸實作時才啟用），以及唯一需要真實模型的那支（`pytest.importorskip`）。其餘 embedding 測試注入假的 encoder，不碰模型。
 
@@ -135,7 +164,7 @@ train_test_split · average_precision_score · make_scorer
 | `test_error_analysis.py` | 混淆矩陣、比率在相加後才算、邊界組合用同一群體當基準 |
 | `test_embeddings.py` | 快取 metadata 不一致就重算、向量列序與 `item_id` 對齊、串接欄序 |
 
-## 7. 文件與視覺化
+## 8. 文件與視覺化
 
 | 工具 | 版本 | 用途 |
 | --- | --- | --- |
@@ -148,12 +177,15 @@ train_test_split · average_precision_score · make_scorer
 | `diagram-design` skill | v2.6.136 | 七張投影片用靜態圖，vendored 進 repo（MIT） |
 | `trendlink-design` skill | — | 色票來源 |
 
-### 互動元件怎麼畫的
+### `@ai-visualize` 生成的元件（7 個）
 
-| 元件 | 方式 |
-| --- | --- |
-| `annotation-count-leakage`、`baseline-results`、`neutral-only-flagging` | recharts |
-| `annotation-reveal-setup`、`metric-saturation`、`review-routing-flow` | 手寫 SVG |
+| 元件 | 方式 | 互動 |
+| --- | --- | --- |
+| `annotation-count-leakage`、`baseline-results`、`neutral-only-flagging` | recharts | 有（分頁／hover） |
+| `annotation-reveal-setup`、`metric-saturation`、`review-routing-flow` | 手寫 SVG | 有（拖動／逐步揭露） |
+| `tech-stack-architecture` | 手寫 SVG | **無**，純靜態 |
+
+純靜態的那個不掛 `client:*` directive——不需要 hydrate，SSR 出來就是最終畫面。
 
 ### 靜態圖的產生鏈
 
@@ -170,7 +202,7 @@ diagrams/<name>.html          原始檔，改圖改這個
 
 > **notecraftapp 沒有 `remark-math` 與 `rehype-katex`。** `docs/` 的數學式一律用 fenced ` ```math ` 區塊，不要用 `$$`——`$$` 裡的大括號會被當成 JSX expression，行首的會讓 build 失敗，剛好是合法 JS 的會被靜默吞掉。
 
-## 8. 流程與治理
+## 9. 流程與治理
 
 | 項目 | 內容 |
 | --- | --- |
@@ -179,7 +211,7 @@ diagrams/<name>.html          原始檔，改圖改這個
 | OpenSpec | 課堂版期間暫停（Q6），`openspec/config.yaml` 已註明 |
 | 資料治理 | `data/`、`artifacts/` 不進版控；`author` 載入後立刻丟棄；commit 前掃原始文字 |
 
-## 9. 刻意沒有用的技術
+## 10. 刻意沒有用的技術
 
 | 技術 | 為什麼不用 |
 | --- | --- |
