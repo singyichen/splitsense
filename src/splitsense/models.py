@@ -47,8 +47,12 @@ RECALL_SCORER = make_scorer(
     recall_at_budget, response_method="predict_proba", greater_is_better=True
 )
 
+# 兩個 Logistic Regression 原本都選到格線最小值 0.01（研究規格 8.4.1），所以
+# 格線往下延伸——不延伸就不知道那是最佳值還是被格線擋住。
+C_GRID = [0.001, 0.003, 0.01, 0.1, 1.0, 10.0]
+
 LOGREG_GRID = {
-    "clf__C": [0.01, 0.1, 1.0, 10.0],
+    "clf__C": C_GRID,
     "clf__class_weight": [None, "balanced"],
 }
 
@@ -69,7 +73,7 @@ SVD_COMPONENTS = 200
 EMBED_LOGREG_GRID = {
     "pre__text__scale": ["passthrough", StandardScaler()],
     "pre__text__pca__n_components": list(cfg.PCA_COMPONENTS),
-    "clf__C": [0.01, 0.1, 1.0, 10.0],
+    "clf__C": C_GRID,
     "clf__class_weight": [None, "balanced"],
 }
 
@@ -262,6 +266,7 @@ def visible_feature_coefficients(search: GridSearchCV, data: TrainingData) -> pd
 
 
 __all__ = [
+    "C_GRID",
     "EMBED_LOGREG_GRID",
     "GB_GRID",
     "LOGREG_GRID",

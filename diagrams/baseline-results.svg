@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg viewBox="0 0 1000 540" width="2000" height="1080" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="baseline-results-title baseline-results-desc" id="baseline-results-root">
         <title id="baseline-results-title">只複核 10% 時能抓到多少爭議題</title>
-        <desc id="baseline-results-desc">長條圖：難題組上六個方法的 Recall@10%。隨機 9.5、可見 entropy 9.9、同意標籤查表 18.5、TF-IDF Logistic Regression 19.4、Gradient Boosting 19.4、BGE-M3 Logistic Regression 21.3，理論上限 40.5%。</desc>
+        <desc id="baseline-results-desc">長條圖：難題組上六個方法的 Recall@10%。隨機 9.5、可見 entropy 9.9、同意標籤查表 18.5、TF-IDF Logistic Regression 19.3、Gradient Boosting 19.4、BGE-M3 Logistic Regression 21.8，理論上限 40.5%。</desc>
   <defs>
       <style>@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&amp;family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400;500;600&amp;family=Noto+Serif:ital@0;1&amp;family=Noto+Sans+KR:wght@400;500;600&amp;family=Noto+Serif+KR:wght@400&amp;family=Noto+Sans+TC:wght@400;500;600&amp;family=Noto+Serif+TC:wght@400&amp;display=swap');
       #baseline-results-root { --color-paper:   #f6f8fb;
@@ -83,7 +83,7 @@
         <text x="447" y="460" text-anchor="middle" class="val mono muted">1.9×</text>
         <rect x="541" y="273" width="104" height="147" fill="#ffffff"/>
         <rect x="541" y="273" width="104" height="147" fill="#2c6ebb" stroke="#2c6ebb" stroke-width="1" fill-opacity="0.10"/>
-        <text x="593" y="265" text-anchor="middle" class="val mono muted">19.4</text>
+        <text x="593" y="265" text-anchor="middle" class="val mono muted">19.3</text>
         <text x="593" y="444" text-anchor="middle" class="h2 ink">LR（TF-IDF）</text>
         <text x="593" y="460" text-anchor="middle" class="val mono muted">1.9×</text>
         <rect x="688" y="273" width="104" height="147" fill="#ffffff"/>
@@ -91,11 +91,11 @@
         <text x="740" y="265" text-anchor="middle" class="val mono muted">19.4</text>
         <text x="740" y="444" text-anchor="middle" class="h2 ink">GB（TF-IDF）</text>
         <text x="740" y="460" text-anchor="middle" class="val mono muted">1.9×</text>
-        <rect x="835" y="258" width="104" height="162" fill="#ffffff"/>
-        <rect x="835" y="258" width="104" height="162" fill="#1b4f9c" stroke="#1b4f9c" stroke-width="1" fill-opacity="0.18"/>
-        <text x="887" y="250" text-anchor="middle" class="val mono navy">21.3</text>
+        <rect x="835" y="254" width="104" height="166" fill="#ffffff"/>
+        <rect x="835" y="254" width="104" height="166" fill="#1b4f9c" stroke="#1b4f9c" stroke-width="1" fill-opacity="0.18"/>
+        <text x="887" y="246" text-anchor="middle" class="val mono navy">21.8</text>
         <text x="887" y="444" text-anchor="middle" class="h2 ink">LR（BGE-M3）</text>
-        <text x="887" y="460" text-anchor="middle" class="val mono muted">2.1×</text>
+        <text x="887" y="460" text-anchor="middle" class="val mono muted">2.2×</text>
         <line x1="32" y1="488" x2="968" y2="488" stroke="#262e3d" stroke-width="0.8" stroke-opacity="0.12"/>
         <text x="32" y="512" letter-spacing="0.14em" class="val mono muted">LEGEND</text>
         <rect x="128" y="502" width="16" height="10" rx="2" fill="#ed9b26" stroke="#c7641a" stroke-width="1" fill-opacity="0.12"/>

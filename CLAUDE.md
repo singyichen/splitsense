@@ -12,10 +12,10 @@
 
 ## 現況（2026-11-09）
 
-- 研究規格 v0.12.0。**課堂版最低成功線六項全部完成**，唯一的選做項目（BGE-M3 + PCA 比較）也在 11/09 完成，91 個測試通過。下一步只剩簡報，程式只缺「把 BGE 那一列補進視覺化」，進度看 `docs/20-progress.mdx`。
-- 結果：hard 範圍 `R@10%`，隨機 9.5、entropy 規則 9.9、**同意標籤先驗（四列查表）18.5**、TF-IDF Logistic Regression 19.4、Gradient Boosting 19.4、**BGE-M3 + PCA(128) + LR 21.3**。
-- **文字表示是比模型族更有效的槓桿。** 同一個 LR 只把 TF-IDF 換成 `bge-m3`：配對差 **+1.88 ± 0.88、5/5 全勝**；把 LR 換成 Gradient Boosting：−0.02 ± 0.40、2/5（與 0 無法區分）。
-- **「查表拿到模型 95% 效果」這句話要加限定詞。** 查表佔 TF-IDF LR 的 95.4%，但只佔 BGE-M3 + LR 的 **86.9%**。那個 95% 量的是 TF-IDF 的天花板，不是這個任務的天花板。對查表的增益從 0.85 變成 2.73 個百分點。
+- 研究規格 v0.13.0。**課堂版最低成功線六項全部完成**，唯一的選做項目（BGE-M3 + PCA 比較）也在 11/09 完成，91 個測試通過。下一步只剩簡報，沒有待寫的程式，進度看 `docs/20-progress.mdx`。
+- 結果：hard 範圍 `R@10%`，隨機 9.5、entropy 規則 9.9、**同意標籤先驗（四列查表）18.5**、TF-IDF Logistic Regression 19.3、Gradient Boosting 19.4、**BGE-M3 + PCA(64) + LR 21.8**。
+- **文字表示是比模型族更有效的槓桿。** 同一個 LR 只把 TF-IDF 換成 `bge-m3`：配對差 **+2.45 ± 0.72、5/5 全勝**；把 LR 換成 Gradient Boosting：+0.05 ± 0.27、2/5（與 0 無法區分）。
+- **「查表拿到模型 95% 效果」這句話要加限定詞。** 查表佔 TF-IDF LR 的 95.9%，但只佔 BGE-M3 + LR 的 **84.9%**。那個 95% 量的是 TF-IDF 的天花板，不是這個任務的天花板。機制見研究規格 8.6.1：兩個模型都只送 neutral 組，差別在組內精確率（48.2% 對 52.7%）。
 - entropy 在 hard 子集恆為常數、等於隨機，不能拿它當「不用 ML」的對照——那會高估 ML 貢獻。真正該比的是「前兩人同意了哪個標籤」。
 - 評估範圍（Q11）已於 2026-10-31 決議：full 與 hard **兩者並列、以 hard 為主**。full 範圍已飽和——六個方法的 `P@10%` 全是 100.0 ± 0.0、`R@10%` 全是 20.1 ± 0.0，連 `bge-m3` 也一樣；該範圍的模型分數採部署式排序（Q12，2026-11-09）。
 - 工具鏈：**uv + `src/splitsense/` 佈局 + `pyproject.toml`**，Python `>=3.12`（本機釘 3.13），版本鎖在 `uv.lock`。
@@ -59,7 +59,7 @@ uv run ruff check src/ scripts/ tests/
 - 英文與繁中分開報告指標，不只報 pooled score，讓英文樣本量不會遮住繁中的弱點。
 - 機器翻譯資料只能當跨語壓力測試，不得當作繁中主證據。
 - **課堂版只做英文**（2026-10-19 定案）。繁中 pilot、annotator 歷史特徵與 GraphSAGE 都在論文延伸；繁中 pilot 於 2026-10-31 決議不與課堂版並行。
-- **BGE-M3 的 dense 輸出恆為單位長度**（SentenceTransformer 組態自帶 `Normalize` 模組），所以「要不要先 L2 normalize」不是可選項；可選的是 PCA 前要不要逐維標準化（CV 選「不做」）。PCA 維度由 CV 從 64／128／256 選出 **128**，**而且一定要放在 Pipeline 裡**——主成分是由資料算出的統計量，先對全部資料算一次就是洩漏（6.4 第 6 條）。
+- **BGE-M3 的 dense 輸出恆為單位長度**（SentenceTransformer 組態自帶 `Normalize` 模組），所以「要不要先 L2 normalize」不是可選項；可選的是 PCA 前要不要逐維標準化（CV 選「不做」）。PCA 維度由 CV 從 64／128／256 選出 **64**，**而且一定要放在 Pipeline 裡**——主成分是由資料算出的統計量，先對全部資料算一次就是洩漏（6.4 第 6 條）。
 - Embedding 快取附 metadata（模型名稱、commit sha、`normalize_embeddings`、`max_length`、維度、item_id 順序），讀取時比對，任一項不同就重算。沿用錯誤的向量不會報錯，只會讓分數「跟上次差不多」。
 - 最低成功線（課堂版）：GoEmotions ＋ item-level split ＋ reveal protocol ＋ 隨機／entropy／Logistic Regression（含調參）＋ 5 seeds 評估 ＋ 錯誤分析。
 - 最低成功線（論文延伸）：英文真實資料 ＋ 繁中 pilot ＋ 完整 baseline ＋ 一個多語 Embedding 模型 ＋ 雙語獨立評估。GraphSAGE 沒做完或沒改善都不影響結論成立。

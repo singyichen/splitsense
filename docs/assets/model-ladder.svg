@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg viewBox="0 0 1000 644" width="2000" height="1288" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="model-ladder-title model-ladder-desc" id="model-ladder-root">
         <title id="model-ladder-title">模型階梯：每一層回答前一層答不了的問題</title>
-        <desc id="model-ladder-desc">五層模型階梯由笨到聰明：隨機排序 9.5、可見標籤 entropy 9.9、同意標籤查表 18.5、Logistic Regression 以 TF-IDF 為 19.4、換成 BGE-M3 為 21.3、Gradient Boosting 19.4。層與層之間標明前一層不足之處。第四層零樣本大語言模型課堂版不做。</desc>
+        <desc id="model-ladder-desc">五層模型階梯由笨到聰明：隨機排序 9.5、可見標籤 entropy 9.9、同意標籤查表 18.5、Logistic Regression 以 TF-IDF 為 19.3、換成 BGE-M3 為 21.8、Gradient Boosting 19.4。層與層之間標明前一層不足之處。第四層零樣本大語言模型課堂版不做。</desc>
         <style>
           text { font-family: 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', sans-serif; }
           .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
@@ -79,13 +79,13 @@
         <rect x="76" y="368" width="4" height="40" rx="2" fill="#1b4f9c"/>
         <text x="96" y="380" class="h ink">2　Logistic Regression</text>
         <text x="96" y="400" class="q muted">第一個真正的 ML 模型。同一個分類器，兩種文字表示</text>
-        <text x="96" y="416" class="mono sub soft">C（最佳 0.01）；BGE-M3 另加 PCA 128</text>
-        <text x="812" y="388" text-anchor="middle" class="big muted">19.4</text>
+        <text x="96" y="416" class="mono sub soft">C（最佳 0.003）；BGE-M3 另加 PCA 64</text>
+        <text x="812" y="388" text-anchor="middle" class="big muted">19.3</text>
         <text x="812" y="406" text-anchor="middle" class="lg soft">TF-IDF</text>
-        <text x="908" y="388" text-anchor="middle" class="big navy">21.3</text>
+        <text x="908" y="388" text-anchor="middle" class="big navy">21.8</text>
         <text x="908" y="406" text-anchor="middle" class="lg soft">BGE-M3</text>
         <line x1="408" y1="420" x2="408" y2="448" stroke="#6c798e" stroke-width="1.5" marker-end="url(#model-ladder-mk)"/>
-        <text x="420" y="438" class="lg muted">換文字表示 +1.88 個百分點；那換模型族呢？</text>
+        <text x="420" y="438" class="lg muted">換文字表示 +2.45 個百分點；那換模型族呢？</text>
         <rect x="76" y="448" width="664" height="64" rx="10" fill="#ffffff" stroke="#2c6ebb"/>
         <rect x="76" y="460" width="4" height="40" rx="2" fill="#2c6ebb"/>
         <text x="96" y="472" class="h ink">3　Gradient Boosting</text>
@@ -93,7 +93,7 @@
         <text x="96" y="508" class="mono sub soft">learning_rate、max_depth</text>
         <text x="860" y="480" text-anchor="middle" class="big muted">19.4</text>
         <text x="860" y="498" text-anchor="middle" class="lg soft">Recall@10%</text>
-        <text x="420" y="524" class="lg muted">沒有。對 TF-IDF LR 的配對差 −0.02 ± 0.40，與 0 分不出來</text>
+        <text x="420" y="524" class="lg muted">沒有。對 TF-IDF LR 的配對差 +0.05 ± 0.27，與 0 分不出來</text>
         <rect x="76" y="532" width="664" height="48" rx="10" fill="#f6f8fb" stroke="#cbd3df" stroke-dasharray="5,4"/>
         <text x="96" y="554" class="h soft">4　零樣本大語言模型</text>
         <text x="96" y="572" class="q soft">課堂版不做（Q9）：資料污染使分數不可檢驗。論文階段必做</text>
@@ -101,7 +101,7 @@
         <line x1="32" y1="604" x2="968" y2="604" stroke="#262e3d" stroke-width="0.8" stroke-opacity="0.12"/>
         <text x="32" y="624" class="lg muted mono" letter-spacing="0.14em">LEGEND</text>
         <rect x="128" y="614" width="16" height="10" rx="2" fill="#ed9b26" stroke="#c7641a" fill-opacity="0.10"/>
-        <text x="152" y="624" class="lg muted">拿到最佳模型 87% 效果的透明規則</text>
-        <text x="420" y="624" class="lg muted">結論採階梯 2 ＋ BGE-M3：對查表贏 2.73 個百分點，5 個 seed 全勝</text>
+        <text x="152" y="624" class="lg muted">拿到最佳模型 85% 效果的透明規則</text>
+        <text x="420" y="624" class="lg muted">結論採階梯 2 ＋ BGE-M3：對查表贏 3.22 個百分點，5 個 seed 全勝</text>
         <text x="968" y="624" text-anchor="end" class="lg muted mono">難題組 3,153 題，上限 40.5%</text>
       </svg>

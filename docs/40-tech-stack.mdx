@@ -67,7 +67,7 @@ Python **3.13.0**（`pyproject.toml` 要求 `>=3.12`），套件管理 **uv 0.12
 | `docs/assets/` | 筆記引用的 SVG | 是 |
 | `.notecraft/components/` | 互動元件 `.tsx` | 是 |
 | `data/` | 上游 parquet | **否** |
-| `artifacts/` | `eda/`、`manifests/`、`baselines/`、`models/`、`error_analysis/`、`embeddings/` | **否** |
+| `artifacts/` | `eda/`、`manifests/`、`baselines/`、`models/`、`error_analysis/<model>/`、`embeddings/` | **否** |
 
 所有實驗參數集中在 `src/splitsense/config.py`，不散落在各腳本——split 與 reveal 要能重現就靠這一點。
 
@@ -81,7 +81,8 @@ uv run python scripts/build_dataset.py          # split 與 reveal manifest
 uv run python scripts/run_baselines.py          # 階梯 0、1
 uv run python scripts/embed_texts.py            # bge-m3 向量，寫快取（需 embed）
 uv run python scripts/run_models.py             # 階梯 2、3 與 BGE，含調參
-uv run python scripts/run_error_analysis.py     # 混淆矩陣與錯誤分析
+uv run python scripts/run_error_analysis.py     # 混淆矩陣與錯誤分析（TF-IDF）
+uv run python scripts/run_error_analysis.py --model bge
 uv run pytest                                   # 91 passed、2 skipped（裝 embed）
 uv run ruff check src/ scripts/ tests/
 ```
@@ -92,7 +93,7 @@ uv run ruff check src/ scripts/ tests/
 
 ## 5. 程式盤點
 
-3,381 行。
+3,463 行。
 
 | 模組 | 負責 |
 | --- | --- |
@@ -106,7 +107,7 @@ uv run ruff check src/ scripts/ tests/
 | `baselines.py` | 階梯 0、1、1.5，以及 full 範圍的部署式排序 |
 | `models.py` | 階梯 2、3 與 BGE 階梯的 Pipeline、疊加 reveal seed 與調參 |
 | `embeddings.py` | `bge-m3` 編碼、快取與 metadata 比對、向量與可見特徵串接 |
-| `error_analysis.py` | 文字訊號、同意標籤剖面、邊界組合、抽樣 |
+| `error_analysis.py` | 文字訊號、同意標籤剖面、邊界組合、抽樣（兩種文字表示各跑一次） |
 
 ### scikit-learn 實際用到的 API
 

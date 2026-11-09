@@ -27,9 +27,9 @@ const BARS: Row[] = [
   { 方法: "隨機排序", "R@10%": 9.5, tone: "floor" },
   { 方法: "可見 entropy", "R@10%": 9.9, tone: "floor" },
   { 方法: "同意標籤查表", "R@10%": 18.5, tone: "rule" },
-  { 方法: "LR（TF-IDF）", "R@10%": 19.4, tone: "tfidf" },
+  { 方法: "LR（TF-IDF）", "R@10%": 19.3, tone: "tfidf" },
   { 方法: "GB（TF-IDF）", "R@10%": 19.4, tone: "tfidf" },
-  { 方法: "LR（BGE-M3）", "R@10%": 21.3, tone: "bge" },
+  { 方法: "LR（BGE-M3）", "R@10%": 21.8, tone: "bge" },
 ];
 
 const TONE: Record<Row["tone"], string> = {
@@ -41,11 +41,11 @@ const TONE: Record<Row["tone"], string> = {
 
 // 逐 seed 的實測 R@10%，直接取自 artifacts/models/per_seed_r10_hard.csv，不是從平均反推
 const PAIRED: { seed: number; prior: number; tfidf: number; bge: number }[] = [
-  { seed: 0, prior: 17.83, tfidf: 18.6, bge: 20.93 },
-  { seed: 1, prior: 18.96, tfidf: 19.72, bge: 21.37 },
-  { seed: 2, prior: 19.41, tfidf: 20.56, bge: 21.2 },
-  { seed: 3, prior: 17.79, tfidf: 18.84, bge: 21.87 },
-  { seed: 4, prior: 18.88, tfidf: 19.39, bge: 21.17 },
+  { seed: 0, prior: 17.83, tfidf: 18.73, bge: 21.45 },
+  { seed: 1, prior: 18.96, tfidf: 19.47, bge: 22.0 },
+  { seed: 2, prior: 19.41, tfidf: 20.56, bge: 22.09 },
+  { seed: 3, prior: 17.79, tfidf: 18.84, bge: 22.27 },
+  { seed: 4, prior: 18.88, tfidf: 19.14, bge: 21.17 },
 ];
 
 const SLOPE_W = 520;
@@ -54,7 +54,7 @@ const LEFT_X = 118;
 const MID_X = 268;
 const RIGHT_X = 418;
 const Y_MIN = 17.4;
-const Y_MAX = 22.3;
+const Y_MAX = 22.6;
 const TOP_Y = 34;
 const BOT_Y = SLOPE_H - 58;
 const toY = (value: number) =>
@@ -183,10 +183,10 @@ export default function BaselineResults() {
           <p className="rounded-lg bg-[#f6f8fb] px-4 py-3 text-sm leading-relaxed text-[#3a4456]">
             可見 entropy 貼著隨機地板線——它在這個子集恆為常數，等於亂猜。
             <span className="font-semibold" style={{ color: GOLD }}>
-              {" "}一張四列查表（18.5）幾乎與 TF-IDF 模型（19.4）等高；
+              {" "}一張四列查表（18.5）幾乎與 TF-IDF 模型（19.3）等高；
             </span>
             <span className="font-semibold" style={{ color: NAVY }}>
-              真正拉開差距的是換掉文字表示（21.3）。
+              真正拉開差距的是換掉文字表示（21.8）。
             </span>
           </p>
         </>
@@ -195,10 +195,10 @@ export default function BaselineResults() {
           <SlopeChart />
           <p className="rounded-lg bg-[#f6f8fb] px-4 py-3 text-sm leading-relaxed text-[#3a4456]">
             三者跑在相同的 5 組 reveal seed 上，所以可以逐組相減。對查表：TF-IDF LR{" "}
-            <span className="font-semibold text-[#6c798e]">+0.85 ± 0.26</span>、BGE-M3 LR{" "}
-            <span className="font-semibold text-[#1b4f9c]">+2.73 ± 0.89</span>，兩者都是 5/5 全勝。
+            <span className="font-semibold text-[#6c798e]">+0.77 ± 0.38</span>、BGE-M3 LR{" "}
+            <span className="font-semibold text-[#1b4f9c]">+3.22 ± 0.86</span>，兩者都是 5/5 全勝。
             兩個模型互比是{" "}
-            <span className="font-semibold text-[#1b4f9c]">+1.88 ± 0.88、5/5</span>——
+            <span className="font-semibold text-[#1b4f9c]">+2.45 ± 0.72、5/5</span>——
             BGE 的五個 seed 全部高過 TF-IDF 的最高分 20.56。
           </p>
         </>

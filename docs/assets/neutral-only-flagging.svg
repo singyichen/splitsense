@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg viewBox="0 0 1000 540" width="2000" height="1080" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="neutral-only-flagging-title neutral-only-flagging-desc" id="neutral-only-flagging-root">
         <title id="neutral-only-flagging-title">模型在操作點上只做一件事</title>
-        <desc id="neutral-only-flagging-desc">分組長條圖：依前兩人同意的標籤分成四組。真實分歧率分別是 46.5%、29.3%、20.8%、12.3%，而模型送複核的比例只有 neutral 組是 36.5%，其餘三組皆為零。</desc>
+        <desc id="neutral-only-flagging-desc">分組長條圖：依前兩人同意的標籤分成 neutral、ambiguous、negative、positive 四組。該組真實分歧率 46.5、29.3、20.8、12.3。兩個模型送複核的比例都只有 neutral 組非零：TF-IDF 36.6、BGE-M3 33.6，其餘三組皆為零。neutral 組內送出的精確率 TF-IDF 48.2%、BGE-M3 52.7%。</desc>
   <defs>
       <style>@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&amp;family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400;500;600&amp;family=Noto+Serif:ital@0;1&amp;family=Noto+Sans+KR:wght@400;500;600&amp;family=Noto+Serif+KR:wght@400&amp;family=Noto+Sans+TC:wght@400;500;600&amp;family=Noto+Serif+TC:wght@400&amp;display=swap');
       #neutral-only-flagging-root { --color-paper:   #f6f8fb;
@@ -65,34 +65,42 @@
         <line x1="80" y1="40" x2="960" y2="40" stroke="#262e3d" stroke-width="0.8" stroke-opacity="0.08"/>
         <text x="72" y="43" text-anchor="end" class="val mono muted">50%</text>
         <line x1="80" y1="40" x2="80" y2="420" stroke="#262e3d" stroke-width="1" stroke-opacity="0.25"/>
-        <rect x="110" y="67" width="72" height="353" fill="#ffffff"/>
-        <rect x="110" y="67" width="72" height="353" fill="#4f5b6e" stroke="#6c798e" stroke-width="1" fill-opacity="0.15"/>
-        <text x="146" y="59" text-anchor="middle" class="val mono muted">46.5</text>
-        <rect x="198" y="143" width="72" height="277" fill="#ffffff"/>
-        <rect x="198" y="143" width="72" height="277" fill="#1b4f9c" stroke="#1b4f9c" stroke-width="1" fill-opacity="0.12"/>
-        <text x="234" y="135" text-anchor="middle" class="val mono navy">36.5</text>
+        <rect x="94" y="67" width="60" height="353" fill="#ffffff"/>
+        <rect x="94" y="67" width="60" height="353" fill="#4f5b6e" stroke="#6c798e" stroke-width="1" fill-opacity="0.15"/>
+        <text x="124" y="59" text-anchor="middle" class="val mono muted">46.5</text>
+        <rect x="160" y="142" width="60" height="278" fill="#ffffff"/>
+        <rect x="160" y="142" width="60" height="278" fill="#2c6ebb" stroke="#2c6ebb" stroke-width="1" fill-opacity="0.10"/>
+        <text x="190" y="134" text-anchor="middle" class="val mono muted">36.6</text>
+        <rect x="226" y="165" width="60" height="255" fill="#ffffff"/>
+        <rect x="226" y="165" width="60" height="255" fill="#1b4f9c" stroke="#1b4f9c" stroke-width="1" fill-opacity="0.18"/>
+        <text x="256" y="157" text-anchor="middle" class="val mono navy">33.6</text>
         <text x="190" y="444" text-anchor="middle" class="h2 ink">neutral</text>
-        <text x="190" y="460" text-anchor="middle" class="val mono navy">送出精確率 48.1%</text>
-        <rect x="330" y="197" width="72" height="223" fill="#ffffff"/>
-        <rect x="330" y="197" width="72" height="223" fill="#4f5b6e" stroke="#6c798e" stroke-width="1" fill-opacity="0.15"/>
-        <text x="366" y="189" text-anchor="middle" class="val mono muted">29.3</text>
-        <text x="454" y="412" text-anchor="middle" class="val mono navy">0</text>
+        <text x="190" y="460" text-anchor="middle" class="val mono muted">送出精確率 48.2%／52.7%</text>
+        <rect x="314" y="197" width="60" height="223" fill="#ffffff"/>
+        <rect x="314" y="197" width="60" height="223" fill="#4f5b6e" stroke="#6c798e" stroke-width="1" fill-opacity="0.15"/>
+        <text x="344" y="189" text-anchor="middle" class="val mono muted">29.3</text>
+        <text x="410" y="412" text-anchor="middle" class="val mono muted">0</text>
+        <text x="476" y="412" text-anchor="middle" class="val mono navy">0</text>
         <text x="410" y="444" text-anchor="middle" class="h2 ink">ambiguous</text>
-        <rect x="550" y="262" width="72" height="158" fill="#ffffff"/>
-        <rect x="550" y="262" width="72" height="158" fill="#4f5b6e" stroke="#6c798e" stroke-width="1" fill-opacity="0.15"/>
-        <text x="586" y="254" text-anchor="middle" class="val mono muted">20.8</text>
-        <text x="674" y="412" text-anchor="middle" class="val mono navy">0</text>
+        <rect x="534" y="262" width="60" height="158" fill="#ffffff"/>
+        <rect x="534" y="262" width="60" height="158" fill="#4f5b6e" stroke="#6c798e" stroke-width="1" fill-opacity="0.15"/>
+        <text x="564" y="254" text-anchor="middle" class="val mono muted">20.8</text>
+        <text x="630" y="412" text-anchor="middle" class="val mono muted">0</text>
+        <text x="696" y="412" text-anchor="middle" class="val mono navy">0</text>
         <text x="630" y="444" text-anchor="middle" class="h2 ink">negative</text>
-        <rect x="770" y="327" width="72" height="93" fill="#ffffff"/>
-        <rect x="770" y="327" width="72" height="93" fill="#4f5b6e" stroke="#6c798e" stroke-width="1" fill-opacity="0.15"/>
-        <text x="806" y="319" text-anchor="middle" class="val mono muted">12.3</text>
-        <text x="894" y="412" text-anchor="middle" class="val mono navy">0</text>
+        <rect x="754" y="327" width="60" height="93" fill="#ffffff"/>
+        <rect x="754" y="327" width="60" height="93" fill="#4f5b6e" stroke="#6c798e" stroke-width="1" fill-opacity="0.15"/>
+        <text x="784" y="319" text-anchor="middle" class="val mono muted">12.3</text>
+        <text x="850" y="412" text-anchor="middle" class="val mono muted">0</text>
+        <text x="916" y="412" text-anchor="middle" class="val mono navy">0</text>
         <text x="850" y="444" text-anchor="middle" class="h2 ink">positive</text>
         <line x1="32" y1="488" x2="968" y2="488" stroke="#262e3d" stroke-width="0.8" stroke-opacity="0.12"/>
         <text x="32" y="512" letter-spacing="0.14em" class="val mono muted">LEGEND</text>
         <rect x="128" y="502" width="16" height="10" rx="2" fill="#4f5b6e" stroke="#6c798e" stroke-width="1" fill-opacity="0.15"/>
         <text x="152" y="512" class="lg muted">該組真實分歧率</text>
-        <rect x="312" y="502" width="16" height="10" rx="2" fill="#1b4f9c" stroke="#1b4f9c" stroke-width="1" fill-opacity="0.12"/>
-        <text x="336" y="512" class="lg muted">模型送複核的比例</text>
+        <rect x="248" y="502" width="16" height="10" rx="2" fill="#2c6ebb" stroke="#2c6ebb" stroke-width="1" fill-opacity="0.10"/>
+        <text x="272" y="512" class="lg muted">TF-IDF 送複核比例</text>
+        <rect x="400" y="502" width="16" height="10" rx="2" fill="#1b4f9c" stroke="#1b4f9c" stroke-width="1" fill-opacity="0.18"/>
+        <text x="424" y="512" class="lg muted">BGE-M3 送複核比例</text>
         <text x="968" y="512" text-anchor="end" class="val mono muted">x 軸：前兩人同意的標籤</text>
       </svg>
