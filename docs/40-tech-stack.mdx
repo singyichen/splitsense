@@ -54,16 +54,19 @@ Python **3.13.0**（`pyproject.toml` 要求 `>=3.12`），套件管理 **uv 0.12
 id: tech-stack-architecture
 type: diagram
 prompt: |
-  靜態技術架構圖（不互動）。主幹由上而下六層，每層一張卡片、層間用箭頭相連：
-  1 執行環境（Python 3.13、uv 0.12.18，版本鎖在 uv.lock）；
-  2 資料與運算（numpy、pandas、scipy、pyarrow）；
-  3 建模（scikit-learn 1.9.1，列出實際用到的 Pipeline／GridSearchCV／GroupKFold／PCA／TruncatedSVD／ColumnTransformer）；
-  4 專案套件 src/splitsense/（12 個模組，config 被 24 處 import、metrics 被 6 處）；
-  5 可執行腳本 scripts/（6 支，標明執行順序）；
-  6 產物 artifacts/（六個目錄，全部不進版控）。
-  右側三塊旁支：選配的 extra 「embed」用虛線接回建模層（sentence-transformers → torch、Apple MPS、BAAI/bge-m3 1024 維，沒裝也能跑完主線）、
-  品質閘（pytest 91 passed 2 skipped、ruff）、文件與視覺化鏈（Node 22、notecraftapp、recharts 做互動元件、diagram-design 做靜態 SVG）。
-  四階語意色：本專案自己寫的用深藍、第三方套件用天藍、選配用金色虛線、其餘中性灰。
+  靜態技術架構圖（不互動）。**少文字、多視覺**：每張卡片只有「圖示 ＋ 標題 ＋ 套件 chip ＋ 一句註解」，
+  不要用逗號串成的長句列舉。套件名與版本一律做成等寬字的小 chip，讓讀者用掃的。
+  主幹由上而下六層，層間用向下箭頭相連，每層配一個 lucide 圖示：
+  1 執行環境（Terminal；Python 3.13、uv、uv.lock）；
+  2 資料與運算（Sigma；numpy、pandas、scipy、pyarrow）；
+  3 建模（Workflow；scikit-learn 與實際用到的 Pipeline／GridSearchCV／GroupKFold／PCA／TruncatedSVD）；
+  4 專案套件 src/splitsense/（Boxes；12 個模組、config 被 24 處 import）；
+  5 可執行腳本 scripts/（FileCode2；依序列出 6 支）；
+  6 產物 artifacts/（Archive；六個目錄全部不進版控）。
+  右欄三塊旁支沿主幹高度分布，讓「選配 embed」大致對到第 3 層建模：
+  選配的 extra「embed」（Cpu，金色虛線框）、品質閘（ShieldCheck）、文件與視覺化鏈（BookOpen）。
+  四階語意色：本專案自己寫的用深藍、第三方套件用天藍、環境與產物用中性灰、選配用金色虛線，圖例要與實際歸屬一致。
+  禁用 emoji，圖示一律用 lucide-react。
 caption: 技術棧怎麼疊起來、誰依賴誰；資料怎麼流見下一節的管線圖
 status: generated
 */}
@@ -183,9 +186,11 @@ train_test_split · average_precision_score · make_scorer
 | --- | --- | --- |
 | `annotation-count-leakage`、`baseline-results`、`neutral-only-flagging` | recharts | 有（分頁／hover） |
 | `annotation-reveal-setup`、`metric-saturation`、`review-routing-flow` | 手寫 SVG | 有（拖動／逐步揭露） |
-| `tech-stack-architecture` | 手寫 SVG | **無**，純靜態 |
+| `tech-stack-architecture` | HTML ＋ lucide 圖示 | **無**，純靜態 |
 
 純靜態的那個不掛 `client:*` directive——不需要 hydrate，SSR 出來就是最終畫面。
+
+它刻意不用 SVG：套件名與版本做成可換行的 chip，SVG 要自己算換行，HTML ＋ Tailwind 直接就有。**註解文字要用 `<span className="block">` 不要用 `<p>`**——筆記的 article CSS 會覆蓋 `<p>` 的 `font-size`，寫 `text-[11px]` 不會生效。
 
 ### 靜態圖的產生鏈
 

@@ -1,352 +1,235 @@
 // 靜態技術架構圖：技術棧怎麼疊起來、誰依賴誰。
 // 與 module-pipeline.svg 互補——那張畫資料流（跑哪支腳本產出什麼），這張畫相依層級。
 // 數字取自 docs/40-tech-stack.mdx 的盤點（2026-11-09）。
+// 純靜態，不需要 client:* directive。
 
-const NAVY = "#1b4f9c";
-const AZURE = "#2c6ebb";
-const GOLD_LINE = "#c7641a";
-const GOLD_FILL = "rgba(237,155,38,0.10)";
-const INK = "#262e3d";
-const MUTED = "#4f5b6e";
-const SOFT = "#9aa6b8";
-const LINE = "#cbd3df";
-const PALE = "#eef4fb";
-const PAPER = "#f6f8fb";
+import {
+  Archive,
+  ArrowDown,
+  BookOpen,
+  Boxes,
+  Cpu,
+  CornerLeftDown,
+  FileCode2,
+  ShieldCheck,
+  Sigma,
+  Terminal,
+  Workflow,
+} from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 
-type Layer = {
-  y: number;
+type Tone = "env" | "third" | "own" | "opt";
+
+type ToneStyle = {
+  card: string;
+  tile: string;
+  chip: string;
   index: string;
-  title: string;
-  body: string;
-  mono?: string;
-  tone: "neutral" | "brand" | "focus";
 };
 
-const CARD_X = 24;
-const CARD_W = 552;
-const CARD_H = 76;
+const TONE: Record<Tone, ToneStyle> = {
+  env: {
+    card: "border-[#e1e6ee] bg-[#f6f8fb]",
+    tile: "bg-[#e1e6ee] text-[#4f5b6e]",
+    chip: "border-[#e1e6ee] bg-white text-[#4f5b6e]",
+    index: "text-[#9aa6b8]",
+  },
+  third: {
+    card: "border-[#adc8e8] bg-white",
+    tile: "bg-[#d6e4f5] text-[#1b4f9c]",
+    chip: "border-[#e1e6ee] bg-[#f6f8fb] text-[#4f5b6e]",
+    index: "text-[#7ba6da]",
+  },
+  own: {
+    card: "border-[#1b4f9c] bg-[#eef4fb]",
+    tile: "bg-[#1b4f9c] text-white",
+    chip: "border-[#adc8e8] bg-white text-[#163f7d]",
+    index: "text-[#1b4f9c]",
+  },
+  opt: {
+    card: "border-dashed border-[#c7641a] bg-[#fdf4e6]",
+    tile: "bg-[#f6cd86] text-[#a04f15]",
+    chip: "border-[#f2b955] bg-white text-[#a04f15]",
+    index: "text-[#c7641a]",
+  },
+};
 
-const LAYERS: Layer[] = [
+type Block = {
+  index?: string;
+  icon: LucideIcon;
+  title: string;
+  path?: string;
+  chips: string[];
+  note?: string;
+  tone: Tone;
+};
+
+const LAYERS: Block[] = [
   {
-    y: 14,
     index: "1",
+    icon: Terminal,
     title: "執行環境",
-    body: "Python 3.13（pyproject 要求 >=3.12）、套件管理 uv 0.12.18",
-    mono: "版本鎖在 uv.lock，從零可完整重跑",
-    tone: "neutral",
+    chips: ["Python 3.13", "uv 0.12.18", "uv.lock"],
+    note: "版本全鎖死，從零可完整重跑",
+    tone: "env",
   },
   {
-    y: 104,
     index: "2",
+    icon: Sigma,
     title: "資料與運算",
-    body: "numpy 2.5.4 · pandas 3.1.0 · scipy 1.18.1 · pyarrow 26.0.0",
-    mono: "讀上游 parquet、manifest、稀疏矩陣串接",
-    tone: "brand",
+    chips: ["numpy 2.5.4", "pandas 3.1.0", "scipy 1.18.1", "pyarrow 26.0.0"],
+    tone: "third",
   },
   {
-    y: 194,
     index: "3",
+    icon: Workflow,
     title: "建模",
-    body: "scikit-learn 1.9.1",
-    mono: "Pipeline · GridSearchCV · GroupKFold · PCA · TruncatedSVD · ColumnTransformer",
-    tone: "brand",
+    chips: [
+      "scikit-learn 1.9.1",
+      "Pipeline",
+      "GridSearchCV",
+      "GroupKFold",
+      "PCA",
+      "TruncatedSVD",
+    ],
+    tone: "third",
   },
   {
-    y: 284,
     index: "4",
-    title: "專案套件　src/splitsense/",
-    body: "12 個模組。實驗參數全部集中在 config.py",
-    mono: "config 被 24 處 import、metrics 被 6 處",
-    tone: "focus",
+    icon: Boxes,
+    title: "專案套件",
+    path: "src/splitsense/",
+    chips: ["12 個模組", "config 被 24 處 import"],
+    note: "實驗參數全部集中在 config.py",
+    tone: "own",
   },
   {
-    y: 374,
     index: "5",
-    title: "可執行腳本　scripts/",
-    body: "6 支。run_eda → build_dataset → run_baselines／embed_texts → run_models → run_error_analysis",
-    mono: "每支只做一件事，產物寫進對應目錄",
-    tone: "focus",
+    icon: FileCode2,
+    title: "可執行腳本",
+    path: "scripts/",
+    chips: ["run_eda", "build_dataset", "embed_texts", "run_models", "run_error_analysis"],
+    note: "每支只做一件事，依序執行",
+    tone: "own",
   },
   {
-    y: 464,
     index: "6",
-    title: "產物　artifacts/",
-    body: "eda · manifests · baselines · models · error_analysis · embeddings",
-    mono: "六個目錄全部不進版控（資料治理，研究規格 9.3）",
-    tone: "neutral",
+    icon: Archive,
+    title: "產物",
+    path: "artifacts/",
+    chips: ["eda", "manifests", "models", "error_analysis", "embeddings"],
+    note: "全部不進版控（研究規格 9.3）",
+    tone: "env",
   },
 ];
 
-const TONE: Record<Layer["tone"], { fill: string; stroke: string; bar: string }> = {
-  neutral: { fill: PAPER, stroke: LINE, bar: SOFT },
-  brand: { fill: "#ffffff", stroke: AZURE, bar: AZURE },
-  focus: { fill: PALE, stroke: NAVY, bar: NAVY },
-};
+const ASIDES: Block[] = [
+  {
+    icon: Cpu,
+    title: "選配　extra「embed」",
+    chips: ["sentence-transformers", "torch 2.15.0", "Apple MPS", "bge-m3 1024 維"],
+    note: "接在第 3 層建模之後：同一個 Logistic Regression，只把文字表示從 TF-IDF 換成 bge-m3。沒裝也能跑完主線，只少掉 BGE 那一列",
+    tone: "opt",
+  },
+  {
+    icon: ShieldCheck,
+    title: "品質閘　extra「dev」",
+    chips: ["pytest 9.2.0", "ruff 0.17.3"],
+    note: "91 passed、2 skipped；洩漏檢查是不變量",
+    tone: "third",
+  },
+  {
+    icon: BookOpen,
+    title: "文件與視覺化",
+    chips: ["Node 22", "notecraftapp 1.13.0", "recharts", "diagram-design"],
+    note: "要操作才懂的用元件，看一眼就走的用靜態圖",
+    tone: "env",
+  },
+];
 
-const SIDE_X = 604;
-const SIDE_W = 352;
+function Card({ block }: { block: Block }) {
+  const tone = TONE[block.tone];
+  const Icon = block.icon;
+  return (
+    <div className={`flex items-start gap-3 rounded-xl border px-3.5 py-3 ${tone.card}`}>
+      <span className={`mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-lg ${tone.tile}`}>
+        <Icon size={17} strokeWidth={2} aria-hidden="true" />
+      </span>
+      <div className="min-w-0 flex-1">
+        <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+          {block.index ? (
+            <span className={`font-mono text-[11px] font-bold ${tone.index}`}>{block.index}</span>
+          ) : null}
+          <span className="text-[13.5px] font-bold text-[#262e3d]">{block.title}</span>
+          {block.path ? (
+            <code className="font-mono text-[11.5px] text-[#4f5b6e]">{block.path}</code>
+          ) : null}
+        </div>
+        <div className="mt-1.5 flex flex-wrap gap-1">
+          {block.chips.map((chip) => (
+            <span
+              key={chip}
+              className={`rounded-md border px-1.5 py-0.5 font-mono text-[10.5px] leading-tight ${tone.chip}`}
+            >
+              {chip}
+            </span>
+          ))}
+        </div>
+        {block.note ? (
+          <span className="mt-1 block text-[11px] leading-snug text-[#9aa6b8]">{block.note}</span>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
+function LegendSwatch({ tone, label }: { tone: Tone; label: string }) {
+  return (
+    <span className="inline-flex items-center gap-1.5">
+      <span className={`inline-block size-3 rounded-sm border ${TONE[tone].card}`} />
+      <span className="text-[11px] text-[#4f5b6e]">{label}</span>
+    </span>
+  );
+}
 
 export default function TechStackArchitecture() {
   return (
     <div className="not-prose mx-auto w-full max-w-4xl">
-      <svg
-        viewBox="0 0 980 580"
-        width="100%"
-        role="img"
-        aria-labelledby="tsa-title tsa-desc"
-      >
-        <title id="tsa-title">SplitSense 技術架構：六層相依與三塊旁支</title>
-        <desc id="tsa-desc">
-          由下而上六層：執行環境（Python 3.13、uv）、資料與運算（numpy、pandas、scipy、pyarrow）、
-          建模（scikit-learn 1.9.1）、專案套件 src/splitsense 的 12 個模組、6 支可執行腳本、
-          以及不進版控的 artifacts 產物目錄。右側三塊旁支：選配的 embed extra
-          （sentence-transformers 與 torch，跑 BAAI/bge-m3，以虛線接到建模層）、
-          品質閘（pytest 91 passed 2 skipped、ruff）、文件與視覺化鏈（Node 22、notecraftapp、recharts、diagram-design）。
-        </desc>
-
-        <defs>
-          <marker
-            id="tsa-arrow"
-            viewBox="0 0 8 8"
-            refX="7"
-            refY="4"
-            markerWidth="7"
-            markerHeight="7"
-            orient="auto"
-          >
-            <path d="M 0 0.5 L 7.5 4 L 0 7.5 z" fill={SOFT} />
-          </marker>
-          <marker
-            id="tsa-arrow-gold"
-            viewBox="0 0 8 8"
-            refX="7"
-            refY="4"
-            markerWidth="7"
-            markerHeight="7"
-            orient="auto"
-          >
-            <path d="M 0 0.5 L 7.5 4 L 0 7.5 z" fill={GOLD_LINE} />
-          </marker>
-        </defs>
-
-        {/* 主幹：六層 */}
-        {LAYERS.map((layer, i) => {
-          const tone = TONE[layer.tone];
-          return (
-            <g key={layer.index}>
-              <rect
-                x={CARD_X}
-                y={layer.y}
-                width={CARD_W}
-                height={CARD_H}
-                rx={10}
-                fill={tone.fill}
-                stroke={tone.stroke}
-              />
-              <rect
-                x={CARD_X}
-                y={layer.y + 14}
-                width={4}
-                height={CARD_H - 28}
-                rx={2}
-                fill={tone.bar}
-              />
-              <text
-                x={CARD_X + 20}
-                y={layer.y + 26}
-                fontSize={11}
-                fontWeight={700}
-                fill={tone.bar}
-                fontFamily="ui-monospace, SFMono-Regular, Menlo, monospace"
-              >
-                {layer.index}
-              </text>
-              <text x={CARD_X + 40} y={layer.y + 26} fontSize={13} fontWeight={700} fill={INK}>
-                {layer.title}
-              </text>
-              <text x={CARD_X + 40} y={layer.y + 46} fontSize={11} fill={MUTED}>
-                {layer.body}
-              </text>
-              {layer.mono ? (
-                <text
-                  x={CARD_X + 40}
-                  y={layer.y + 64}
-                  fontSize={9.5}
-                  fill={SOFT}
-                  fontFamily="ui-monospace, SFMono-Regular, Menlo, monospace"
-                >
-                  {layer.mono}
-                </text>
-              ) : null}
+      <div className="grid gap-4 lg:grid-cols-[1.4fr_1fr]">
+        <div>
+          {LAYERS.map((layer, i) => (
+            <div key={layer.index}>
+              <Card block={layer} />
               {i < LAYERS.length - 1 ? (
-                <line
-                  x1={CARD_X + CARD_W / 2}
-                  y1={layer.y + CARD_H}
-                  x2={CARD_X + CARD_W / 2}
-                  y2={layer.y + CARD_H + 13}
-                  stroke={SOFT}
-                  strokeWidth={1.5}
-                  markerEnd="url(#tsa-arrow)"
-                />
+                <div className="flex justify-center py-1" aria-hidden="true">
+                  <ArrowDown size={15} className="text-[#9aa6b8]" />
+                </div>
               ) : null}
-            </g>
-          );
-        })}
+            </div>
+          ))}
+        </div>
 
-        {/* 旁支一：選配 extra（虛線，接回建模層） */}
-        <rect
-          x={SIDE_X}
-          y={194}
-          width={SIDE_W}
-          height={CARD_H}
-          rx={10}
-          fill={GOLD_FILL}
-          stroke={GOLD_LINE}
-          strokeDasharray="5,4"
-        />
-        <text x={SIDE_X + 20} y={216} fontSize={13} fontWeight={700} fill={INK}>
-          選配　extra 「embed」
-        </text>
-        <text x={SIDE_X + 20} y={236} fontSize={11} fill={MUTED}>
-          sentence-transformers 6.2.0 → torch 2.15.0（Apple MPS）
-        </text>
-        <text
-          x={SIDE_X + 20}
-          y={254}
-          fontSize={9.5}
-          fill={SOFT}
-          fontFamily="ui-monospace, SFMono-Regular, Menlo, monospace"
-        >
-          BAAI/bge-m3 1024 維，環境多約 2 GB；沒裝也能跑完主線
-        </text>
-        <line
-          x1={SIDE_X}
-          y1={194 + CARD_H / 2}
-          x2={CARD_X + CARD_W + 12}
-          y2={194 + CARD_H / 2}
-          stroke={GOLD_LINE}
-          strokeWidth={1.5}
-          strokeDasharray="5,4"
-          markerEnd="url(#tsa-arrow-gold)"
-        />
+        <div className="flex flex-col gap-3 lg:h-full lg:justify-between lg:gap-4">
+          <div className="flex items-center gap-1.5 text-[11px] text-[#9aa6b8]">
+            <CornerLeftDown size={13} aria-hidden="true" />
+            <span>旁支：接在主幹上，不在主線裡</span>
+          </div>
+          {ASIDES.map((aside) => (
+            <Card key={aside.title} block={aside} />
+          ))}
+        </div>
+      </div>
 
-        {/* 旁支二：品質閘 */}
-        <rect
-          x={SIDE_X}
-          y={284}
-          width={SIDE_W}
-          height={CARD_H}
-          rx={10}
-          fill="#ffffff"
-          stroke={LINE}
-        />
-        <text x={SIDE_X + 20} y={306} fontSize={13} fontWeight={700} fill={INK}>
-          品質閘（dev extra）
-        </text>
-        <text x={SIDE_X + 20} y={326} fontSize={11} fill={MUTED}>
-          pytest 9.2.0 · ruff 0.17.3
-        </text>
-        <text
-          x={SIDE_X + 20}
-          y={344}
-          fontSize={9.5}
-          fill={SOFT}
-          fontFamily="ui-monospace, SFMono-Regular, Menlo, monospace"
-        >
-          91 passed、2 skipped；洩漏檢查與重現性是不變量
-        </text>
-
-        {/* 旁支三：文件與視覺化 */}
-        <rect
-          x={SIDE_X}
-          y={374}
-          width={SIDE_W}
-          height={166}
-          rx={10}
-          fill={PAPER}
-          stroke={LINE}
-        />
-        <text x={SIDE_X + 20} y={396} fontSize={13} fontWeight={700} fill={INK}>
-          文件與視覺化（Node 側）
-        </text>
-        <text x={SIDE_X + 20} y={418} fontSize={11} fill={MUTED}>
-          Node ≥ 22 · notecraftapp 1.13.0（port 4326）
-        </text>
-        <text x={SIDE_X + 20} y={440} fontSize={11} fill={MUTED}>
-          React 18 + recharts 2.15.4 → 互動元件
-        </text>
-        <text x={SIDE_X + 20} y={462} fontSize={11} fill={MUTED}>
-          diagram-design v2.6.136 → 靜態 SVG
-        </text>
-        <line
-          x1={SIDE_X + 20}
-          y1={476}
-          x2={SIDE_X + SIDE_W - 20}
-          y2={476}
-          stroke={LINE}
-          strokeWidth={0.8}
-        />
-        <text
-          x={SIDE_X + 20}
-          y={496}
-          fontSize={9.5}
-          fill={SOFT}
-          fontFamily="ui-monospace, SFMono-Regular, Menlo, monospace"
-        >
-          分工以用途切，不以位置切
-        </text>
-        <text x={SIDE_X + 20} y={516} fontSize={9.5} fill={SOFT}>
-          要讀者操作才懂的用元件，看一眼就走的用靜態圖
-        </text>
-
-        {/* 圖例 */}
-        <line x1={24} y1={558} x2={956} y2={558} stroke={LINE} strokeWidth={0.8} />
-        <text
-          x={24}
-          y={574}
-          fontSize={9}
-          fill={MUTED}
-          fontFamily="ui-monospace, SFMono-Regular, Menlo, monospace"
-          letterSpacing="0.14em"
-        >
-          LEGEND
-        </text>
-        <rect x={110} y={566} width={14} height={9} rx={2} fill={PALE} stroke={NAVY} />
-        <text x={130} y={574} fontSize={9.5} fill={MUTED}>
-          本專案自己寫的
-        </text>
-        <rect x={222} y={566} width={14} height={9} rx={2} fill="#ffffff" stroke={AZURE} />
-        <text x={242} y={574} fontSize={9.5} fill={MUTED}>
-          第三方套件
-        </text>
-        <rect x={318} y={566} width={14} height={9} rx={2} fill={PAPER} stroke={LINE} />
-        <text x={338} y={574} fontSize={9.5} fill={MUTED}>
-          環境與產物
-        </text>
-        <rect
-          x={414}
-          y={566}
-          width={14}
-          height={9}
-          rx={2}
-          fill={GOLD_FILL}
-          stroke={GOLD_LINE}
-          strokeDasharray="3,2"
-        />
-        <text x={434} y={574} fontSize={9.5} fill={MUTED}>
-          選配，沒裝也能跑完主線
-        </text>
-        <text
-          x={956}
-          y={574}
-          fontSize={9.5}
-          fill={SOFT}
-          textAnchor="end"
-          fontFamily="ui-monospace, SFMono-Regular, Menlo, monospace"
-        >
+      <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-[#e1e6ee] pt-3">
+        <span className="font-mono text-[10px] tracking-[0.14em] text-[#9aa6b8]">LEGEND</span>
+        <LegendSwatch tone="own" label="本專案自己寫的" />
+        <LegendSwatch tone="third" label="第三方套件" />
+        <LegendSwatch tone="env" label="環境與產物" />
+        <LegendSwatch tone="opt" label="選配，沒裝也能跑完主線" />
+        <span className="ml-auto font-mono text-[10px] text-[#9aa6b8]">
           版本為 2026-11-09 盤點值
-        </text>
-      </svg>
+        </span>
+      </div>
     </div>
   );
 }
