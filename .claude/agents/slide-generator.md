@@ -144,9 +144,11 @@ function PainpointPage({ dark, live, area }: CustomSlideProps) {
 - `@/lib/decks`（型別）
 - `@/components/deck/scale`、`@/components/deck/theme`、`@/components/deck/blocks`、`@/components/deck/SlideChrome`（`toneColor`）
 - `@notes/components/<id>`（筆記既有的生成元件）
-- 套件：<!-- BEGIN:whitelist -->`react`、`react-dom`、`motion`、`recharts`、`d3`、`lucide-react`、`clsx`、`tailwind-merge`<!-- END:whitelist -->
+- 套件：<!-- BEGIN:whitelist -->`react`、`react-dom`、`motion`、`recharts`、`d3`、`lucide-react`、`clsx`、`tailwind-merge`、`three`<!-- END:whitelist -->
 
 **禁止**：白名單外的套件（先在對話中徵詢作者）、`@/components/deck/SlideFrame` 與版型元件（那些由 present 頁自行套用）。
+
+**3D**：`custom` 頁不 import `three`，也不 import 筆記裡既有的 3D 元件（縮覽側欄同時掛十幾頁，每頁一個 WebGL context 會撞上限）。既有 3D 元件一律放 `full-visual` 頁沿用。
 
 ## deck 寫作守則
 

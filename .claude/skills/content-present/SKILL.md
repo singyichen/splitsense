@@ -250,9 +250,11 @@ function ArchPage({ dark, live, play, area, outerScale }: CustomSlideProps) {
 
 ### import 白名單
 
-`custom` 頁允許：`@/lib/decks`（型別）、`@/components/deck/*`（原子層）、`@notes/components/<id>`（筆記既有元件），以及套件 <!-- BEGIN:whitelist -->`react`、`react-dom`、`motion`、`recharts`、`d3`、`lucide-react`、`clsx`、`tailwind-merge`<!-- END:whitelist -->。
+`custom` 頁允許：`@/lib/decks`（型別）、`@/components/deck/*`（原子層）、`@notes/components/<id>`（筆記既有元件），以及套件 <!-- BEGIN:whitelist -->`react`、`react-dom`、`motion`、`recharts`、`d3`、`lucide-react`、`clsx`、`tailwind-merge`、`three`<!-- END:whitelist -->。
 
 其他套件**先在對話中徵詢作者**。動畫遵守專案規則：200–400ms ease-out、用 `useReducedMotion()`，且**只在 `live === true` 時啟動**（縮覽側欄會同時掛十幾頁，`live: false` 時啟動動畫會拖垮整頁）。
+
+**3D（`three`）**：`custom` 頁**不新寫** 3D，也不在 `custom` 頁 import 筆記裡既有的 3D 元件——縮覽側欄與大綱會同時掛十幾頁 `custom`，每頁一個 WebGL context，很快就撞到瀏覽器上限。筆記裡既有的 3D 元件一律以 `full-visual` 頁沿用（只有目前頁真的渲染元件，縮圖只畫佔位）。
 
 ### `CustomSlideProps`
 

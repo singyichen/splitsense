@@ -24,8 +24,9 @@ model: sonnet
 
 1. **載入規範**：若本對話尚未讀過，讀取 `.claude/skills/content-visualize/SKILL.md`（生成規範）與 `trendlink-design` Skill（樣式 token）
 2. **建立元件檔**：依規劃書，用 Write 建立 `.notecraft/components/<id>.tsx`
-3. **lint imports**（產出前把關，跑 tsc/astro build 前必做）：Read 剛寫的檔案、逐條掃 `import ... from '<specifier>'`（含 `import type`、`import()` 動態 import），對每個 `<specifier>` 取 **root package**（`motion/react` → `motion`、`d3/utils` → `d3`；`@notes/...`、`@/...`、`./`、`../` 屬 alias/相對路徑）：
+3. **lint imports**（產出前把關，跑 tsc/astro build 前必做）：Read 剛寫的檔案、逐條掃 `import ... from '<specifier>'`（含 `import type`、`import()` 動態 import），對每個 `<specifier>` 取 **root package**（`motion/react` → `motion`、`d3/utils` → `d3`、`three/addons/controls/OrbitControls.js` → `three`；`@notes/...`、`@/...`、`./`、`../` 屬 alias/相對路徑）：
    - **允許**：白名單套件（見「元件寫作守則」的 whitelist 標記段落）、`@/*`、`@notes/*`、相對路徑
+   - **three 的禁用子路徑**（root package 雖是 `three`，仍視為違規、直接 Edit 改寫，不需徵詢作者）：`three/webgpu`、`three/tsl`、`three/src/*`、`three/examples/fonts/*`；`three/examples/jsm/*` 改寫成等價的 `three/addons/*`
    - **白名單外**：兩種處理路徑
      - 3a) **可用白名單替代**（例：`date-fns` → `Date` 內建 / `Intl.DateTimeFormat`；`sanitize-html` → 手寫 escape；`lodash` → 原生方法）→ Edit 檔案改掉，繼續走 step 4
      - 3b) **不可替代**（功能上必要、白名單無替代品）→ **停止產出**、用 Bash 刪除已寫的元件檔（避免 astro build 時整站掛掉），跳到 step 6 以「需徵詢作者引入 X」格式回報，**不跑 step 4 驗證**
@@ -43,13 +44,27 @@ model: sonnet
 - 一律 default export Functional Component
 - 完整 TS 型別，沒有 `any`（除非註解中說明理由）
 - 不接受 required props
-- import 僅限 SKILL.md 列舉的白名單（<!-- BEGIN:whitelist -->`react`、`react-dom`、`motion`、`recharts`、`d3`、`lucide-react`、`clsx`、`tailwind-merge`<!-- END:whitelist -->）+ 專案相對路徑。**由工作流程 step 3 的 import lint 把關**——這條白名單同時是 `astro.config.mjs` 的 `vite.resolve.dedupe` 清單，違反會在 rollup 端 build fail
+- import 僅限 SKILL.md 列舉的白名單（<!-- BEGIN:whitelist -->`react`、`react-dom`、`motion`、`recharts`、`d3`、`lucide-react`、`clsx`、`tailwind-merge`、`three`<!-- END:whitelist -->）+ 專案相對路徑。**由工作流程 step 3 的 import lint 把關**——這條白名單同時是 `astro.config.mjs` 的 `vite.resolve.dedupe` 清單，違反會在 rollup 端 build fail
 - **禁止使用任何 emoji 字元**（🚀 ✅ ⚠️ 等 Unicode emoji）。需要圖示時一律 `import { Check, TriangleAlert, ArrowRight, ... } from 'lucide-react'`；icon 大小用 `size` prop、顏色透過 Tailwind class 與 `currentColor` 控制。若在程式碼中偵測到 emoji，視為驗證失敗的一種，須立即替換為對應的 lucide icon
 - 樣式採 Tailwind utility class；色彩、間距、圓角等優先使用 `trendlink-design` 提供的 token 或 class
 - SVG 設定 `viewBox` 與 `width="100%"`
 - motion 元件套用 `useReducedMotion()`，預設動畫 200–400ms ease-out
 - **SSR 輸出最終高度**：不要用 `inView && …`／`mounted && …` 讓內容晚出現（hydrate 時會推動下方內文）；內容一律 render，只把 `animate` 狀態綁在 `useInView`。`useReducedMotion()` 只切換動畫參數、不切換顯示內容（伺服器端恆為 false）。寫完可用 `scripts/fixtures/viz-height-audit.mjs` 比對 SSR 與 hydrate 後的高度（差距應 ≤ 8px）
 - **元件本體不得自帶外框卡片**：根（最外層）元素禁止加上 `border`／`shadow-*`／大圓角 `rounded-*` 卡片／白底（`bg-white`）等卡片化樣式，也不要自畫左上類型標籤、右上 `generated/<id>.tsx` 來源標頭、或外層 padding。這些外框、陰影、來源標頭、底部 caption 一律由系統元件 `GeneratedFrame` 在寫回時統一提供（mdx-writer 負責），元件自帶會造成**雙層外框**。根元素只應是透明版型容器（`flex`／`grid`／`space-y-*`）加必要的 `max-w-*`／`mx-auto`／`not-prose`。**禁止 import 任何自製 `Figure` 之類的外框包裝元件**——外框唯一來源是 `GeneratedFrame`。（內部子卡片、面板、表格圓角屬內容結構，不在此限。）
+
+### 3D 元件（規劃書指定 `three` 時）
+
+**先複製 SKILL.md「3D 元件（three）」末的最小骨架再改**，不要從零寫。下列每條都要在回報前自己核對一次：
+
+- 模組頂層不碰 `window`／`document`；renderer 只在 `useEffect` 建立，canvas 放進 React 不放子節點的空 `<div>`
+- cleanup 依序：`cancelAnimationFrame` → ResizeObserver／IntersectionObserver `disconnect` → 移除 listener → `controls.dispose()` → 走訪 scene dispose geometry／material／貼圖 → `renderer.dispose()` → `renderer.forceContextLoss()` → 移除 canvas
+- 隨需渲染（`controls` 的 `change` 事件排幀），不跑常駐 rAF；IntersectionObserver 離開可視範圍不排幀；`setPixelRatio(Math.min(devicePixelRatio, 2))`；陰影預設關、開也 ≤ 1024
+- 寬度以 ResizeObserver 跟版面、高度寫死在元件內並在 SSR 佔位；raycaster 以 `getBoundingClientRect()` 換算座標，位移 < 4px 才算點選
+- `OrbitControls`：`enablePan = false`、`enableZoom = false`（滾輪留給頁面）、polar 角限制約 20°–70°；縮放由按鈕調 `camera.zoom`
+- 無障礙：容器 `role="img"` + 描述畫面的 `aria-label`；canvas 外的 HTML 資訊面板（`aria-live="polite"`，文字長短不一時給 `min-h-*`，按鈕列才不會跳動）；`<div role="group">` 按鈕列含上一步／下一步／播放／暫停／縮小／放大／重設視角，每顆都有 `aria-label`
+- `useReducedMotion()` 為 true：關阻尼、不補間，只重繪終態
+- 傳給 three 的顏色集中成檔內常數、逐一註明 trendlink-design token；`alpha: true` 透明底、無外框；禁 bloom／glow／fog／後處理／3D 文字；標籤用 HTML overlay
+- `WebGLRenderer` 建立包 `try/catch`，失敗只顯示一行說明，按鈕與面板照常可用
 
 ## 輸出格式
 

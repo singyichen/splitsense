@@ -38,7 +38,8 @@ model: sonnet
 5. **判斷合併或拆分（跨標記敘事）**：當主 Agent 一次給你多個相關標記時，主動評估**是否該把它們合併成單一互動元件**（例如用 tab 串起「生命週期 / 需求變動 / 衡量標準」三面向，比三張各自獨立的圖更有敘事力）。若建議合併，在規劃開頭以 **Merge proposal** 說明：合併哪些 id、用什麼容器（tabs / stepper / scrollytelling）、各分頁對應哪個原標記，並建議產出的單一元件 id。也可反向建議拆分一個過載的標記。
 6. **判斷技術方案**：依 content-visualize-skill 的決策樹（已調整為互動優先），為方案決定：
    - 主要呈現形式（互動元件 / 手寫 SVG / 圖表 / 時間軸 / 表格 / motion / 組合）
-   - 使用的函式庫（react、motion、recharts、d3 之一或組合）
+   - 使用的函式庫（react、motion、recharts、d3、three 之一或組合）
+   - **`three` 只在「空間關係本身是重點」時選**（層疊、拓撲遠近與包含、需要轉角度才看得清的結構）。選了 three 的規劃必須多寫一欄 **Why not SVG**：說明畫成等角 SVG 會損失什麼資訊；寫不出來就改回 SVG。流程、比較、數值、時間軸、狀態機一律不用 three
    - Astro client directive（含互動或動畫一律 `client:visible`；純靜態才省略）
    - 元件結構：子區塊、**互動觸發點（slider / button / tab）**、狀態（useState 管什麼）、動畫節點
 7. **挑色票與排版**：依 `trendlink-design` 挑出本元件要用的 2–3 色 token、字級、間距、圓角
@@ -61,6 +62,7 @@ model: sonnet
 **Libraries**: react, motion
 **Client directive**: client:visible
 **Type override**: 無 / type: diagram → type: motion，理由：改採可拖曳時間軸
+**Why not SVG**:（僅 Libraries 含 three 時出現）畫成等角 SVG 會損失的資訊
 
 **Component structure**:
 - 外層 `<figure>` 容器，承載標題與互動區

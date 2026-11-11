@@ -59,7 +59,7 @@ status: pending | generated | locked | failed
 
 動手前先挖出**核心洞察**——這段內容真正想讓讀者記住的一句話，常常是作者沒明寫、藏在字裡行間的那層意思。元件應以它為收斂點，並把概念間的張力（有限 vs 無限、凍結 vs 流動、固定 vs 浮動）放大。
 
-對每個區塊套用以下決策樹，命中第一條符合的即停止：
+對每個區塊套用以下決策樹，命中第一條符合的即停止。**3D（`three`）不是決策樹的預設出口**：只有第 6 條命中時才用，其他各條即使「轉起來好像很酷」也維持 2D。
 
 1. **可被「體驗」的概念對比 / 走查**（兩種情境的差異、隨某個變數推進的變化、需要逐步揭露的流程）—— 這是預設的首選。用 `motion` + react state 做成互動元件，讓讀者透過操作感受差異。常用互動隱喻：
    - **時間軸 slider**：拖動推進，看兩條線「一條停下、一條繼續」
@@ -76,9 +76,11 @@ status: pending | generated | locked | failed
 
 5. **含豐富欄位的比較表（圖示、徽章、迷你長條）** —— 以 Tailwind 樣式化的 HTML `<table>` 呈現，不要做成 SVG。表格本質靜態，通常不需互動；但若比較項目多到適合分頁或篩選，可考慮升級為 tab。
 
-6. **複合需求** —— 把上面幾種組合起來。例如「以動畫呈現 token bucket 的限流演算法」就是自訂 SVG + motion 的組合。請組合，不要二選一。
+6. **空間關係本身是重點（3D）** —— 層疊（哪一層疊在哪一層上）、拓撲裡的遠近與包含、需要轉個角度才看得清的結構（例：架構分層、平台拓撲、等角插圖風格的流程全景）。用 `three` 做等角（Orthographic）3D 場景，可旋轉、可點選，寫法見下方「3D 元件（three）」。先問自己：**「把它畫成等角 SVG 會不會損失資訊？」不會 → 用 SVG**。流程、比較、數值、時間軸、狀態機一律不用 3D——旋轉換不到任何資訊，只換到更大的 bundle 與更差的可讀性。
 
-7. **自由 / 含糊** —— 挑選最能讓讀者**體驗**該概念的形式；同樣優先互動。當兩種可行形式並列時，選更能放大概念張力的那一種。
+7. **複合需求** —— 把上面幾種組合起來。例如「以動畫呈現 token bucket 的限流演算法」就是自訂 SVG + motion 的組合。請組合，不要二選一。
+
+8. **自由 / 含糊** —— 挑選最能讓讀者**體驗**該概念的形式；同樣優先互動。當兩種可行形式並列時，選更能放大概念張力的那一種。
 
 標記區塊中的 `type` 欄位只是提示，不是限制。若你想到明顯更好的做法，可以覆蓋它，但請在對話回覆中告訴作者你做了這個選擇。
 
@@ -93,7 +95,7 @@ status: pending | generated | locked | failed
   - 是一個自包含的 React Functional Component，使用 default export
   - 完整型別標註（`.tsx`，除非有理由並在註解中說明，否則禁用 `any`）
   - 不可有 required props —— MDX 使用端不會傳入任何 props
-  - import 來源限制為：<!-- BEGIN:whitelist -->`react`、`react-dom`、`motion`、`recharts`、`d3`、`lucide-react`、`clsx`、`tailwind-merge`<!-- END:whitelist -->、以及專案內的相對路徑檔案。若需要其他套件，請先在對話中詢問作者
+  - import 來源限制為：<!-- BEGIN:whitelist -->`react`、`react-dom`、`motion`、`recharts`、`d3`、`lucide-react`、`clsx`、`tailwind-merge`、`three`<!-- END:whitelist -->、以及專案內的相對路徑檔案。若需要其他套件，請先在對話中詢問作者
   - **元件本體不得自帶外框卡片**：根（最外層）元素**禁止**同時或單獨加上 `border`／`shadow-*`／`rounded-*`（大圓角卡片）／白底（`bg-white`）等「卡片化」樣式，也**不要**自畫左上類型標籤或右上 `generated/<id>.tsx` 來源標頭、或外層 padding。這些外框、陰影、來源標頭、底部 caption 一律由系統元件 `GeneratedFrame` 在寫回時統一提供（見第 5 步），元件自帶會造成**雙層外框**。根元素只應是透明的版型容器（`flex`／`grid`／`space-y-*` 等），以及必要的 `max-w-*`、`mx-auto`、`not-prose`。**也不要 import 任何自製的 `Figure` 之類外框包裝元件**——外框只有 `GeneratedFrame` 一個來源。（內部的子卡片、面板、表格圓角等屬於內容結構，不在此限。）
   - **禁止使用 emoji**（包含 Unicode emoji、表情符號、🚀 ✅ ⚠️ 等任何 emoji 字元），無論是 JSX 文字節點、字串、aria-label、註解、或 SVG `<text>` 內。需要表達狀態 / 物件 / 方向 / 警示等語意時，一律改用 `lucide-react` 的 icon 元件（例如 `<Check />`、`<TriangleAlert />`、`<ArrowRight />`），icon 大小以 `size` prop 控制，顏色用 Tailwind class 透過 `currentColor` 繼承
   - 樣式使用 Tailwind utility classes；除非動畫需要，否則不要寫原生 CSS
@@ -148,6 +150,331 @@ import <PascalCaseId> from '@notes/components/<id>'
 - `<notesDir>/` 下的 MDX 由 Astro 渲染。在 MDX 中嵌入的 React 元件，只有具備互動或動畫時才需要 `client:*` directive；純靜態 SVG 不加更快
 - 生成的元件不要加入頁面層級的版型、標題或外層包裝 —— 元件是嵌入於筆記之中，會繼承筆記本身的排版樣式。統一的外框卡片由系統元件 `GeneratedFrame` 在寫回時（第 5 步）提供，元件本體只需專注內容，**不要自行畫卡片 / 標題 / 邊框**，以免與外框重複包裝
 - 生成元件不得 import 另一個生成元件（避免相互耦合）
+
+## 3D 元件（three）
+
+只在決策樹第 6 條命中時使用。以下每一條都是硬規則；**先複製本節末的骨架再改，不要從零寫**。
+
+### 匯入
+
+- `import * as THREE from "three"`；控制器等擴充一律走 `three/addons/...`，**含 `.js` 副檔名**：`import { OrbitControls } from "three/addons/controls/OrbitControls.js"`
+- 禁用子路徑：`three/webgpu`、`three/tsl`、`three/src/*`、`three/examples/fonts/*`。也不載入任何外部檔（glTF、貼圖、字型）——幾何一律程式產生，元件必須自包含
+- 不用 `@react-three/fiber`／`drei`（不在白名單）
+
+### 生命週期（SSR 安全）
+
+- 模組頂層**不得**存取 `window`／`document`；`new THREE.WebGLRenderer()` 只在 `useEffect` 裡。頂層可以放純資料（顏色常數、座標表）與 `import * as THREE`
+- canvas 放進一個 React **不放任何子節點**的空 `<div>`（`appendChild`），不要插進 React 管理子節點的容器
+- cleanup 依序：`cancelAnimationFrame` → `ResizeObserver.disconnect()` → `IntersectionObserver.disconnect()` → 移除自己掛的 listener → `controls.dispose()` → 走訪 scene，對每個 geometry、material（含 material 上的貼圖）`dispose()` → `renderer.dispose()` → **`renderer.forceContextLoss()`** → 從 DOM 移除 canvas
+  - 只有 `dispose()` 時 context 要等 GC 才釋放，簡報連續翻頁會累積到瀏覽器上限（「Too many active WebGL contexts」）；`forceContextLoss()` 讓它立即釋放
+- 不要用模組層的單例 renderer：HMR 與 React 18 開發模式會 mount → unmount → mount，cleanup 寫對就自然成立
+
+### 效能
+
+- **隨需渲染**：不跑常駐的 rAF 迴圈。只有控制器在動（含阻尼）、或狀態改變時才排一幀（`controls.addEventListener("change", invalidate)`）
+- `IntersectionObserver`：離開可視範圍就不排幀，回來再補一幀
+- `renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))`
+- `new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: "low-power" })`
+- 預設不開陰影；真的需要時只給一盞主光，`shadow.mapSize` ≤ 1024
+- 寫回 MDX 一律 `client:visible`（3D 元件必定互動）
+
+### 尺寸
+
+- 寬度跟著版面：`ResizeObserver` 觀察容器，更新 `renderer.setSize(w, H)` 與相機（Orthographic 改 left/right/top/bottom、Perspective 改 aspect）後 `updateProjectionMatrix()`
+- 高度固定、寫在元件內（例：`const H = 360`），容器以 `style={{ height: H }}` 在 SSR 就佔好位置
+- **raycaster 的座標一律以 `canvas.getBoundingClientRect()` 換算**，不用 `clientWidth`：「放大檢視」把元件搬進套了 CSS `transform: scale()` 的畫布，用 `clientWidth` 換算點選會偏
+- 點選要區分「點」與「拖」：pointerdown → pointerup 位移 < 4px 才算點選，拖曳旋轉不觸發選取
+
+### 相機與控制器
+
+- 等角視角：`OrthographicCamera`、`camera.position.set(d, d, d)`、`lookAt(0, 0, 0)`
+- `OrbitControls`：`enablePan = false`；`minPolarAngle`／`maxPolarAngle` 限制在俯視約 20°–70°（不能翻到底下）
+- **`enableZoom = false`**：滾輪要留給筆記頁捲動。縮放改由按鈕（＋／－）調 `camera.zoom`，夾在 `minZoom`／`maxZoom` 之間
+- `controls.saveState()`，「重設視角」按鈕呼叫 `controls.reset()`
+
+### 無障礙
+
+- 容器 `role="img"` + **描述畫面內容**的 `aria-label`（寫出看到什麼、關係是什麼；不要寫「3D 場景」這種空話）；canvas 容器 `aria-hidden`
+- 資訊放在 canvas 外的 HTML 面板（目前選中的物件名稱與說明），`aria-live="polite"`；說明文字長短不一時給面板 `min-h-*`（以最長的一則為準），否則切換時按鈕列會跳動、點不到
+- **一定要有按鈕操作**：上一步、下一步、播放／暫停、縮小、放大、重設視角，按鈕列包在 `<div role="group" aria-label="…">`；點 3D 物件只是捷徑，所有資訊都要能只用按鈕走完
+- 每顆圖示按鈕都要 `aria-label`；不在 canvas 或 window 掛全域 keydown（筆記頁、簡報頁都有自己的快捷鍵）
+
+### 減少動態
+
+`useReducedMotion()`（`motion/react`）為 true 時：`controls.enableDamping = false`、不做 autoRotate、不做補間動畫，每次狀態改變只重繪一次終態。「播放」照樣逐步切換，但每一步直接跳到終態。
+
+### 視覺
+
+- 顏色用**檔內常數**，每個常數註明對應的 `trendlink-design` token（例：`node: 0x1f5aa6, // --blue-600`）。WebGL 讀不到 CSS 變數，這是「不要硬編碼色碼」的明文例外，**只限傳給 three 的值**；HTML 面板、按鈕、標籤仍用 Tailwind／token class
+- 透明底：`alpha: true` + `renderer.setClearColor(0x000000, 0)`。白底與細框由 `GeneratedFrame` 提供，元件不自帶外框
+- 禁用：bloom、glow、fog、`EffectComposer` 與任何後處理、`TextGeometry`／3D 文字
+- 光：`HemisphereLight`（地面色取淺中性色）＋一盞 `DirectionalLight`；需要陰影時要淡（`ShadowMaterial` opacity ≤ 0.15）
+- 材質：`MeshLambertMaterial` 或低 metalness 的 `MeshStandardMaterial`；以 `EdgesGeometry` + `LineBasicMaterial` 描邊，做出插圖感
+- 文字標籤一律 **HTML overlay**：每幀渲染後以 `vector.project(camera)` 換算到容器座標，用 `transform: translate()` 定位、`pointer-events: none`；SSR 時 `opacity-0`，第一次渲染後才顯示
+
+### WebGL 不可用
+
+`new THREE.WebGLRenderer()` 包在 `try/catch`；失敗時不 throw（否則整塊變錯誤卡），改顯示一行說明，HTML 面板與按鈕照常可用。
+
+### 最小骨架
+
+等角 OrthographicCamera、OrbitControls（限制 polar、關滾輪縮放）、raycaster 點選、ResizeObserver、IntersectionObserver、reduced motion、HTML overlay 標籤與資訊面板、`role="group"` 按鈕列、完整 cleanup。換掉 `ITEMS` 與幾何就是一個新元件：
+
+```tsx
+import { useEffect, useRef, useState } from "react";
+import { useReducedMotion } from "motion/react";
+import { Minus, Pause, Play, Plus, RotateCcw, SkipBack, SkipForward } from "lucide-react";
+import * as THREE from "three";
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+
+// WebGL 讀不到 CSS 變數：傳給 three 的顏色集中成檔內常數，逐一註明 trendlink-design token
+const C = {
+  node: 0x1f5aa6, // --blue-600
+  edge: 0x7ba6da, // --blue-300
+  active: 0xed9b26, // --orange-400
+  ground: 0xe1e6ee, // --neutral-200
+} as const;
+
+const H = 360; // 高度固定、寫在元件內；寬度跟著版面
+const FRUSTUM = 7; // 正交相機的可視高度（世界單位）
+const ZOOM = { min: 0.7, max: 1.8, step: 0.2 };
+
+type Item = { label: string; desc: string; pos: [number, number, number] };
+const ITEMS: Item[] = [
+  { label: "前端", desc: "使用者操作的介面，請求從這裡出發。", pos: [-2, 1.6, 0] },
+  { label: "服務", desc: "處理商業邏輯，向下讀寫資料。", pos: [0, 0.6, 0] },
+  { label: "資料", desc: "持久化儲存，回應服務層的查詢。", pos: [2, -0.4, 0] },
+];
+
+type Api = { select: (i: number) => void; zoom: (d: number) => void; reset: () => void };
+
+export default function ThreeSkeleton() {
+  const hostRef = useRef<HTMLDivElement>(null);
+  const glRef = useRef<HTMLDivElement>(null); // canvas 只放這裡，React 不在裡面放子節點
+  const labelRefs = useRef<(HTMLSpanElement | null)[]>([]);
+  const api = useRef<Api | null>(null);
+  const activeRef = useRef(0);
+  const [active, setActive] = useState(0);
+  const [playing, setPlaying] = useState(false);
+  const [webgl, setWebgl] = useState(true);
+  const reduce = useReducedMotion();
+
+  useEffect(() => {
+    const host = hostRef.current;
+    const gl = glRef.current;
+    if (!host || !gl) return;
+
+    let renderer: THREE.WebGLRenderer;
+    try {
+      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: "low-power" });
+    } catch {
+      setWebgl(false); // 沒有 WebGL：只留 HTML 面板
+      return;
+    }
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setClearColor(0x000000, 0); // 透明底，白底與細框由 GeneratedFrame 提供
+    gl.appendChild(renderer.domElement);
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 100);
+    camera.position.set(10, 10, 10); // 等角視角
+    camera.lookAt(0, 0, 0);
+    scene.add(new THREE.HemisphereLight(0xffffff, C.ground, 2.2));
+    const sun = new THREE.DirectionalLight(0xffffff, 1.1);
+    sun.position.set(4, 10, 6);
+    scene.add(sun);
+
+    const meshes = ITEMS.map((it, i) => {
+      const geo = new THREE.BoxGeometry(1.6, 0.5, 1.6);
+      const mesh = new THREE.Mesh(geo, new THREE.MeshLambertMaterial({ color: C.node }));
+      mesh.position.set(...it.pos);
+      mesh.userData.index = i;
+      mesh.add(new THREE.LineSegments(new THREE.EdgesGeometry(geo), new THREE.LineBasicMaterial({ color: C.edge })));
+      scene.add(mesh);
+      return mesh;
+    });
+
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enablePan = false;
+    controls.enableZoom = false; // 滾輪留給頁面捲動；縮放走按鈕
+    controls.minPolarAngle = THREE.MathUtils.degToRad(20);
+    controls.maxPolarAngle = THREE.MathUtils.degToRad(70);
+    controls.enableDamping = !reduce;
+    controls.saveState();
+
+    // 隨需渲染：只有控制器在動（含阻尼）或狀態改變時才排一幀；離開可視範圍不排
+    let raf = 0;
+    let visible = true;
+    const v = new THREE.Vector3();
+    const frame = () => {
+      raf = 0;
+      const moving = controls.update();
+      renderer.render(scene, camera);
+      const w = host.clientWidth;
+      meshes.forEach((m, i) => {
+        const el = labelRefs.current[i];
+        if (!el) return;
+        v.copy(m.position).setY(m.position.y + 0.5).project(camera);
+        el.style.transform = `translate(${((v.x + 1) / 2) * w}px, ${((1 - v.y) / 2) * H}px) translate(-50%, -120%)`;
+        el.style.opacity = "1";
+      });
+      if (moving && !reduce) invalidate();
+    };
+    const invalidate = () => {
+      if (!raf && visible) raf = requestAnimationFrame(frame);
+    };
+    controls.addEventListener("change", invalidate);
+
+    const resize = () => {
+      const w = host.clientWidth;
+      const aspect = w / H;
+      renderer.setSize(w, H);
+      camera.left = (-FRUSTUM * aspect) / 2;
+      camera.right = (FRUSTUM * aspect) / 2;
+      camera.top = FRUSTUM / 2;
+      camera.bottom = -FRUSTUM / 2;
+      camera.updateProjectionMatrix();
+      invalidate();
+    };
+    const ro = new ResizeObserver(resize);
+    ro.observe(host);
+    resize();
+
+    const io = new IntersectionObserver(([e]) => {
+      visible = e.isIntersecting;
+      if (visible) invalidate();
+    });
+    io.observe(host);
+
+    // 點選：pointerdown→up 位移小於 4px 才算點擊（拖曳旋轉不觸發）
+    // NDC 一律以 getBoundingClientRect 換算：放大檢視套了 CSS transform，clientWidth 會偏
+    const ray = new THREE.Raycaster();
+    const ndc = new THREE.Vector2();
+    let down: { x: number; y: number } | null = null;
+    const onDown = (e: PointerEvent) => (down = { x: e.clientX, y: e.clientY });
+    const onUp = (e: PointerEvent) => {
+      if (!down || Math.hypot(e.clientX - down.x, e.clientY - down.y) > 4) return;
+      const r = renderer.domElement.getBoundingClientRect();
+      ndc.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
+      ray.setFromCamera(ndc, camera);
+      const hit = ray.intersectObjects(meshes, false)[0];
+      if (hit) setActive(hit.object.userData.index as number);
+    };
+    renderer.domElement.addEventListener("pointerdown", onDown);
+    renderer.domElement.addEventListener("pointerup", onUp);
+
+    api.current = {
+      select: (i) => {
+        meshes.forEach((m, j) => (m.material as THREE.MeshLambertMaterial).color.setHex(i === j ? C.active : C.node));
+        invalidate();
+      },
+      zoom: (d) => {
+        camera.zoom = THREE.MathUtils.clamp(camera.zoom + d, ZOOM.min, ZOOM.max);
+        camera.updateProjectionMatrix();
+        invalidate();
+      },
+      reset: () => {
+        controls.reset();
+        invalidate();
+      },
+    };
+    api.current.select(activeRef.current);
+
+    return () => {
+      api.current = null;
+      if (raf) cancelAnimationFrame(raf);
+      ro.disconnect();
+      io.disconnect();
+      renderer.domElement.removeEventListener("pointerdown", onDown);
+      renderer.domElement.removeEventListener("pointerup", onUp);
+      controls.removeEventListener("change", invalidate);
+      controls.dispose();
+      scene.traverse((o) => {
+        if (!(o instanceof THREE.Mesh || o instanceof THREE.LineSegments)) return;
+        o.geometry.dispose();
+        const mats: THREE.Material[] = Array.isArray(o.material) ? o.material : [o.material];
+        mats.forEach((m) => {
+          Object.values(m).forEach((val) => val instanceof THREE.Texture && val.dispose());
+          m.dispose();
+        });
+      });
+      renderer.dispose();
+      renderer.forceContextLoss(); // 立即釋放 context，連續翻簡報頁才不會累積
+      renderer.domElement.remove();
+    };
+  }, [reduce]);
+
+  useEffect(() => {
+    activeRef.current = active;
+    api.current?.select(active);
+  }, [active]);
+
+  useEffect(() => {
+    if (!playing) return;
+    const t = window.setInterval(() => setActive((i) => (i + 1) % ITEMS.length), 1600);
+    return () => window.clearInterval(t);
+  }, [playing]);
+
+  const step = (d: number) => {
+    setPlaying(false);
+    setActive((i) => (i + d + ITEMS.length) % ITEMS.length);
+  };
+  const btn =
+    "inline-flex h-8 w-8 items-center justify-center rounded-md text-neutral-600 hover:bg-neutral-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-500";
+
+  return (
+    <div className="not-prose space-y-3">
+      <div
+        ref={hostRef}
+        role="img"
+        aria-label="三層架構的等角立體圖：前端在最上層，服務在中間，資料在最下層，請求由上往下經過三層。"
+        className="relative w-full overflow-hidden"
+        style={{ height: H }}
+      >
+        <div ref={glRef} aria-hidden="true" className="absolute inset-0 cursor-grab active:cursor-grabbing" />
+        {ITEMS.map((it, i) => (
+          <span
+            key={it.label}
+            ref={(el) => {
+              labelRefs.current[i] = el;
+            }}
+            aria-hidden="true"
+            className="pointer-events-none absolute left-0 top-0 whitespace-nowrap rounded bg-white/90 px-1.5 py-0.5 text-xs font-medium text-neutral-700 opacity-0"
+          >
+            {it.label}
+          </span>
+        ))}
+      </div>
+      {!webgl && <p className="text-sm text-neutral-500">此裝置無法顯示 3D，可用下方按鈕逐步瀏覽。</p>}
+      <div className="flex flex-wrap items-center gap-3">
+        <div role="group" aria-label="檢視控制" className="flex items-center gap-0.5">
+          <button type="button" className={btn} aria-label="上一步" onClick={() => step(-1)}>
+            <SkipBack size={16} />
+          </button>
+          <button type="button" className={btn} aria-label={playing ? "暫停" : "播放"} onClick={() => setPlaying((p) => !p)}>
+            {playing ? <Pause size={16} /> : <Play size={16} />}
+          </button>
+          <button type="button" className={btn} aria-label="下一步" onClick={() => step(1)}>
+            <SkipForward size={16} />
+          </button>
+          <button type="button" className={btn} aria-label="縮小" onClick={() => api.current?.zoom(-ZOOM.step)}>
+            <Minus size={16} />
+          </button>
+          <button type="button" className={btn} aria-label="放大" onClick={() => api.current?.zoom(ZOOM.step)}>
+            <Plus size={16} />
+          </button>
+          <button type="button" className={btn} aria-label="重設視角" onClick={() => api.current?.reset()}>
+            <RotateCcw size={16} />
+          </button>
+        </div>
+        <p aria-live="polite" className="text-sm text-neutral-700">
+          <span className="font-semibold text-neutral-900">{ITEMS[active].label}</span>：{ITEMS[active].desc}
+        </p>
+      </div>
+    </div>
+  );
+}
+```
 
 ## 預設樣式 —— 依循 trendlink-design
 
