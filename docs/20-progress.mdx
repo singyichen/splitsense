@@ -3,7 +3,7 @@ title: "進度追蹤"
 description: "課程規範必做項目、課堂版時程、最低成功線與交付物的單一進度真相"
 tags: ["進度", "交付物", "課程規範"]
 createdAt: "2026-10-31"
-updatedAt: "2026-11-09"
+updatedAt: "2026-11-11"
 ---
 
 # 進度追蹤
@@ -29,7 +29,7 @@ updatedAt: "2026-11-09"
 | [總覽](./index.mdx) | — | — |
 | [研究規格](./00-research-spec.mdx) | 1（模型階梯） | — |
 | [Dataset Card](./10-dataset-card-goemotions.mdx) | 1（資料篩選漏斗） | — |
-| 進度追蹤（本文件） | — | — |
+| 進度追蹤（本文件） | — | 1（課程規範必做項目） |
 | [期末簡報內容](./30-presentation.mdx) | 7 | 6 |
 | [技術棧](./40-tech-stack.mdx) | 1（管線圖） | 1（技術架構，靜態） |
 | [術語表](./80-glossary.mdx) | — | — |
@@ -37,7 +37,7 @@ updatedAt: "2026-11-09"
 
 技術棧的「技術架構」是 `@ai-visualize` 生成的元件但**不互動**——用元件是為了把提示詞留在 MDX 裡好重生成，不是為了互動。
 
-總覽、本文件、術語表與待釐清事項刻意不畫圖：總覽的結果表從研究規格嵌入，另畫一張就是第二份真相；進度會一直變，圖一畫就過時；`Qn` 是扁平清單，沒有順序也沒有轉折，表格比圖清楚。
+總覽、術語表與待釐清事項刻意不畫圖：總覽的結果表從研究規格嵌入，另畫一張就是第二份真相；`Qn` 是扁平清單，沒有順序也沒有轉折，表格比圖清楚。本文件只在第 2 節放一個元件，畫的是**每一站用了哪些技術**，不是狀態：狀態一欄字就說完了，表格比圖清楚；技術細節分散在研究規格、Dataset Card 與技術棧三份文件，收成一站一頁才看得出整條管線。元件只放「完成」小徽章，**狀態的真相仍是第 2 節表格**；研究規格的數字改了，`.notecraft/components/course-stage-techniques.tsx` 的 `STAGES` 要在同一個 commit 跟著改。
 
 狀態只有四種：:badge[完成]{variant="success"}、:badge[部分]{variant="warning"}、:badge[未開始]{variant="neutral"}、:badge[逾期風險]{variant="danger"}。每一列的「證據」欄要指到檔案、指令或數字，不寫感覺。
 
@@ -70,6 +70,25 @@ updatedAt: "2026-11-09"
 | 7 | 主題與組員登記 | :badge[逾期風險]{variant="danger"} | **表單尚未送出**，截止 11/30。三個欄位的內容 2026-10-19 就定了，見研究規格 2.4 末段 |
 | 8 | 發表簡報 | :badge[部分]{variant="warning"} | 內容草稿完成（[`30-presentation.mdx`](./30-presentation.mdx)），六段齊備含 Q&A 準備，內嵌六個互動元件與七張靜態圖，全部含 BGE-M3 的結果。**投影片本身未製作** |
 | 9 | 專題程式 | :badge[完成]{variant="success"} | 規範未要求交付。`uv run pytest` **91 passed、2 skipped**；從零（無 `data/`、無 `artifacts/`）可完整重跑 |
+
+{/* @ai-visualize
+id: course-stage-techniques
+type: motion
+prompt: |
+  把「課程規範必做項目」裡有技術內容的七站（問題描述、資料收集、分析與前處理、模型訓練、模型評估、結論，
+  加上專題程式）做成可切換的分頁走查。每一站顯示：一句目標、2–3 個關鍵數字、依類別分組的技術清單
+  （技術名稱＋一句參數或用途）、對應的程式或文件。模型評估那一站附 hard 範圍 R@10% 六個方法的迷你長條。
+  狀態只留一個小徽章；#7 登記表單、#8 投影片不涉及技術，只在底部一行帶過。
+  核心訊息：每一步用了什麼方法、參數是多少、在哪個檔案。數字以研究規格為準。
+caption: 點上方各站看該階段用到的技術、參數與程式；評估一站附六個方法的 hard 範圍 R@10%
+status: generated
+*/}
+import GeneratedFrame from '@/components/GeneratedFrame.astro'
+import CourseStageTechniques from '@notes/components/course-stage-techniques'
+
+<GeneratedFrame id="course-stage-techniques" type="motion" prompt={"把「課程規範必做項目」裡有技術內容的七站（問題描述、資料收集、分析與前處理、模型訓練、模型評估、結論，\n加上專題程式）做成可切換的分頁走查。每一站顯示：一句目標、2–3 個關鍵數字、依類別分組的技術清單\n（技術名稱＋一句參數或用途）、對應的程式或文件。模型評估那一站附 hard 範圍 R@10% 六個方法的迷你長條。\n狀態只留一個小徽章；#7 登記表單、#8 投影片不涉及技術，只在底部一行帶過。\n核心訊息：每一步用了什麼方法、參數是多少、在哪個檔案。數字以研究規格為準。\n"} caption="點上方各站看該階段用到的技術、參數與程式；評估一站附六個方法的 hard 範圍 R@10%">
+  <CourseStageTechniques client:idle />
+</GeneratedFrame>
 
 ## 3. 課堂版時程
 
