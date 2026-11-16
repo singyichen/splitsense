@@ -108,7 +108,7 @@ export default function TechStackArchitecture() {
           <Node
             icon={BookOpen}
             label="Node（文件側）"
-            chips={["22", "notecraftapp 1.13.0", "recharts", "diagram-design"]}
+            chips={["22", "notecraftapp 1.15.0", "recharts", "diagram-design"]}
             note="要操作才懂的用元件，看一眼就走的用靜態圖"
           />
         </div>
