@@ -6,7 +6,7 @@ createdAt: "2026-10-13"
 updatedAt: "2026-11-16"
 Project Name: SplitSense
 文件類型: Research Specification
-文件版本: v0.14.1
+文件版本: v0.14.2
 文件狀態: 草稿
 文件作者: 陳欣怡
 建立日期: 2026-10-13
@@ -25,7 +25,7 @@ Project Name: SplitSense
 | --- | --- |
 | 專案名稱 | SplitSense |
 | 文件類型 | Research Specification |
-| 文件版本 | v0.14.1 |
+| 文件版本 | v0.14.2 |
 | 文件狀態 | 草稿 |
 | 文件作者 | 陳欣怡 |
 | 建立日期 | 2026-10-13 |
@@ -415,9 +415,31 @@ Split 的實際結果（`SPLIT_SEED = 20261031`）：
 
 由笨到聰明逐層比較，所有層級使用相同 split、相同可見資訊與相同 `K`：
 
-![模型階梯：五層由笨到聰明，隨機排序 9.5、可見標籤 entropy 9.9、同意標籤查表 18.5、Logistic Regression 以 TF-IDF 為 19.4、換成 BGE-M3 為 21.3、Gradient Boosting 19.4；層與層之間標明前一層答不了的問題](./assets/model-ladder.svg)
+{/* @ai-visualize
+id: model-ladder
+type: diagram
+prompt: |
+  模型階梯，由笨到聰明五層實線 ＋ 一層虛線，每列可點開。
+  列上只放「編號膠囊 ＋ 名稱 ＋ Recall@10%」，一句副標說明這層在回答什麼；
+  點開才顯示超參數與「前一層答不了的問題」那句轉折——那句話是這張圖的重點，
+  靜態圖只能擠在箭頭旁，所以改成點開。
+  0 隨機排序 9.5、1 可見標籤 entropy 9.9、1.5 同意標籤先驗 18.5、
+  2 Logistic Regression 一列兩個數字（TF-IDF 19.3 ／ BGE-M3 21.8，視覺上強調是同一個分類器換文字表示）、
+  3 Gradient Boosting 19.4、4 零樣本大語言模型畫虛線（課堂版不做）。
+  頂部標「笨 ← → 聰明」與難題組 3,153 題、上限 40.5%。底部一句結論。
+  BGE-M3 那個數字用金色，其餘 navy。禁用 emoji。
+caption: 每一層回答前一層答不了的問題；點一列看那句轉折
+status: generated
+*/}
 
-圖上箭頭寫的是**前一層答不了的問題**，那才是下一層存在的理由。實測數字見 8.4。
+import GeneratedFrame from '@/components/GeneratedFrame.astro'
+import ModelLadder from '@notes/components/model-ladder'
+
+<GeneratedFrame id="model-ladder" type="diagram" prompt={"模型階梯，五層實線 ＋ 一層虛線，每列可點開。列上只放編號、名稱與 Recall@10%；點開才顯示超參數與「前一層答不了的問題」那句轉折。0 隨機 9.5、1 entropy 9.9、1.5 同意標籤先驗 18.5、2 Logistic Regression 一列兩個數字（TF-IDF 19.3 ／ BGE-M3 21.8）、3 Gradient Boosting 19.4、4 零樣本大語言模型虛線。頂部標難題組 3,153 題、上限 40.5%。"} caption="每一層回答前一層答不了的問題；點一列看那句轉折">
+  <ModelLadder client:idle />
+</GeneratedFrame>
+
+點開任一層，展開的是**前一層答不了的問題**，那才是下一層存在的理由。實測數字見 8.4。
 
 BGE-M3 畫在階梯 2 的同一列，不是新的一層：它只把那一層的**文字表示**換掉（TF-IDF → `bge-m3` dense 向量），分類器與可見標註特徵都不變。那一列的兩個數字 19.3 與 21.8 就是這個對照，見 7.2.1 與 8.4。
 
@@ -1142,6 +1164,11 @@ visible_annotation_count
 完整清單在 [90-open-questions.mdx](./90-open-questions.mdx)，全文的 `Qn` 一律指該文件的編號；已決議者留在原位改狀態，編號不重排、不回收。
 
 ## 14. Change Log
+
+### [0.14.2] - 2026-11-16
+
+- **Changed**: 7.1 的模型階梯從靜態 SVG 改為 `@ai-visualize` 互動元件（`.notecraft/components/model-ladder.tsx`），點一列展開該層的超參數與「前一層答不了的問題」。**理由**：那句轉折才是這張圖的重點，靜態圖只能把它擠在箭頭旁的小字。`diagrams/model-ladder.html` 與 `docs/assets/model-ladder.svg` 保留，供 PNG 匯出與投影後備。
+- **Fixed**: 同一處圖的替代文字把 Logistic Regression 的數字寫成 TF-IDF **19.4**、BGE-M3 **21.3**，正確是 **19.3** 與 **21.8**。v0.13.0 更新了五張圖的數字卻漏掉替代文字，螢幕報讀者從 v0.13.0 起拿到的都是舊數字。改成元件後數字只有一份正本，這類脫鉤不會再以「圖對、文字錯」的形式發生。
 
 ### [0.14.1] - 2026-11-16
 
