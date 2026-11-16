@@ -29,4 +29,16 @@ paths:
 | --- | --- |
 | 要讓讀者操作才懂的概念（拖動、逐步揭露、分頁對照） | `content-visualize` → `.notecraft/components/*.tsx` |
 | 投影片用圖 | `diagram-design` → `diagrams/*.html` |
-| 參考圖（架構、相依、流程，看一眼就走） | `diagram-design` |
+| 參考圖（架構、相依、流程，看一眼就走） | `content-visualize` → **靜態元件**（不掛 `client:*`） |
+
+參考圖在 2026-11-16 從 `diagram-design` 改判到元件：理由不是互動，是**數字的正本要跟著圖走**。
+同一張圖的數字散在 `.html`、匯出的 `.svg` 與 MDX 的 alt 文字三處時會脫鉤——研究規格 §7.1 的替代文字
+就曾從 v0.13.0 起一直是舊數字（19.4／21.3，正確是 19.3／21.8）。
+
+## 數字同步
+
+**圖的數字以 `.notecraft/components/` 的元件為正本。** 改了元件裡的數字，
+若 `diagrams/` 有對應的 `.html`，要在**同一個 commit** 改它並重跑匯出；反之亦然。
+比照 `docs/20-progress.mdx` 對 `course-stage-techniques.tsx` 的同步要求。
+
+目前成對的三組：`model-ladder`、`dataset-funnel`、`module-pipeline`。
