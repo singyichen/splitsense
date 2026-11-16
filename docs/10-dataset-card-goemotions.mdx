@@ -161,7 +161,29 @@ TID-8 的 Dataset Card 授權欄標示 `unknown`，其論文也沒有授權聲�
 
 ## 5. 候選比較與排除理由
 
-![四階段篩選：從 TID-8 八個子資料集取出四個保留逐人標註的候選，授權篩選淘汰 md-agreement，資料品質篩選淘汰 sentiment 與 CommitmentBank，最後 GoEmotions 從 57,703 題篩到 31,766 題、去重後 31,603 題](./assets/dataset-funnel.svg)
+{/* @ai-visualize
+id: dataset-funnel
+type: chart
+prompt: |
+  四階段篩選漏斗，逐步揭露。固定在最上方顯示一行總覽：8 個子資料集 → 4 候選 → 1 定案 → 31,603 題，
+  讓只掃過去的讀者也看得到終點。下方四個階段按鈕可直接跳，另有「下一步」推進。
+  已走過的階段淡化留在畫面上、不要換頁式切換——漏斗要看得出收斂。
+  每個階段顯示判準、剩餘候選數與被淘汰者：
+  1 保留逐人標註的子資料集（剩 4）；
+  2 授權篩選（剩 3，md-agreement 出局）；
+  3 資料品質篩選（剩 1，sentiment 與 CommitmentBank 出局）；
+  4 GoEmotions 子集篩選，展開 57,703 → 31,766 → 31,603 三個數字。
+  被淘汰者用金色提示框，其餘用 navy 與中性灰。禁用 emoji。
+caption: 八個子資料集怎麼一層層篩到 GoEmotions 的 31,603 題
+status: generated
+*/}
+
+import GeneratedFrame from '@/components/GeneratedFrame.astro'
+import DatasetFunnel from '@notes/components/dataset-funnel'
+
+<GeneratedFrame id="dataset-funnel" type="chart" prompt={"四階段篩選漏斗，逐步揭露。最上方固定顯示總覽「8 個子資料集 → 4 候選 → 1 定案 → 31,603 題」。四個階段按鈕可直接跳，已走過的階段淡化留在畫面上。每階段顯示判準、剩餘候選數與被淘汰者及理由；第 4 階段展開 57,703 → 31,766 → 31,603。"} caption="八個子資料集怎麼一層層篩到 GoEmotions 的 31,603 題">
+  <DatasetFunnel client:idle />
+</GeneratedFrame>
 
 下面兩張表是同一件事的查找版：圖給形狀，表給細節。
 
