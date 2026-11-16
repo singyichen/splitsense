@@ -6,7 +6,7 @@ createdAt: "2026-10-13"
 updatedAt: "2026-11-16"
 Project Name: SplitSense
 文件類型: Research Specification
-文件版本: v0.14.2
+文件版本: v0.14.3
 文件狀態: 草稿
 文件作者: 陳欣怡
 建立日期: 2026-10-13
@@ -25,7 +25,7 @@ Project Name: SplitSense
 | --- | --- |
 | 專案名稱 | SplitSense |
 | 文件類型 | Research Specification |
-| 文件版本 | v0.14.2 |
+| 文件版本 | v0.14.3 |
 | 文件狀態 | 草稿 |
 | 文件作者 | 陳欣怡 |
 | 建立日期 | 2026-10-13 |
@@ -348,6 +348,22 @@ $$
 3. **只用 `O_i` 與 training history 建立特徵。**
 4. 用完整 `A_i` 計算 target `z_i`。
 5. 因公開資料沒有可靠時間順序，重複多個隨機的 :ref[reveal seed]{id="term.reveal-seed"}（課堂版 5 個，論文延伸建議 10 個）。
+
+{/* @ai-visualize
+id: annotation-reveal-setup
+type: diagram
+prompt: |
+  （重用既有元件）一則留言發給三位標註者，前兩位都標 neutral、第三位標 positive。
+  模型只看得到前兩份，第三份藏起來只用來計算答案。拖動可切換揭露的是哪兩份。
+caption: `r=2` 的具體樣子：看得到哪兩份、藏起哪一份
+status: generated
+*/}
+
+import AnnotationRevealSetup from '@notes/components/annotation-reveal-setup'
+
+<GeneratedFrame id="annotation-reveal-setup" type="diagram" prompt={"一則留言發給三位標註者，前兩位都標 neutral、第三位標 positive。模型只看得到前兩份，第三份藏起來只用來計算答案。"} caption="`r=2` 的具體樣子：看得到哪兩份、藏起哪一份">
+  <AnnotationRevealSetup client:idle />
+</GeneratedFrame>
 
 ### 6.4 洩漏檢查
 
@@ -684,6 +700,23 @@ $$
 可見的 2 份標註不一致時，該 item 必然分歧（這是定義，不是模型能力）。test split 有 1,588 個這種 item，佔 33.5%；而預算 10% 的名額只有 `K=474`。確定陽性的數量遠超過名額，所以**任何把它們排在前面的方法都會得到 `P@10%` = 100%**，`Recall@10%` 也固定等於理論上限 `K/|P|` = 20.1%。可見標籤 entropy 規則就已經做到這個數字，標準差 0.0。
 
 要讓 full 範圍開始有區分力，預算必須大於 **33.5%**——遠高於研究規格原本設定的 `b ∈ {0.05, 0.10, 0.20}`。
+
+{/* @ai-visualize
+id: metric-saturation
+type: chart
+prompt: |
+  （重用既有元件）拖動複核預算，看 Precision@K 何時才開始下降。
+  預算吃不完「可見已不一致」那 1,588 題之前，Precision 恆為 100%，指標分不出模型好壞；
+  要超過 33.5% 才開始有鑑別力，而那遠高於實務會用的預算。
+caption: 拖動預算：為什麼 full 範圍的指標會飽和
+status: generated
+*/}
+
+import MetricSaturation from '@notes/components/metric-saturation'
+
+<GeneratedFrame id="metric-saturation" type="chart" prompt={"拖動複核預算，看 Precision@K 何時才開始下降。預算吃不完「可見已不一致」那 1,588 題之前 Precision 恆為 100%，要超過 33.5% 才有鑑別力。"} caption="拖動預算：為什麼 full 範圍的指標會飽和">
+  <MetricSaturation client:idle />
+</GeneratedFrame>
 
 因此改為兩個範圍分開報告：
 
@@ -1186,6 +1219,11 @@ visible_annotation_count
 完整清單在 [90-open-questions.mdx](./90-open-questions.mdx)，全文的 `Qn` 一律指該文件的編號；已決議者留在原位改狀態，編號不重排、不回收。
 
 ## 14. Change Log
+
+### [0.14.3] - 2026-11-16
+
+- **Added**: 8.4.1 新增 `tuning-grid-sensitivity` 元件，可切換「只看平均」與「含 CV 標準差」。**理由**：格線表由上而下遞減，讀者會讀成「`C=0.003` 比 `0.01` 好」，但前三名差不到 **0.05** 個百分點、CV 標準差是 **0.6–1.1**——誤差比差距大一個數量級。表格的排序欄位在主張資料不支持的事，原本要讀完下一段散文才解除；切換一下就看到排名解體。只畫規格記錄有案的四個格點，完整格線的另外八點 `best_params.json` 沒存，不補值。
+- **Added**: 6.3 嵌入既有的 `annotation-reveal-setup`、8.2.1 嵌入既有的 `metric-saturation`，兩者原本只出現在 `30-presentation.mdx`。**理由**：8.2.1 要讀者在腦中比較「1,588 個確定陽性對 474 個名額」再推出 33.5% 的門檻，那正是拖一下就懂、純讀很吃力的那類內容；6.3 用數學定義 `r=2`，看到具體的三份標註藏一份比符號快。沒有新寫元件，只是把衍生文件已有的圖接回真相來源。
 
 ### [0.14.2] - 2026-11-16
 
