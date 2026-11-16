@@ -6,11 +6,11 @@ paths:
 
 # NoteCraft 文件撰寫
 
-文件由 notecraftapp 1.13.0 呈現：notesDir 是 `docs/`，生成元件與 `series.json` 在專案根的 `.notecraft/`。
+文件由 notecraftapp 1.15.0 呈現：notesDir 是 `docs/`，生成元件與 `series.json` 在專案根的 `.notecraft/`。
 
 ## 鐵律
 
-- **數學式一律用 fenced ` ```math ` 區塊，不要用 `$$`。** notecraftapp 1.13.0 沒有 `remark-math` / `rehype-katex`，`$$` 區塊裡的 `{` 會被當成 JSX expression——行首的 `{\log ...}` 直接讓 build 失敗，而剛好是合法 JS 的 `{C}` 會被靜默吞掉。
+- **數學式用 fenced ` ```math ` 區塊或 `$$…$$`，同一份文件不混用。** 1.14.0 起有 `remark-math` / `rehype-katex`，`$…$` 與 `$$…$$` 會渲染成 KaTeX 公式；` ```math ` 仍然只是程式碼區塊。`docs/` 現有的數學式都是 ` ```math `，要改成 `$$` 得整批一起改，別一篇一個樣。
 - **改完 `docs/` 一律跑 `npm run docs:build`** 確認。數學式、`:ref` 找不到 id、`define` 重複都只有 build 會抓到。
 - 新增或刪除 `docs/` 底下的文件時，同步改 `.notecraft/series.json`，它不會自動掃描。
 - 任何影響進度的 commit 都要同步改 `docs/20-progress.mdx` 的狀態與頂部日期，與程式一起 commit。不要在其他文件新增狀態欄。

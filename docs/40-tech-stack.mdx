@@ -3,12 +3,12 @@ title: "技術棧"
 description: "實際安裝的工具與版本、目錄佈局、常用指令、程式與測試盤點、視覺化工具鏈"
 tags: ["技術棧", "工具鏈", "版本"]
 createdAt: "2026-10-31"
-updatedAt: "2026-11-09"
+updatedAt: "2026-11-16"
 ---
 
 # 技術棧
 
-> 以 repo 實況為準，**2026-11-09** 盤點。
+> 以 repo 實況為準，**2026-11-16** 盤點。
 
 本文件管**實際裝了什麼**；為什麼選它管在別處。
 
@@ -174,8 +174,9 @@ train_test_split · average_precision_score · make_scorer
 | 工具 | 版本 | 用途 |
 | --- | --- | --- |
 | Node | ≥ 22 | notecraftapp 的執行環境 |
-| `notecraftapp` | ^1.13.0 | MDX 文件檢視，固定 port 4326 |
-| `content-visualize` skill | — | 由 `@ai-visualize` 標記產生互動元件 |
+| `notecraftapp` | ^1.15.0 | MDX 文件檢視，固定 port 4326 |
+| `content-visualize` skill | 2.1.0-alpha.1 | 由 `@ai-visualize` 標記產生互動元件 |
+| `content-present` skill | 1.1.1-alpha.1 | 把一篇筆記轉成 16:9 簡報（`/present/<slug>`） |
 | React | 18.3.1 | 互動元件本體，掛 `client:idle` |
 | `recharts` | 2.15.4 | 三個圖表元件 |
 | `lucide-react` | 0.469.0 | icon（skill 禁用 emoji） |
@@ -209,7 +210,7 @@ diagrams/<name>.html          原始檔，改圖改這個
 
 細節與色票規則見 [`diagrams/README.md`](../diagrams/README.md)。
 
-> **notecraftapp 沒有 `remark-math` 與 `rehype-katex`。** `docs/` 的數學式一律用 fenced ` ```math ` 區塊，不要用 `$$`——`$$` 裡的大括號會被當成 JSX expression，行首的會讓 build 失敗，剛好是合法 JS 的會被靜默吞掉。
+> **數學式：1.14.0 起支援 KaTeX。** notecraftapp 1.14.0 加了 `remark-math` 與 `rehype-katex`，`$…$` 與 `$$…$$` 會渲染成公式；fenced ` ```math ` 區塊仍然只當程式碼區塊顯示。`docs/` 目前的數學式都還是 ` ```math `，尚未遷移。
 
 ## 9. 流程與治理
 
