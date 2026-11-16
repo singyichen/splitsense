@@ -58,7 +58,7 @@ const LAYERS: Layer[] = [
     title: "模型與分析",
     icon: Settings2,
     modules: ["baselines.py", "models.py", "error_analysis.py"],
-    script: "run_models.py 等 3 支",
+    script: "run_baselines.py · run_models.py · run_error_analysis.py",
     invariant: "只取恰好 3 份標註的 item，分母固定",
     store: ["artifacts/baselines/", "artifacts/models/", "artifacts/error_analysis/"],
   },
@@ -70,13 +70,15 @@ const LAYER_SPECS: Record<string, string[]> = {
   "4": ["階梯 0–3 ＋ BGE", "full／hard", "配對比較"],
 };
 
+// 六支腳本，一支剛好寫一個產物目錄（docs/40-tech-stack.mdx 第 3 節）。
+// 不要把 `run_error_analysis --model bge` 當成第七支——那是同一支的第二次呼叫。
 const ORDER = [
   "run_eda",
   "build_dataset",
   "embed_texts",
+  "run_baselines",
   "run_models",
   "run_error_analysis",
-  "run_error_analysis --model bge",
 ];
 
 function Chip({ text, mono = true }: { text: string; mono?: boolean }) {
@@ -109,7 +111,7 @@ export default function ModulePipeline() {
       <div
         className="space-y-3"
         role="img"
-        aria-label="分層架構圖。由上而下四層：1 取得資料（data.py、eda.py，跑 run_eda.py，不變量是切 split 前先文字去重）；2 資料協議（split.py、reveal.py，跑 build_dataset.py，item-level 70/15/15、揭露 2 份，隱藏標註不得進入特徵或統計）；3 特徵（features.py、embeddings.py，跑 embed_texts.py，TF-IDF 31,451 維、bge-m3 經 PCA 降到 64 維，兩者都只由 training 決定）；4 模型與分析（baselines.py、models.py、error_analysis.py，跑 run_models.py 等 3 支，只取恰好 3 份標註的 item）。每層右側標出它寫出的目錄。底部是六支腳本的執行順序，以及四層共用的 config.py 與 metrics.py"
+        aria-label="分層架構圖。由上而下四層。1 取得資料：data.py、eda.py，跑 run_eda.py，寫出 data/raw 與 artifacts/eda；不變量是切 split 前先文字去重，同一段文字不得同時落在 train 與 test。2 資料協議：split.py、reveal.py，跑 build_dataset.py，item-level 70/15/15、揭露 2 份，寫出 artifacts/manifests；不變量是只用可見的 2 份建特徵，隱藏標註不得進入特徵或統計。3 特徵：features.py、embeddings.py，跑 embed_texts.py，TF-IDF 31,451 維、bge-m3 經 PCA 降到 64 維，寫出 artifacts/embeddings；不變量是兩者都只由 training 決定，PCA 在 Pipeline 裡逐折 fit。4 模型與分析：baselines.py、models.py、error_analysis.py，跑 run_baselines.py、run_models.py、run_error_analysis.py，涵蓋階梯 0 到 3 加 BGE、full 與 hard 兩個範圍、配對比較，寫出 artifacts 的 baselines、models、error_analysis；不變量是只取恰好 3 份標註的 item，分母固定。"
       >
         {LAYERS.map((layer) => {
           const Icon = layer.icon;

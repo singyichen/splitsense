@@ -80,4 +80,4 @@ uv run ruff check src/ scripts/ tests/
 - 分領域的規則在 `.claude/rules/`，動到對應檔案時自動載入，目錄見 [`.claude/rules/index.md`](.claude/rules/index.md)：
   - 實驗程式（洩漏、同分打散、配對比較）→ `experiments.md`
   - 文件撰寫（math fence、`docs:build`、術語 `:ref`、進度同步、notecraft 預覽）→ `notecraft-writing.md`
-  - 靜態圖（diagram-design、配色、SVG）→ `diagrams.md`
+  - 靜態圖與圖表元件（diagram-design、配色、參考圖做成元件、數字以元件為正本）→ `diagrams.md`

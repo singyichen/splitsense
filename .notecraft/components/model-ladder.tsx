@@ -93,11 +93,14 @@ export default function ModelLadder() {
         <span>聰明</span>
       </div>
 
-      <ol
-        className="space-y-2"
-        role="img"
-        aria-label={`模型階梯：隨機排序 9.5、可見標籤 entropy 9.9、同意標籤先驗 18.5、Logistic Regression 以 TF-IDF 為 19.3、換成 BGE-M3 為 21.8、Gradient Boosting 19.4，全部是難題組的 Recall@10%；第四層零樣本大語言模型課堂版不做。難題組 ${HARD_N} 題，理論上限 ${CEILING}`}
-      >
+      <p className="sr-only">
+        模型階梯共六層，數字是難題組的 Recall@10%：0 隨機排序 9.5、1 可見標籤 entropy 9.9、
+        1.5 同意標籤先驗 18.5、2 Logistic Regression 以 TF-IDF 為 19.3、換成 BGE-M3 為 21.8、
+        3 Gradient Boosting 19.4，另有一層零樣本大語言模型課堂版不做。
+        難題組 {HARD_N} 題，理論上限 {CEILING}。展開任一層可看到它的超參數與前一層答不了的問題。
+      </p>
+
+      <ol className="space-y-2">
         {RUNGS.map((r) => {
           const expanded = open === r.n;
           const isLadder2 = r.scores.length > 1;
@@ -107,6 +110,8 @@ export default function ModelLadder() {
                 type="button"
                 onClick={() => setOpen(expanded ? null : r.n)}
                 aria-expanded={expanded}
+                aria-controls={`rung-${r.n}-panel`}
+                id={`rung-${r.n}-button`}
                 className={`w-full rounded-lg border px-4 py-3 text-left transition-colors motion-reduce:transition-none ${
                   r.dashed
                     ? "border-dashed border-[#d7dde7] bg-[#fafbfc]"
@@ -157,23 +162,28 @@ export default function ModelLadder() {
                   )}
                 </div>
 
-                <p className="mt-1 text-xs leading-relaxed" style={{ color: MUTED }}>
+                <span className="mt-1 block text-xs leading-relaxed" style={{ color: MUTED }}>
                   {r.subtitle}
-                </p>
+                </span>
 
-                {expanded && (
-                  <div className="mt-2 space-y-1.5 border-t border-[#eef1f5] pt-2">
-                    <p className="text-xs" style={{ color: MUTED }}>
-                      超參數：{r.hyper}
-                    </p>
-                    {r.transition && (
-                      <p className="text-xs leading-relaxed" style={{ color: INK }}>
-                        前一層答不了的：{r.transition}
-                      </p>
-                    )}
-                  </div>
-                )}
               </button>
+
+              <div
+                id={`rung-${r.n}-panel`}
+                role="region"
+                aria-labelledby={`rung-${r.n}-button`}
+                hidden={!expanded}
+                className="mt-1 space-y-1.5 rounded-lg border border-[#eef1f5] bg-white px-4 py-2.5"
+              >
+                <p className="text-xs" style={{ color: MUTED }}>
+                  超參數：{r.hyper}
+                </p>
+                {r.transition && (
+                  <p className="text-xs leading-relaxed" style={{ color: INK }}>
+                    前一層答不了的：{r.transition}
+                  </p>
+                )}
+              </div>
             </li>
           );
         })}

@@ -2,6 +2,7 @@
 paths:
   - "diagrams/**"
   - "docs/assets/**"
+  - ".notecraft/components/**"
   - ".claude/skills/diagram-design/**"
 ---
 
@@ -42,3 +43,7 @@ paths:
 比照 `docs/20-progress.mdx` 對 `course-stage-techniques.tsx` 的同步要求。
 
 目前成對的三組：`model-ladder`、`dataset-funnel`、`module-pipeline`。
+
+**`diagrams/` 不是唯讀的。** 本規則要求的同步會改 `.html` 並重跑匯出，這跟「保留 `diagrams/`、不刪檔案」
+不衝突——保留指的是不刪除，不是不修改。當元件的數字與 `.html` 不一致時，
+**以元件為準去改 `.html`**，不要反過來改元件遷就舊圖。
