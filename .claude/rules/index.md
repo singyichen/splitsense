@@ -6,7 +6,7 @@
 | --- | --- | --- |
 | [experiments.md](./experiments.md) | 洩漏檢查、同分隨機打散、同一批 reveal seed、`GroupKFold` 用 `item_id`、配對比較、先加總再算比例 | `src/**`、`scripts/**`、`tests/**` |
 | [notecraft-writing.md](./notecraft-writing.md) | 數學式用 `$$…$$`、改完跑 `docs:build`、`series.json`、術語用 `:ref`、進度同步、port 4326 | `docs/**`、`.notecraft/**` |
-| [diagrams.md](./diagrams.md) | diagram-design 不直接改、配色擇一、筆記引用 SVG、排版慣例 | `diagrams/**`、`docs/assets/**`、`.claude/skills/diagram-design/**` |
+| [diagrams.md](./diagrams.md) | diagram-design 不直接改、配色擇一、**參考圖做成靜態元件**、**圖的數字以元件為正本**、排版慣例 | `diagrams/**`、`docs/assets/**`、`.notecraft/components/**`、`.claude/skills/diagram-design/**` |
 
 ## 新增規則
 
