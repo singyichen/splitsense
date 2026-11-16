@@ -10,7 +10,7 @@ paths:
 
 ## 鐵律
 
-- **數學式用 fenced ` ```math ` 區塊或 `$$…$$`，同一份文件不混用。** 1.14.0 起有 `remark-math` / `rehype-katex`，`$…$` 與 `$$…$$` 會渲染成 KaTeX 公式；` ```math ` 仍然只是程式碼區塊。`docs/` 現有的數學式都是 ` ```math `，要改成 `$$` 得整批一起改，別一篇一個樣。
+- **數學式一律用 `$$…$$`（行內用 `$…$`），不要用 fenced ` ```math `。** 1.14.0 起有 `remark-math` / `rehype-katex`，`$$` 會渲染成 KaTeX 公式，` ```math ` 只是程式碼區塊。`docs/` 已於 2026-11-16 整批遷移完畢（研究規格 16 式），新寫的跟著用 `$$`。
 - **改完 `docs/` 一律跑 `npm run docs:build`** 確認。數學式、`:ref` 找不到 id、`define` 重複都只有 build 會抓到。
 - 新增或刪除 `docs/` 底下的文件時，同步改 `.notecraft/series.json`，它不會自動掃描。
 - 任何影響進度的 commit 都要同步改 `docs/20-progress.mdx` 的狀態與頂部日期，與程式一起 commit。不要在其他文件新增狀態欄。

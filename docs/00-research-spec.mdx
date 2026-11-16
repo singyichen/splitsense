@@ -3,14 +3,14 @@ title: "SplitSense 研究規格"
 description: "在部分標註下預測標註分歧、協助安排人工複核的研究問題、資料協議、評估方法與時程"
 tags: ["研究規格", "標註分歧", "複核排序"]
 createdAt: "2026-10-13"
-updatedAt: "2026-11-09"
+updatedAt: "2026-11-16"
 Project Name: SplitSense
 文件類型: Research Specification
-文件版本: v0.14.0
+文件版本: v0.14.1
 文件狀態: 草稿
 文件作者: 陳欣怡
 建立日期: 2026-10-13
-更新日期: 2026-11-09
+更新日期: 2026-11-16
 ---
 
 # SplitSense（歧見預判）
@@ -25,11 +25,11 @@ Project Name: SplitSense
 | --- | --- |
 | 專案名稱 | SplitSense |
 | 文件類型 | Research Specification |
-| 文件版本 | v0.14.0 |
+| 文件版本 | v0.14.1 |
 | 文件狀態 | 草稿 |
 | 文件作者 | 陳欣怡 |
 | 建立日期 | 2026-10-13 |
-| 更新日期 | 2026-11-09 |
+| 更新日期 | 2026-11-16 |
 
 ### 1.2 文件分工
 
@@ -220,38 +220,38 @@ Project Name: SplitSense
 
 令第 `i` 個資料項目為 `x_i`，標籤集合為 `\mathcal{C}`，完整標註集合為 `A_i`。類別 `c` 在完整標註中的比例為：
 
-```math
+$$
 p_{ic}
 =
 \frac{\sum_{a \in A_i}\mathbf{1}(y_{ia}=c)}{|A_i|}
-```
+$$
 
 其中 `y_{ia}` 表示 annotator `a` 對項目 `i` 的標籤。使用正規化 entropy 表示完整分歧程度：
 
-```math
+$$
 H_i
 =
 \frac{-\sum_{c \in \mathcal{C}}p_{ic}\log p_{ic}}{\log |\mathcal{C}|}
-```
+$$
 
 `H_i=0` 代表所有標註完全一致；越接近 `1`，代表標籤分布越分散。
 
 主要二元目標定義為是否出現任何分歧：
 
-```math
+$$
 z_i
 =
 \mathbf{1}
 \left(
 \left|\{y_{ia}:a\in A_i\}\right| > 1
 \right)
-```
+$$
 
 備用的高分歧門檻版本：
 
-```math
+$$
 z_i^{(\tau)} = \mathbf{1}(H_i \ge \tau)
-```
+$$
 
 門檻 `\tau` 只能由訓練集決定，固定後才可評估測試集。
 
@@ -259,7 +259,7 @@ z_i^{(\tau)} = \mathbf{1}(H_i \ge \tau)
 
 :ref[部分觀測]{id="term.partial-observation"}實驗中，只向模型揭露 `r` 份標註，記為 `O_i`；其餘標註 `U_i=A_i\setminus O_i` 全部隱藏。主要設定為 `r=2`。模型輸出風險分數：
 
-```math
+$$
 s_i
 =
 f_{\theta}
@@ -269,7 +269,7 @@ O_i,
 \text{history}(a),
 G_{\text{visible}}
 \right)
-```
+$$
 
 其中 `G_{\text{visible}}` 只能包含預測當下已可見的 annotation edges。**測試項目的隱藏標註不得出現在特徵、統計或圖 adjacency 中。**
 
@@ -317,7 +317,7 @@ source_dataset
 
 以 `item_id` 分組切分（:ref[Item-level split]{id="term.item-level-split"}）：
 
-```math
+$$
 \mathcal{D}
 =
 \mathcal{D}_{\text{train}}
@@ -325,15 +325,15 @@ source_dataset
 \mathcal{D}_{\text{val}}
 \cup
 \mathcal{D}_{\text{test}}
-```
+$$
 
-```math
+$$
 |\mathcal{D}_{\text{train}}|:
 |\mathcal{D}_{\text{val}}|:
 |\mathcal{D}_{\text{test}}|
 =
 70:15:15
-```
+$$
 
 - 同一個 item 的所有 annotation 必須留在同一 split。不能逐 annotation 隨機切分，否則模型在訓練時已看過測試 item 的其他標註。
 - **不得沿用 TID-8 自帶的 split**。已實測確認 `goemotions-atr` 的 test item 有 96.0% 同時出現在 train；TID-8 的兩種切法是為「從分歧中學習」設計的，不是為本專題的排序任務設計。
@@ -498,13 +498,13 @@ Embedding 只跟文字有關、跟 reveal 無關，所以 31,603 個 item 編一
 
 完整模型為：
 
-```math
+$$
 \mathbf{e}_i
 =
 \operatorname{Embed}(x_i)
-```
+$$
 
-```math
+$$
 \hat{p}_i
 =
 \sigma
@@ -513,7 +513,7 @@ Embedding 只跟文字有關、跟 reveal 無關，所以 31,603 個 item 編一
 [\mathbf{e}_i;\mathbf{v}_i]
 +b
 \right)
-```
+$$
 
 其中 `\mathbf{v}_i` 是可見標註與 annotator 歷史的結構化特徵，`[\cdot;\cdot]` 表示向量串接。
 
@@ -553,7 +553,7 @@ item --rev_annotated_as_<label>--> annotator
 
 一層聚合：
 
-```math
+$$
 \mathbf{h}_i^{(\ell+1)}
 =
 \sigma
@@ -564,11 +564,11 @@ item --rev_annotated_as_<label>--> annotator
 \operatorname{mean}_{j\in\mathcal{N}(i)}
 \mathbf{h}_j^{(\ell)}
 \right)
-```
+$$
 
 類別不平衡時使用帶正類權重的 binary cross-entropy：
 
-```math
+$$
 \mathcal{L}
 =
 -\frac{1}{N}
@@ -578,7 +578,7 @@ w_{+}z_i\log \hat{p}_i
 +
 (1-z_i)\log(1-\hat{p}_i)
 \right]
-```
+$$
 
 公平比較要求：Logistic Regression、Gradient Boosting 與 GraphSAGE 必須使用同一批 item、同一 reveal seed 與相同可見資訊，差別只在是否使用圖結構。
 
@@ -609,21 +609,21 @@ w_{+}z_i\log \hat{p}_i
 
 設測試集排序後前 `K` 筆為 `\operatorname{TopK}`，真正分歧集合為 `\mathcal{P}`：
 
-```math
+$$
 \operatorname{Precision@K}
 =
 \frac{|\operatorname{TopK}\cap\mathcal{P}|}{K}
-```
+$$
 
-```math
+$$
 \operatorname{Recall@K}
 =
 \frac{|\operatorname{TopK}\cap\mathcal{P}|}{|\mathcal{P}|}
-```
+$$
 
 測試集共 `N` 筆時，分歧盛行率與相對隨機抽查的提升為：
 
-```math
+$$
 \pi
 =
 \frac{|\mathcal{P}|}{N}
@@ -631,15 +631,15 @@ w_{+}z_i\log \hat{p}_i
 \operatorname{Lift@K}
 =
 \frac{\operatorname{Precision@K}}{\pi}
-```
+$$
 
 固定預算比例 `b` 時：
 
-```math
+$$
 K=\lfloor bN\rfloor,
 \qquad
 b\in\{0.05,0.10,0.20\}
-```
+$$
 
 ### 8.2 主要與次要指標
 
@@ -682,9 +682,9 @@ hard 範圍才是 2.2 真正要解的問題。關鍵事實：**可見 entropy �
 - 隨機排序基準至少執行 30 個 random seeds，回報平均、標準差與 95% confidence interval。
 - 論文延伸：英文與繁中**分開報告**，不只報 pooled score；另報語言落差
 
-```math
+$$
 \Delta_{\text{lang}} = M_{\text{zh-TW}} - M_{\text{en}}
-```
+$$
 
 必須同時列出 `M_{\text{zh-TW}}` 與 `M_{\text{en}}`，否則英文樣本量較大時會遮住繁中的弱點。
 
@@ -1142,6 +1142,11 @@ visible_annotation_count
 完整清單在 [90-open-questions.mdx](./90-open-questions.mdx)，全文的 `Qn` 一律指該文件的編號；已決議者留在原位改狀態，編號不重排、不回收。
 
 ## 14. Change Log
+
+### [0.14.1] - 2026-11-16
+
+- **Changed**: 16 個數學式從 fenced ` ```math ` 區塊改為 `$$…$$`，改由 KaTeX 排版。**理由**：` ```math ` 從來不是想要的寫法，是 notecraftapp 1.13.0 沒有 `remark-math` 時的權宜之計——那時 `$$` 裡的大括號會被當成 JSX expression，行首的 `{\log …}` 直接讓 build 失敗。1.14.0 加入 `remark-math` 與 `rehype-katex` 之後限制解除，`$$` 裡的內容不再進 JSX 解析。公式本體一字未改，只換外層圍欄；渲染從「單色等寬的原始 LaTeX」變成真正的分式、求和符號與希臘字母。
+- **Note**: 全數一次改完，不分批。同一份文件兩種寫法會讓讀者以為那是語意差別（例如「這個比較不正式」），實際上只是遷移做到一半。`.claude/rules/notecraft-writing.md` 的鐵律同步要求不混用。
 
 ### [0.14.0] - 2026-11-09
 
